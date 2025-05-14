@@ -1,4 +1,4 @@
-package org.example.project
+package com.github.ericytsang.app.app
 
 class Greeting {
     private val platform = getPlatform()

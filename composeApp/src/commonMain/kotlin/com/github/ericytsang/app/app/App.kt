@@ -1,4 +1,4 @@
-package org.example.project
+package com.github.ericytsang.app.app
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -13,13 +13,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import com.github.ericytsang.app.model.Theme
+import com.github.ericytsang.app.model.getNextTheme
+import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlocking
+import com.github.ericytsang.app.util.animatedThemeColors
+import com.github.ericytsang.app.util.fillMaxBackground
+import com.github.ericytsang.domain.objects.WorkingFileSet
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.compose_multiplatform
-import com.github.ericytsang.domain.objects.WorkingFileSet
-import org.example.project.modal.openWorkingFileSetEditorInNewWindowBlocking
-import org.example.project.util.animatedThemeColors
-import org.example.project.util.fillMaxBackground
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.awt.Window
