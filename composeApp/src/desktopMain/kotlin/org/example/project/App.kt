@@ -16,13 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.compose_multiplatform
+import org.example.project.domain.WorkingFileSet
 import org.example.project.modal.openWorkingFileSetEditorInNewWindowBlocking
 import org.example.project.util.animatedThemeColors
 import org.example.project.util.fillMaxBackground
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.awt.Window
-import java.io.File
 
 @Composable
 @Preview
@@ -87,10 +87,6 @@ fun App(window:Window)
         }
     }
 }
-
-data class WorkingFileSet(
-    val files: List<File>,
-)
 
 object Dimens
 {
