@@ -31,3 +31,4 @@ dependencyResolutionManagement {
 include(":composeApp")
 include(":lib:kotlin")
 include(":domain:objects")
+include(":domain:repo")
