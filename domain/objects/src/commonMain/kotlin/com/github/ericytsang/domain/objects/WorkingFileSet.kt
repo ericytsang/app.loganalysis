@@ -1,4 +1,4 @@
-package org.example.project.domain
+package com.github.ericytsang.domain.objects
 
 import java.io.File
 

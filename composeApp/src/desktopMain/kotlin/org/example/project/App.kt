@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.compose_multiplatform
-import org.example.project.domain.WorkingFileSet
+import com.github.ericytsang.domain.objects.WorkingFileSet
 import org.example.project.modal.openWorkingFileSetEditorInNewWindowBlocking
 import org.example.project.util.animatedThemeColors
 import org.example.project.util.fillMaxBackground
