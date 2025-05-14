@@ -2,12 +2,37 @@ package org.example.project
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.material.Colors
+import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.graphics.Color
+
+/**
+ * animates the colors of the theme.
+ * @param theme the theme to use for the colors.
+ * @return the animated colors of the theme.
+ */
+@Composable
+fun animatedThemeColors(theme:Theme):State<Colors>
+{
+    val themeColors = when (theme)
+    {
+        Theme.LIGHT -> lightColors()
+        Theme.DARK -> darkColors()
+    }
+
+    val animatedThemeColors = animateColorsAsState(
+        targetValue = themeColors,
+        animationSpec = spring<Color>(stiffness = Spring.StiffnessLow)
+    )
+
+    return animatedThemeColors
+}
 
 /**
  * animates the colors of the theme.
@@ -16,7 +41,7 @@ import androidx.compose.ui.graphics.Color
  * @param label the label to use for the animation.
  */
 @Composable
-fun animateColorsAsState(
+private fun animateColorsAsState(
     targetValue:Colors,
     animationSpec:AnimationSpec<Color> = spring<Color>(),
     label: String = "ColorAnimation",
