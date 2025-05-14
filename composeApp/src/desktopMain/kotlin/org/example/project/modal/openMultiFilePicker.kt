@@ -1,4 +1,4 @@
-package org.example.project.utildialog
+package org.example.project.modal
 
 import java.awt.Dialog
 import java.awt.FileDialog
