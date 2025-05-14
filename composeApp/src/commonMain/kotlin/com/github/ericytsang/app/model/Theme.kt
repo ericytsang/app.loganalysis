@@ -1,4 +1,4 @@
-package org.example.project
+package com.github.ericytsang.app.model
 
 /**
  * supported themes.

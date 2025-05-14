@@ -1,4 +1,4 @@
-package org.example.project.frame
+package com.github.ericytsang.app.ui.frame
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,9 +14,9 @@ import kotlin.collections.plus
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import org.example.project.Dimens
+import com.github.ericytsang.app.model.Dimens
+import com.github.ericytsang.app.ui.modal.openMultiFilePicker
 import com.github.ericytsang.domain.objects.WorkingFileSet
-import org.example.project.modal.openMultiFilePicker
 
 @Composable
 fun workingFileSetEditor(

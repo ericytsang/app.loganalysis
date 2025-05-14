@@ -88,9 +88,3 @@ fun App(window:Window)
     }
 }
 
-object Dimens
-{
-    val minimumTouchTargetSize = 48.dp
-    val minimumTouchTargetPadding = 8.dp
-}
-

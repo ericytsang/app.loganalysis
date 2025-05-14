@@ -1,4 +1,4 @@
-package org.example.project.modal
+package com.github.ericytsang.app.ui.modal
 
 import java.awt.Dialog
 import java.awt.FileDialog

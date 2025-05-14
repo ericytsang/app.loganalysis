@@ -1,4 +1,4 @@
-package org.example.project.util
+package com.github.ericytsang.app.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.awt.ComposeDialog

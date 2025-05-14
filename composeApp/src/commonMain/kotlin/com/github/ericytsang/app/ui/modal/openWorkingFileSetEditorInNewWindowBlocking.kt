@@ -1,9 +1,9 @@
-package org.example.project.modal
+package com.github.ericytsang.app.ui.modal
 
 import androidx.compose.runtime.MutableState
+import com.github.ericytsang.app.ui.frame.workingFileSetEditor
 import com.github.ericytsang.domain.objects.WorkingFileSet
-import org.example.project.frame.workingFileSetEditor
-import org.example.project.util.openBlockingDialog
+import com.github.ericytsang.app.util.openBlockingDialog
 import java.awt.Window
 
 fun openWorkingFileSetEditorInNewWindowBlocking(
