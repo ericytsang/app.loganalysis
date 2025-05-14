@@ -1,4 +1,4 @@
-package org.example.project
+package org.example.project.util
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.AnimationSpec
@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.graphics.Color
+import org.example.project.Theme
 
 /**
  * animates the colors of the theme.
