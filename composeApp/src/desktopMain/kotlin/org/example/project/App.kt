@@ -23,9 +23,17 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun App()
 {
     var theme by remember { mutableStateOf(Theme.LIGHT) }
-    val animatedThemeColors = animatedThemeColors(theme)
+    val animatedThemeColors by animatedThemeColors(theme)
+    var requestOpenFilePicker by remember { mutableStateOf(0) }
+    if (requestOpenFilePicker > 0)
+    {
+        requestOpenFilePicker -= 1
+        openMultiFilePicker {
+            println(it.joinToString("\n") { file -> file.absolutePath })
+        }
+    }
 
-    fillMaxBackground(colors = animatedThemeColors.value)
+    fillMaxBackground(colors = animatedThemeColors)
     {
         var showContent by remember { mutableStateOf(false) }
 
@@ -44,6 +52,11 @@ fun App()
                 content = { Text("Toggle theme") },
             )
 
+            Button(
+                onClick = { requestOpenFilePicker += 1 },
+                content = { Text("Open files") },
+            )
+
             AnimatedVisibility(showContent)
             {
                 val greeting = remember { Greeting().greet() }
@@ -60,3 +73,4 @@ fun App()
         }
     }
 }
+
