@@ -7,5 +7,9 @@ kotlin {
 }
 
 dependencies {
+
+    commonMainApi(libs.kotlin.stdlib)
     commonMainApi(libs.kotlinx.coroutines.swing)
+
+    commonTestImplementation(libs.kotlin.test)
 }
