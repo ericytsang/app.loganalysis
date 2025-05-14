@@ -7,7 +7,8 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "KotlinProject",
-    ) {
-        App()
+    )
+    {
+        App(window = window)
     }
 }
