@@ -13,6 +13,9 @@ kotlin {
         val desktopMain by getting
         
         commonMain.dependencies {
+
+            api(projects.lib.kotlin)
+
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
