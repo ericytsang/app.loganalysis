@@ -52,7 +52,7 @@ class LogcatFilterParserTest
         `test parser`("tag:foo & (level:error | message:\"bar\")")
     }
 
-    fun `test parser`(input:String)
+    private fun `test parser`(input:String)
     {
         val parser = LogcatFilterParser()
         println("input: $input")
