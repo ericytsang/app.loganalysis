@@ -30,5 +30,6 @@ dependencyResolutionManagement {
 
 include(":composeApp")
 include(":lib:kotlin")
+include(":lib:logcatFilterParser")
 include(":domain:objects")
 include(":domain:repo")
