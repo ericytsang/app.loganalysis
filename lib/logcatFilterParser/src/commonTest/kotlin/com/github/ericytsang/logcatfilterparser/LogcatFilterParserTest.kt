@@ -5,49 +5,49 @@ import org.junit.Test
 class LogcatFilterParserTest
 {
     @Test
-    fun `test 1`()
+    fun `test message key`()
     {
         `test parser`("message:hello")
     }
 
     @Test
-    fun `test 2`()
+    fun `test tag key with quotations`()
     {
         `test parser`("tag:\"goodbye friend\"")
     }
 
     @Test
-    fun `test 3`()
+    fun `test level key`()
     {
         `test parser`("level:error")
     }
 
     @Test
-    fun `test 4`()
+    fun `test no key`()
     {
         `test parser`("simplenotag")
     }
 
     @Test
-    fun `test 5`()
+    fun `test no key with quotations`()
     {
         `test parser`("\"simple no tag\"")
     }
 
     @Test
-    fun `test 6`()
+    fun `test negated message key with quotations`()
     {
         `test parser`("-message:\"i don\'t want to see this in the output\"")
     }
 
     @Test
-    fun `test 7`()
+    fun `test negated message key with regular expression`()
     {
         `test parser`("-message~:reg.*exp")
     }
 
     @Test
-    fun `test 8`()
+    fun `test complex expression with operators and brackets`()
     {
         `test parser`("tag:foo & (level:error | message:\"bar\")")
     }
