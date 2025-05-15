@@ -2,7 +2,7 @@ package com.github.ericytsang.logcatfilterparser
 
 /** Helper class to manage the token stream during parsing */
 internal class TokenStream(
-    private val tokens:List<String?>,
+    private val tokens:List<String>,
 )
 {
     private var index:Int = 0

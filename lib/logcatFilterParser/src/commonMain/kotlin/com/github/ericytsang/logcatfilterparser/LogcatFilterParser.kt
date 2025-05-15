@@ -131,67 +131,64 @@ class LogcatFilterParser
         }
     }
 
-    companion object
+    /**
+     * Tokenizes the input string into a list of tokens.
+     * Handles quoted strings and separates operators and brackets.
+     */
+    private fun tokenize(input:String):List<String>
     {
-        /**
-         * Tokenizes the input string into a list of tokens.
-         * Handles quoted strings and separates operators and brackets.
-         */
-        fun tokenize(input:String):List<String>
-        {
-            val tokens:MutableList<String> = mutableListOf<String>()
-            val buffer = StringBuilder()
-            var inQuote = false
+        val tokens:MutableList<String> = mutableListOf<String>()
+        val buffer = StringBuilder()
+        var inQuote = false
 
-            for (i in 0..<input.length)
+        for (i in 0..<input.length)
+        {
+            val c = input[i]
+            if (c == '"')
             {
-                val c = input[i]
-                if (c == '"')
-                {
-                    if (inQuote)
-                    {
-                        buffer.append(c)
-                        tokens.add(buffer.toString())
-                        buffer.setLength(0)
-                        inQuote = false
-                    }
-                    else
-                    {
-                        buffer.append(c)
-                        inQuote = true
-                    }
-                }
-                else if (inQuote)
+                if (inQuote)
                 {
                     buffer.append(c)
-                }
-                else if (c == ' ')
-                {
-                    if (buffer.isNotEmpty())
-                    {
-                        tokens.add(buffer.toString())
-                        buffer.setLength(0)
-                    }
-                }
-                else if (c == '&' || c == '|' || c == '(' || c == ')')
-                {
-                    if (buffer.isNotEmpty())
-                    {
-                        tokens.add(buffer.toString())
-                        buffer.setLength(0)
-                    }
-                    tokens.add(c.toString())
+                    tokens.add(buffer.toString())
+                    buffer.setLength(0)
+                    inQuote = false
                 }
                 else
                 {
                     buffer.append(c)
+                    inQuote = true
                 }
             }
-            if (buffer.isNotEmpty())
+            else if (inQuote)
             {
-                tokens.add(buffer.toString())
+                buffer.append(c)
             }
-            return tokens
+            else if (c == ' ')
+            {
+                if (buffer.isNotEmpty())
+                {
+                    tokens.add(buffer.toString())
+                    buffer.setLength(0)
+                }
+            }
+            else if (c == '&' || c == '|' || c == '(' || c == ')')
+            {
+                if (buffer.isNotEmpty())
+                {
+                    tokens.add(buffer.toString())
+                    buffer.setLength(0)
+                }
+                tokens.add(c.toString())
+            }
+            else
+            {
+                buffer.append(c)
+            }
         }
+        if (buffer.isNotEmpty())
+        {
+            tokens.add(buffer.toString())
+        }
+        return tokens
     }
 }
