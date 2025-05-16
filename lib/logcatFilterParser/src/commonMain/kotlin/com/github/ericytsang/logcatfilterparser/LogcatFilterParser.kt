@@ -110,12 +110,6 @@ class LogcatFilterParser
     private fun parseLeaf(token:String):LeafNode
     {
         var token = token
-        var negated = false
-//        if (token.startsWith("-"))
-//        {
-//            negated = true
-//            token = token.substring(1)
-//        }
         if (token.startsWith("\""))
         {
             // Quoted string without key, treat as message filter
