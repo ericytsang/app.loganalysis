@@ -18,7 +18,7 @@ class LogcatFilterParser
     }
 
     /**
-     * Parses an expression: term ( "|" term )*
+     * Parses an expression: term ( "|" term )
      */
     private fun parseOrExpression(stream:TokenStream):Node?
     {
@@ -33,7 +33,7 @@ class LogcatFilterParser
     }
 
     /**
-     * Parses a term: factor ( "&" factor )*
+     * Parses a term: factor ( "&" factor )
      */
     private fun parseAndExpression(stream:TokenStream):Node?
     {
