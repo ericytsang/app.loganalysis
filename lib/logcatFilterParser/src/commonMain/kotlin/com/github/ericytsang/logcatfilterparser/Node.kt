@@ -46,3 +46,11 @@ internal class OrNode(
 {
     override fun toString():String = "($left | $right)"
 }
+
+/** NOT node representing a negation of one expression */
+internal class NotNode(
+    val right:Node?,
+):Node()
+{
+    override fun toString():String = "-($right)"
+}
