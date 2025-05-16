@@ -5,6 +5,7 @@ internal object Tokenizer
     fun tokenize(input:String):TokenStream
     {
         val tokens = tokenizeInternal(input).insertOrOperators()
+        if (PRINT_DEBUG) println(tokens)
         return TokenStream(tokens)
     }
 
@@ -90,4 +91,6 @@ internal object Tokenizer
     }
 
     private const val OPERATORS = "&|()-"
+
+    private const val PRINT_DEBUG = false
 }
