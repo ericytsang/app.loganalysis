@@ -52,6 +52,18 @@ class LogcatFilterParserTest
         `test parser`("tag:foo & (level:error | message:\"bar\")")
     }
 
+    @Test
+    fun `test complex negated expression with operators and brackets`()
+    {
+        `test parser`("tag:foo | -(level:error & message:\"bar\")")
+    }
+
+    @Test
+    fun `no operator between key value pairs is interpreted as an or node`()
+    {
+        `test parser`("tag:foo message:\"bar\")")
+    }
+
     private fun `test parser`(input:String)
     {
         val parser = LogcatFilterParser()
