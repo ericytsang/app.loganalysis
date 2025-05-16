@@ -17,10 +17,11 @@ dependencies {
     commonMainApi(libs.kotlinx.coroutines.swing)
 
     // room SQLite library
-    commonMainApi(libs.androidx.room.compiler)
+    commonMainImplementation(libs.androidx.room.gradle)
+    commonMainImplementation(libs.androidx.room.compiler)
+    commonMainImplementation(libs.androidx.sqlite.sqliteBundled)
     commonMainApi(libs.androidx.room.runtime)
     commonMainApi(libs.androidx.room.paging)
-    commonMainApi(libs.androidx.sqlite.sqliteBundled)
 
     commonTestImplementation(libs.kotlin.test)
 }
