@@ -9,7 +9,7 @@ class LogcatFilterParser
     fun parse(input:String):Node?
     {
         val stream = Tokenizer.tokenize(input)
-        val node = parseExpression(stream)
+        val node = parseOrExpression(stream)
         if (stream.peek() != null)
         {
             throw RuntimeException("Unexpected token: "+stream.peek())
@@ -20,13 +20,13 @@ class LogcatFilterParser
     /**
      * Parses an expression: term ( "|" term )*
      */
-    private fun parseExpression(stream:TokenStream):Node?
+    private fun parseOrExpression(stream:TokenStream):Node?
     {
-        var node = parseTerm(stream)
+        var node = parseAndExpression(stream)
         while (stream.peek() == "|")
         {
             stream.next() // consume "|"
-            val right = parseTerm(stream)
+            val right = parseAndExpression(stream)
             node = OrNode(node,right)
         }
         return node
@@ -35,13 +35,13 @@ class LogcatFilterParser
     /**
      * Parses a term: factor ( "&" factor )*
      */
-    private fun parseTerm(stream:TokenStream):Node?
+    private fun parseAndExpression(stream:TokenStream):Node?
     {
-        var node = parseFactor(stream)
+        var node = parseBrackets(stream)
         while (stream.peek() == "&")
         {
             stream.next() // consume "&"
-            val right = parseFactor(stream)
+            val right = parseBrackets(stream)
             node = AndNode(node,right)
         }
         return node
@@ -50,7 +50,7 @@ class LogcatFilterParser
     /**
      * Parses a factor: leaf | "(" expression ")"
      */
-    private fun parseFactor(stream:TokenStream):Node?
+    private fun parseBrackets(stream:TokenStream):Node?
     {
         val token = stream.next()
         if (token == null)
@@ -59,7 +59,7 @@ class LogcatFilterParser
         }
         if (token == "(")
         {
-            val node = parseExpression(stream)
+            val node = parseOrExpression(stream)
             val close = stream.next()
             if (close != ")")
             {
