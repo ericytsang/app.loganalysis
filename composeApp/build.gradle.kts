@@ -8,14 +8,16 @@ plugins {
 
 kotlin {
     jvm("desktop")
-    
+
     sourceSets {
         val desktopMain by getting
         
         commonMain.dependencies {
 
-            api(projects.lib.kotlin)
-            api(projects.domain.objects)
+            implementation(projects.lib.kotlin)
+            implementation(projects.domain.objects)
+//            implementation(projects.domain.repo)
+            implementation(projects.domain.sqlite)
 
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -32,7 +34,6 @@ kotlin {
         }
     }
 }
-
 
 compose.desktop {
     application {
