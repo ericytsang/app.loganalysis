@@ -61,7 +61,7 @@ class LogcatFilterParserTest
     @Test
     fun `no operator between key value pairs is interpreted as an or node`()
     {
-        `test parser`("tag:foo message:\"bar\")")
+        `test parser`("tag:foo message:\"bar\"")
     }
 
     private fun `test parser`(input:String)

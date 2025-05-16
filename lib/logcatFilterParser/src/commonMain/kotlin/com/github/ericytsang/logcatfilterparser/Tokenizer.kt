@@ -4,8 +4,23 @@ internal object Tokenizer
 {
     fun tokenize(input:String):TokenStream
     {
-        val tokens = tokenizeInternal(input)
+        val tokens = tokenizeInternal(input).insertOrOperators()
         return TokenStream(tokens)
+    }
+
+    private fun List<String>.insertOrOperators():List<String>
+    {
+        return fold(emptyList<String>())
+        { acc,token ->
+            if (isLeafToken(acc.lastOrNull()) && isLeafToken(token))
+            {
+                acc+"|"+token
+            }
+            else
+            {
+                acc+token
+            }
+        }
     }
 
     /**
@@ -67,5 +82,10 @@ internal object Tokenizer
             tokens.add(buffer.toString())
         }
         return tokens
+    }
+
+    private fun isLeafToken(token:String?):Boolean
+    {
+        return (token != null) && (token != "&") && (token != "|") && (token != "(") && (token != ")")
     }
 }
