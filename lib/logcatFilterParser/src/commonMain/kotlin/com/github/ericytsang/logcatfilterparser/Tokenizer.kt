@@ -63,7 +63,7 @@ internal object Tokenizer
                     buffer.setLength(0)
                 }
             }
-            else if (c == '&' || c == '|' || c == '(' || c == ')')
+            else if (c in "&|()-")
             {
                 if (buffer.isNotEmpty())
                 {
@@ -86,6 +86,8 @@ internal object Tokenizer
 
     private fun isLeafToken(token:String?):Boolean
     {
-        return (token != null) && (token != "&") && (token != "|") && (token != "(") && (token != ")")
+        return token != null && !(token.length == 1 && token[0] in OPERATORS)
     }
+
+    private const val OPERATORS = "&|()-"
 }
