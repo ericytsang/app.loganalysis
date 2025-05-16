@@ -137,8 +137,8 @@ class LogcatFilterParser
             }
             else
             {
-                // Simple unquoted string, treat as tag filter
-                return LeafNode("tag",token,false)
+                // Simple unquoted string, treat as message filter
+                return LeafNode("message",token,false)
             }
         }
     }
