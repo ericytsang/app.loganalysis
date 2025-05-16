@@ -6,9 +6,6 @@ sealed class Node
 /** Leaf node representing a single filter condition */
 internal class LeafNode(
 
-    /** True if the condition is negated (e.g., -message:...) */
-    val negated:Boolean,
-
     /** The field to filter (e.g., "message", "tag", "level") */
     val key:String,
 
@@ -21,7 +18,6 @@ internal class LeafNode(
 {
     override fun toString():String = buildString()
     {
-        append(if (negated) "-" else "")
         append(key)
         append(if (regex) "~" else "")
         append(":")

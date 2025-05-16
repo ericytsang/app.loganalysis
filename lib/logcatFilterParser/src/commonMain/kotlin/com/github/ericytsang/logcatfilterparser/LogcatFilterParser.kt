@@ -37,12 +37,31 @@ class LogcatFilterParser
      */
     private fun parseAndExpression(stream:TokenStream):Node?
     {
-        var node = parseBrackets(stream)
+        var node = parseNotExpression(stream)
         while (stream.peek() == "&")
         {
             stream.next() // consume "&"
-            val right = parseBrackets(stream)
+            val right = parseNotExpression(stream)
             node = AndNode(node,right)
+        }
+        return node
+    }
+
+    /**
+     * Parses an expression: term ( "|" term )
+     */
+    private fun parseNotExpression(stream:TokenStream):Node?
+    {
+        var node: Node? = null
+        while (stream.peek() == "-")
+        {
+            stream.next() // consume "-"
+            val right = parseBrackets(stream)
+            node = NotNode(right)
+        }
+        if (node == null)
+        {
+            node = parseBrackets(stream)
         }
         return node
     }
@@ -92,16 +111,16 @@ class LogcatFilterParser
     {
         var token = token
         var negated = false
-        if (token.startsWith("-"))
-        {
-            negated = true
-            token = token.substring(1)
-        }
+//        if (token.startsWith("-"))
+//        {
+//            negated = true
+//            token = token.substring(1)
+//        }
         if (token.startsWith("\""))
         {
             // Quoted string without key, treat as message filter
             val value = token.substring(1,token.length-1) // remove quotes
-            return LeafNode(negated,"message",value,false)
+            return LeafNode("message",value,false)
         }
         else
         {
@@ -120,12 +139,12 @@ class LogcatFilterParser
                 {
                     value = value.substring(1,value.length-1)
                 }
-                return LeafNode(negated,key,value,regex)
+                return LeafNode(key,value,regex)
             }
             else
             {
                 // Simple unquoted string, treat as tag filter
-                return LeafNode(negated,"tag",token,false)
+                return LeafNode("tag",token,false)
             }
         }
     }
