@@ -3,11 +3,11 @@ package com.github.ericytsang.service.sqlite
 import app.cash.sqldelight.db.SqlDriver
 
 expect class DriverFactory {
-    fun createDriver(): SqlDriver
+    fun createDriver(appPackageName:String): SqlDriver
 }
 
-fun createDatabase(driverFactory: DriverFactory): SqlDelightDatabase {
-    val driver = driverFactory.createDriver()
+fun createDatabase(driverFactory: DriverFactory,appPackageName:String): SqlDelightDatabase {
+    val driver = driverFactory.createDriver(appPackageName)
     val database = SqlDelightDatabase(driver)
 
     println(database.erictsangQueries.selectAll().executeAsList())

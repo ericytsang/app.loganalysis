@@ -37,7 +37,10 @@ fun App(
 {
     var theme by remember { mutableStateOf(Theme.LIGHT) }
     val animatedThemeColors by animatedThemeColors(theme)
-    createDatabase(DriverFactory())
+    createDatabase(
+        driverFactory = DriverFactory(),
+        appPackageName = "com.github.ericytsang.loganalyzer",
+    )
 
     val workingFileSetState = remember { mutableStateOf(WorkingFileSet(files = emptyList())) }
     val workingFileSet by workingFileSetState
