@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.ksp)
@@ -17,11 +19,15 @@ dependencies {
     commonMainApi(libs.kotlinx.coroutines.swing)
 
     // room SQLite library
-    commonMainImplementation(libs.androidx.room.gradle)
-    commonMainImplementation(libs.androidx.room.compiler)
+    kspCommonMainMetadata(libs.androidx.room.compiler)
+    add("kspJvm", libs.androidx.room.compiler)
     commonMainImplementation(libs.androidx.sqlite.sqliteBundled)
     commonMainApi(libs.androidx.room.runtime)
     commonMainApi(libs.androidx.room.paging)
 
     commonTestImplementation(libs.kotlin.test)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
