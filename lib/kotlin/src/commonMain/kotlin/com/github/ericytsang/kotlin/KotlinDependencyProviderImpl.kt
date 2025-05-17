@@ -1,5 +1,6 @@
 package com.github.ericytsang.kotlin
 
-class KotlinDependencyProviderImpl(
-    override val dispatchers:CoroutineDispatcherProvider = CoroutineDispatcherProviderImpl(),
-):KotlinDependencyProvider
+object KotlinDependencyProviderImpl:KotlinDependencyProvider
+{
+    override val dispatchers:CoroutineDispatcherProvider = CoroutineDispatcherProviderImpl()
+}
