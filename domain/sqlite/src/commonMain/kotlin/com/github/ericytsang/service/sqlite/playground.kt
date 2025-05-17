@@ -10,6 +10,8 @@ fun createDatabase(driverFactory: DriverFactory): SqlDelightDatabase {
     val driver = driverFactory.createDriver()
     val database = SqlDelightDatabase(driver)
 
+    println(database.erictsangQueries.selectAll().executeAsList())
+
     // Do more work with the database (see below).
     return database
 }
