@@ -9,13 +9,11 @@ actual class DriverFactory
 {
     actual fun createDriver(appPackageName:String):SqlDriver
     {
-        // use the user home directory to store the database file
-        val userHomePath = System.getProperty("user.home")
-        val appHomePath = File(userHomePath,".$appPackageName")
-        val appDatabasePath = File(appHomePath,"sql.db")
-
         // need to create the directory if it doesn't exist, otherwise the database file won't be created
-        appHomePath.mkdirs()
+        val appHomePath = getAndCreateAppHome(appPackageName)
+
+        // use the user home directory to store the database file
+        val appDatabasePath = File(appHomePath,"sql.db")
 
         // create the database driver
         return JdbcSqliteDriver(
@@ -23,5 +21,19 @@ actual class DriverFactory
             properties = Properties(),
             schema = SqlDelightDatabase.Schema,
         )
+    }
+
+    private fun getAndCreateAppHome(appPackageName:String):File
+    {
+        val userHome = getUserHome()
+        val appHome = File(userHome,".$appPackageName")
+        appHome.mkdirs()
+        return appHome
+    }
+
+    private fun getUserHome():File
+    {
+        val userHomePath = System.getProperty("user.home")
+        return File(userHomePath)
     }
 }
