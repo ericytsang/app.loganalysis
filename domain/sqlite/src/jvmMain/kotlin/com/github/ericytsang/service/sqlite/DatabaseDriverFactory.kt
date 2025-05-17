@@ -5,7 +5,7 @@ import java.util.Properties
 import app.cash.sqldelight.db.SqlDriver
 import java.io.File
 
-actual class DriverFactory
+actual class DatabaseDriverFactory
 {
     actual fun createDriver(appPackageName:String):SqlDriver
     {

@@ -20,27 +20,41 @@ import com.github.ericytsang.app.util.animatedThemeColors
 import com.github.ericytsang.app.util.fillMaxBackground
 import com.github.ericytsang.domain.objects.WorkingFileSet
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
-import com.github.ericytsang.service.sqlite.DriverFactory
-import com.github.ericytsang.service.sqlite.createDatabase
+import com.github.ericytsang.kotlin.KotlinDependencyProviderImpl
+import com.github.ericytsang.service.sqlite.SqliteDependencyProvider
+import com.github.ericytsang.service.sqlite.SqliteDependencyProviderImpl
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.compose_multiplatform
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.awt.Window
 
+interface ColdStartDependencyProvider:KotlinDependencyProvider,SqliteDependencyProvider
+{
+    val kotlinDependencyProvider:KotlinDependencyProvider
+    val sqliteDependencyProvider:SqliteDependencyProvider
+    val packageName:String
+}
+
+object ColdStartDependencyProviderImpl:ColdStartDependencyProvider,
+    KotlinDependencyProvider by KotlinDependencyProviderImpl,
+    SqliteDependencyProvider by SqliteDependencyProviderImpl
+{
+    override val kotlinDependencyProvider:KotlinDependencyProvider get() = this
+    override val sqliteDependencyProvider:SqliteDependencyProvider get() = this
+    override val packageName:String = "com.github.ericytsang.loganalyzer"
+}
+
 @Composable
 @Preview
 fun App(
-    kotlinDependencyProvider:KotlinDependencyProvider,
+    dependencyProvider:ColdStartDependencyProvider,
     window:Window,
 )
 {
     var theme by remember { mutableStateOf(Theme.LIGHT) }
     val animatedThemeColors by animatedThemeColors(theme)
-    createDatabase(
-        driverFactory = DriverFactory(),
-        appPackageName = "com.github.ericytsang.loganalyzer",
-    )
+    dependencyProvider.databaseFactory.getDatabase(dependencyProvider.packageName)
 
     val workingFileSetState = remember { mutableStateOf(WorkingFileSet(files = emptyList())) }
     val workingFileSet by workingFileSetState
