@@ -29,9 +29,8 @@ dependencyResolutionManagement {
 }
 
 include(":composeApp")
+include(":lib:kotlin")
+include(":lib:logcatFilterParser")
 include(":domain:objects")
 include(":domain:repo")
 include(":domain:sqlite")
-include(":example:composeApp")
-include(":lib:kotlin")
-include(":lib:logcatFilterParser")
