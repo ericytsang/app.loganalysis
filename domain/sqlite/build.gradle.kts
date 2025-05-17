@@ -3,31 +3,31 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.room)
+    id("app.cash.sqldelight") version "2.1.0"
 }
 
 kotlin {
     jvm()
+
+    sourceSets.commonMain.dependencies {
+        api(projects.lib.kotlin)
+        api(projects.domain.objects)
+        implementation(libs.primitive.adapters)
+    }
+
+    sourceSets.commonTest.dependencies {
+        implementation(libs.kotlin.test)
+    }
+
+    sourceSets.jvmMain.dependencies {
+        implementation("app.cash.sqldelight:sqlite-driver:2.1.0")
+    }
 }
 
-dependencies {
-
-    commonMainApi(projects.lib.kotlin)
-    commonMainApi(projects.domain.objects)
-
-    commonMainApi(libs.kotlin.stdlib)
-    commonMainApi(libs.kotlinx.coroutines.swing)
-
-    // room SQLite library
-    kspCommonMainMetadata(libs.androidx.room.compiler)
-    add("kspJvm", libs.androidx.room.compiler)
-    commonMainImplementation(libs.androidx.sqlite.sqliteBundled)
-    commonMainApi(libs.androidx.room.runtime)
-    commonMainApi(libs.androidx.room.paging)
-
-    commonTestImplementation(libs.kotlin.test)
-}
-
-room {
-    schemaDirectory("$projectDir/schemas")
+sqldelight {
+    databases {
+        create("SqlDelightDatabase") {
+            packageName = "com.github.ericytsang.service.sqlite"
+        }
+    }
 }

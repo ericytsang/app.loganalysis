@@ -11,9 +11,7 @@ runner = "1.5.2"
 core = "1.5.0"
 junit-version = "1.1.5"
 ksp = "2.1.10-1.0.31"
-androidx-room = "2.7.1"
-androidx-room-sqlite-bundled = "2.5.1"
-androidx-paging = "3.3.6"
+sqliteNativeDriver = "2.0.2"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -26,11 +24,8 @@ kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", versio
 androidx-runner = { group = "androidx.test", name = "runner", version.ref = "runner" }
 androidx-core = { group = "androidx.test", name = "core", version.ref = "core" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit-version" }
-androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "androidx-paging" }
-androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidx-room" }
-androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "androidx-room" }
-androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "androidx-room" }
-androidx-sqlite-sqliteBundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "androidx-room-sqlite-bundled" }
+primitive-adapters = { module = "app.cash.sqldelight:primitive-adapters", version.ref = "sqliteNativeDriver" }
+sqlite-jvm-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqliteNativeDriver" }
 
 [plugins]
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
@@ -39,4 +34,3 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 jetbrainsKotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrains-kotlin-jvm" }
 androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-room = { id = "androidx.room", version.ref = "androidx-room" }
