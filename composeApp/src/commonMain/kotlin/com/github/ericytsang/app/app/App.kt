@@ -19,6 +19,9 @@ import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlo
 import com.github.ericytsang.app.util.animatedThemeColors
 import com.github.ericytsang.app.util.fillMaxBackground
 import com.github.ericytsang.domain.objects.WorkingFileSet
+import com.github.ericytsang.domain.sqlite.getDatabaseBuilder
+import com.github.ericytsang.domain.sqlite.getRoomDatabase
+import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.compose_multiplatform
 import org.jetbrains.compose.resources.painterResource
@@ -27,10 +30,14 @@ import java.awt.Window
 
 @Composable
 @Preview
-fun App(window:Window)
+fun App(
+    kotlinDependencyProvider:KotlinDependencyProvider,
+    window:Window,
+)
 {
     var theme by remember { mutableStateOf(Theme.LIGHT) }
     val animatedThemeColors by animatedThemeColors(theme)
+    getRoomDatabase(kotlinDependencyProvider,getDatabaseBuilder())
 
     val workingFileSetState = remember { mutableStateOf(WorkingFileSet(files = emptyList())) }
     val workingFileSet by workingFileSetState
