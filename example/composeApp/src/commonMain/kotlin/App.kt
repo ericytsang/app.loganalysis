@@ -42,6 +42,9 @@ import appDatabase.AppDatabase
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+import kmp_with_roomdb.composeapp.generated.resources.Res
+import kmp_with_roomdb.composeapp.generated.resources.github_logo
+
 @Composable
 @Preview
 fun App(db: AppDatabase) {
@@ -108,14 +111,14 @@ fun ListScreen(
                     elevation = CardDefaults.cardElevation(2.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-//                        Image(
-//                            painter = painterResource(Res.drawable.github_logo),
-//                            contentDescription = "",
-//                            modifier = Modifier
-//                                .padding(16.dp)
-//                                .size(50.dp)
-//                                .clip(RoundedCornerShape(5.dp))
-//                        )
+                        Image(
+                            painter = painterResource(Res.drawable.github_logo),
+                            contentDescription = "",
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .size(50.dp)
+                                .clip(RoundedCornerShape(5.dp))
+                        )
                         Column {
                             Text(text = item.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                             Text(text = "${item.stars} stars", style = MaterialTheme.typography.bodySmall)
@@ -160,17 +163,17 @@ fun DetailScreen(item: GithubRepo, goBack: () -> Unit) {
         Column(
             modifier = Modifier.padding(it).fillMaxSize().padding(16.dp)
         ) {
-//            val painter = painterResource(Res.drawable.github_logo)
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth().height(300.dp)
-//            ) {
-//                Image(
-//                    painter,
-//                    modifier = Modifier.fillMaxWidth().height(300.dp).padding(8.dp),
-//                    contentDescription = item.name
-//                )
-//            }
+            val painter = painterResource(Res.drawable.github_logo)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth().height(300.dp)
+            ) {
+                Image(
+                    painter,
+                    modifier = Modifier.fillMaxWidth().height(300.dp).padding(8.dp),
+                    contentDescription = item.name
+                )
+            }
 
             Text(
                 item.name,
