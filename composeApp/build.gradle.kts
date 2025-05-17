@@ -7,42 +7,34 @@ plugins {
 }
 
 kotlin {
-    jvm("desktop")
+    jvm()
 
-    sourceSets {
-        val desktopMain by getting
-        
-        commonMain.dependencies {
+    sourceSets.commonMain.dependencies {
 
-            implementation(projects.lib.kotlin)
-            implementation(projects.domain.objects)
+        implementation(projects.lib.kotlin)
+        implementation(projects.domain.objects)
 //            implementation(projects.domain.repo)
-            implementation(projects.domain.sqlite)
+        implementation(projects.domain.sqlite)
 
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.runtime.compose)
-        }
-        desktopMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutines.swing)
-        }
+        implementation(compose.runtime)
+        implementation(compose.foundation)
+        implementation(compose.material)
+        implementation(compose.ui)
+        implementation(compose.components.resources)
+        implementation(compose.components.uiToolingPreview)
+        implementation(libs.androidx.lifecycle.viewmodel)
+        implementation(libs.androidx.lifecycle.runtime.compose)
+    }
+
+    sourceSets.jvmMain.dependencies {
+        implementation(compose.desktop.currentOs)
+        implementation(libs.kotlinx.coroutines.swing)
     }
 }
 
 compose.desktop {
     application {
         mainClass = "org.example.project.MainKt"
-
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "org.example.project"
-            packageVersion = "1.0.0"
-        }
+        version = "0.0.1"
     }
 }
