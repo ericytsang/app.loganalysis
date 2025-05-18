@@ -13,7 +13,7 @@ import kotlin.collections.get
 
 interface ThemeRepository
 {
-    fun getTheme():Flow<Theme>
+    fun getThemeFlow():Flow<Theme>
     fun changeTheme()
 }
 
@@ -25,7 +25,7 @@ class ThemeRepositoryImpl(
 {
     private val database by lazy { sqliteDependencyProvider.databaseFactory.getDatabase(appInfoService.getAppPackageName()) }
 
-    override fun getTheme():Flow<Theme> = database.logAnalysisQueries.selectSettings().asFlow()
+    override fun getThemeFlow():Flow<Theme> = database.logAnalysisQueries.selectSettings().asFlow()
         .mapToList(dispatchers.io)
         .map { entities -> entities.firstOrNull() }
         .map { settingsEntity -> parseDbValueToTheme(settingsEntity?.theme) ?: Theme.LIGHT }

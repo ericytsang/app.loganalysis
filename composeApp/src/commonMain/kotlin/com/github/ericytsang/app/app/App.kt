@@ -48,7 +48,7 @@ class AppViewModelImpl(
 ):AppViewModel
 {
     override val theme:Flow<Theme>
-        get() = themeRepository.getTheme()
+        get() = themeRepository.getThemeFlow()
 
     override fun switchTheme()
     {
