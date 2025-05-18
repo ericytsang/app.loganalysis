@@ -1,0 +1,56 @@
+-- database.sq
+
+CREATE TABLE Configurations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+);
+
+CREATE TABLE LogFiles (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  config_id INTEGER NOT NULL,
+  file_path TEXT NOT NULL,
+  order_index INTEGER NOT NULL,
+  FOREIGN KEY (config_id) REFERENCES Configurations(id) ON DELETE CASCADE,
+  UNIQUE (config_id, file_path),
+  CHECK (order_index >= 0)
+);
+
+CREATE TABLE Filters (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  filter_string TEXT NOT NULL,
+  config_id INTEGER,
+  created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+  FOREIGN KEY (config_id) REFERENCES Configurations(id) ON DELETE SET NULL,
+  UNIQUE (filter_string, config_id)
+);
+
+CREATE INDEX idx_logfiles_config_id ON LogFiles(config_id);
+CREATE INDEX idx_filters_config_id ON Filters(config_id);
+
+-- Example queries (optional, for SQLDelight to generate methods)
+insertConfiguration:
+INSERT INTO Configurations (name)
+VALUES (?);
+
+selectAllConfigurations:
+SELECT * FROM Configurations
+ORDER BY created_at DESC;
+
+insertLogFile:
+INSERT INTO LogFiles (config_id, file_path, order_index)
+VALUES (?, ?, ?);
+
+selectLogFilesForConfig:
+SELECT * FROM LogFiles
+WHERE config_id = ?
+ORDER BY order_index;
+
+insertFilter:
+INSERT INTO Filters (filter_string, config_id)
+VALUES (?, ?);
+
+selectFilters:
+SELECT * FROM Filters
+WHERE config_id IS NULL OR config_id = ?
+ORDER BY created_at DESC;
