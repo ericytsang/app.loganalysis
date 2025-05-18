@@ -28,9 +28,14 @@ dependencyResolutionManagement {
     }
 }
 
+// the application module
 include(":composeApp")
-include(":lib:kotlin")
-include(":lib:logcatFilterParser")
+
+// :domain: app-specific modules
 include(":domain:objects")
 include(":domain:repo")
 include(":domain:sqlite")
+
+// :lib: - generic libraries
+include(":lib:kotlin")
+include(":lib:logcatFilterParser")
