@@ -19,71 +19,18 @@ import com.github.ericytsang.app.util.animatedThemeColors
 import com.github.ericytsang.app.util.fillMaxBackground
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSet
-import com.github.ericytsang.domain.repo.RepositoryDependencyProvider
-import com.github.ericytsang.domain.repo.ThemeRepository
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.compose_multiplatform
-import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.awt.Window
-import java.io.File
-
-interface WorkingFileSetEditorViewModel
-{
-    val workingFileSet:WorkingFileSet
-    fun addFiles(newFiles:List<File>)
-    fun moveFilesToPosition(files:List<File>,position:Int)
-    fun removeFiles(files:List<File>)
-}
-
-interface AppViewModel
-{
-    val theme:Flow<Theme>
-    fun switchTheme()
-}
-
-class AppViewModelImpl(
-    private val themeRepository:ThemeRepository,
-):AppViewModel
-{
-    override val theme:Flow<Theme>
-        get() = themeRepository.getThemeFlow()
-
-    override fun switchTheme()
-    {
-        themeRepository.changeTheme()
-    }
-}
-
-fun getAppViewModel():AppViewModel = AppViewModelImpl(
-    themeRepository = RepositoryDependencyProvider.instance.themeRepository,
-)
-
-fun getWorkingFileSetEditorViewModel():WorkingFileSetEditorViewModel = object:WorkingFileSetEditorViewModel
-{
-    override val workingFileSet:WorkingFileSet
-        get() = WorkingFileSet(files = emptyList())
-
-    override fun addFiles(newFiles:List<File>)
-    {
-    }
-
-    override fun moveFilesToPosition(files:List<File>,position:Int)
-    {
-    }
-
-    override fun removeFiles(files:List<File>)
-    {
-    }
-}
 
 @Composable
 @Preview
 fun App(
     window:Window,
-    viewModel:AppViewModel = getAppViewModel(),
-    workingFileSetEditorViewModel:WorkingFileSetEditorViewModel = getWorkingFileSetEditorViewModel(),
+    viewModel:AppViewModel = AppViewModel.create(),
+    workingFileSetEditorViewModel:WorkingFileSetEditorViewModel = WorkingFileSetEditorViewModel.createDefault(),
 )
 {
     val theme by viewModel.theme.collectAsState(Theme.DARK)
