@@ -22,11 +22,13 @@ actual class DatabaseDriverFactory
         val appDatabaseFileUri = appDatabasePath.toURI().toASCIIString()
 
         // create the database driver
-        return JdbcSqliteDriver(
+        val sqliteDriver = JdbcSqliteDriver(
             url = "$SQLITE_JDBC_CONNECTIONS_SCHEME$appDatabaseFileUri",
             properties = Properties(),
             schema = SqlDelightDatabase.Schema,
         )
+
+        return sqliteDriver
     }
 
     private fun getAndCreateAppHome(appPackageName:String):File
