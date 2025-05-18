@@ -1,19 +1,26 @@
 package com.github.ericytsang.app.ui.modal
 
-import androidx.compose.runtime.MutableState
+import com.github.ericytsang.app.app.WorkingFileSetEditorViewModel
 import com.github.ericytsang.app.ui.frame.workingFileSetEditor
-import com.github.ericytsang.domain.objects.WorkingFileSet
 import com.github.ericytsang.app.util.openBlockingDialog
+import com.github.ericytsang.domain.objects.WorkingFileSet
 import java.awt.Window
+import java.io.File
 
 fun openWorkingFileSetEditorInNewWindowBlocking(
     owner:Window,
-    workingFileSet:MutableState<WorkingFileSet>,
+    viewModel:WorkingFileSetEditorViewModel,
 )
 {
     openBlockingDialog(
         owner = owner,
         title = "Working File Set Editor",
-        content = { workingFileSetEditor(owner = window,fileSet = workingFileSet) },
     )
+    {
+        workingFileSetEditor(
+            owner = window,
+            workingFileSet = viewModel.workingFileSet,
+            addFilesToWorkingFileSet = { newFiles -> viewModel.addFiles(newFiles) },
+        )
+    }
 }

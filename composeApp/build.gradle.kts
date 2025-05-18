@@ -13,8 +13,7 @@ kotlin {
 
         implementation(projects.lib.kotlin)
         implementation(projects.domain.objects)
-//            implementation(projects.domain.repo)
-        implementation(projects.domain.sqlite)
+        implementation(projects.domain.repo)
 
         implementation(compose.runtime)
         implementation(compose.foundation)

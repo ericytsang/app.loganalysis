@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.graphics.Color
-import com.github.ericytsang.app.model.Theme
+import com.github.ericytsang.domain.objects.Theme
 
 /**
  * animates the colors of the theme.

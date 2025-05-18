@@ -7,54 +7,87 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.github.ericytsang.app.model.Theme
-import com.github.ericytsang.app.model.getNextTheme
 import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlocking
 import com.github.ericytsang.app.util.animatedThemeColors
 import com.github.ericytsang.app.util.fillMaxBackground
+import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSet
-import com.github.ericytsang.kotlin.KotlinDependencyProvider
-import com.github.ericytsang.kotlin.KotlinDependencyProviderImpl
-import com.github.ericytsang.service.sqlite.dependencyinjection.SqliteDependencyProvider
-import com.github.ericytsang.service.sqlite.dependencyinjection.SqliteDependencyProviderImpl
+import com.github.ericytsang.domain.repo.RepositoryDependencyProvider
+import com.github.ericytsang.domain.repo.ThemeRepository
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.compose_multiplatform
+import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.awt.Window
+import java.io.File
 
-interface ColdStartDependencyProvider:KotlinDependencyProvider,SqliteDependencyProvider
+interface WorkingFileSetEditorViewModel
 {
-    val kotlinDependencyProvider:KotlinDependencyProvider
-    val sqliteDependencyProvider:SqliteDependencyProvider
-    val packageName:String
+    val workingFileSet:WorkingFileSet
+    fun addFiles(newFiles:List<File>)
+    fun moveFilesToPosition(files:List<File>,position:Int)
+    fun removeFiles(files:List<File>)
 }
 
-object ColdStartDependencyProviderImpl:ColdStartDependencyProvider,
-    KotlinDependencyProvider by KotlinDependencyProviderImpl,
-    SqliteDependencyProvider by SqliteDependencyProviderImpl
+interface AppViewModel
 {
-    override val kotlinDependencyProvider:KotlinDependencyProvider get() = this
-    override val sqliteDependencyProvider:SqliteDependencyProvider get() = this
-    override val packageName:String = "com.github.ericytsang.loganalyzer"
+    val theme:Flow<Theme>
+    fun switchTheme()
+}
+
+class AppViewModelImpl(
+    private val themeRepository:ThemeRepository,
+):AppViewModel
+{
+    override val theme:Flow<Theme>
+        get() = themeRepository.getTheme()
+
+    override fun switchTheme()
+    {
+        themeRepository.changeTheme()
+    }
+}
+
+fun getAppViewModel():AppViewModel = AppViewModelImpl(
+    themeRepository = RepositoryDependencyProvider.instance.themeRepository,
+)
+
+fun getWorkingFileSetEditorViewModel():WorkingFileSetEditorViewModel = object:WorkingFileSetEditorViewModel
+{
+    override val workingFileSet:WorkingFileSet
+        get() = WorkingFileSet(files = emptyList())
+
+    override fun addFiles(newFiles:List<File>)
+    {
+    }
+
+    override fun moveFilesToPosition(files:List<File>,position:Int)
+    {
+    }
+
+    override fun removeFiles(files:List<File>)
+    {
+    }
 }
 
 @Composable
 @Preview
 fun App(
-    dependencyProvider:ColdStartDependencyProvider,
     window:Window,
+    viewModel:AppViewModel = getAppViewModel(),
+    workingFileSetEditorViewModel:WorkingFileSetEditorViewModel = getWorkingFileSetEditorViewModel(),
 )
 {
-    var theme by remember { mutableStateOf(Theme.LIGHT) }
+    val theme by viewModel.theme.collectAsState(Theme.DARK)
     val animatedThemeColors by animatedThemeColors(theme)
-    dependencyProvider.databaseFactory.getDatabase(dependencyProvider.packageName)
 
     val workingFileSetState = remember { mutableStateOf(WorkingFileSet(files = emptyList())) }
     val workingFileSet by workingFileSetState
@@ -74,14 +107,17 @@ fun App(
             )
 
             Button(
-                onClick = { theme = theme.getNextTheme() },
+                onClick = { viewModel.switchTheme() },
                 content = { Text("Toggle theme") },
             )
 
             Button(
                 onClick =
                 {
-                    openWorkingFileSetEditorInNewWindowBlocking(window,workingFileSetState)
+                    openWorkingFileSetEditorInNewWindowBlocking(
+                        owner = window,
+                        viewModel = workingFileSetEditorViewModel,
+                    )
                 },
                 content =
                 {

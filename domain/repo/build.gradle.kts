@@ -11,8 +11,7 @@ dependencies {
     commonMainApi(projects.lib.kotlin)
     commonMainApi(projects.domain.objects)
 
-    commonMainApi(libs.kotlin.stdlib)
-    commonMainApi(libs.kotlinx.coroutines.swing)
+    commonMainImplementation(projects.domain.sqlite)
 
     commonTestImplementation(libs.kotlin.test)
 }

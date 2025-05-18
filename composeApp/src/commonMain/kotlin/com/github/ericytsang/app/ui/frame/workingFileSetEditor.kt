@@ -10,28 +10,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import java.awt.Dialog
-import kotlin.collections.plus
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
 import com.github.ericytsang.domain.objects.WorkingFileSet
+import java.io.File
 
 @Composable
 fun workingFileSetEditor(
     owner:Dialog,
-    fileSet:MutableState<WorkingFileSet>,
+    workingFileSet:WorkingFileSet,
+    addFilesToWorkingFileSet:(List<File>) -> Unit,
 )
 {
-    var workingFileSet by fileSet
-
     fun openFilePickerToAddFiles()
     {
-        openMultiFilePicker(owner)
-        { selectedFiles ->
-            workingFileSet = workingFileSet.copy(files = workingFileSet.files+selectedFiles)
-        }
+        openMultiFilePicker(owner) { selectedFiles -> addFilesToWorkingFileSet(selectedFiles) }
     }
 
     Column(
