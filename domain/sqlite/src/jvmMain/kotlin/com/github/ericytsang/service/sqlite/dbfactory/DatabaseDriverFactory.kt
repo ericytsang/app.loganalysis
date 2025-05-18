@@ -1,9 +1,10 @@
-package com.github.ericytsang.service.sqlite
+package com.github.ericytsang.service.sqlite.dbfactory
 
-import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
-import java.util.Properties
 import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import com.github.ericytsang.service.sqlite.SqlDelightDatabase
 import java.io.File
+import java.util.Properties
 
 /**
  * This is the implementation of the DatabaseDriverFactory for JVM.
@@ -25,7 +26,7 @@ actual class DatabaseDriverFactory
         val sqliteDriver = JdbcSqliteDriver(
             url = "$SQLITE_JDBC_CONNECTIONS_SCHEME$appDatabaseFileUri",
             properties = Properties(),
-            schema = SqlDelightDatabase.Schema,
+            schema = SqlDelightDatabase.Companion.Schema,
         )
 
         return sqliteDriver

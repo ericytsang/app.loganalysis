@@ -1,6 +1,7 @@
-package com.github.ericytsang.service.sqlite
+package com.github.ericytsang.service.sqlite.dbfactory
 
 import app.cash.sqldelight.db.SqlDriver
+import com.github.ericytsang.service.sqlite.SqlDelightDatabase
 
 class DatabaseFactory()
 {
@@ -28,7 +29,7 @@ class DatabaseFactory()
     {
         val driver = driverFactory.createDriver(appPackageName)
         configureDatabase(driver)
-        val database = SqlDelightDatabase(driver)
+        val database = SqlDelightDatabase.Companion(driver)
         return database
     }
 

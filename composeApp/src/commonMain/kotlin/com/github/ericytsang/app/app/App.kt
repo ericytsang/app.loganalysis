@@ -21,8 +21,8 @@ import com.github.ericytsang.app.util.fillMaxBackground
 import com.github.ericytsang.domain.objects.WorkingFileSet
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import com.github.ericytsang.kotlin.KotlinDependencyProviderImpl
-import com.github.ericytsang.service.sqlite.SqliteDependencyProvider
-import com.github.ericytsang.service.sqlite.SqliteDependencyProviderImpl
+import com.github.ericytsang.service.sqlite.dependencyinjection.SqliteDependencyProvider
+import com.github.ericytsang.service.sqlite.dependencyinjection.SqliteDependencyProviderImpl
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.compose_multiplatform
 import org.jetbrains.compose.resources.painterResource

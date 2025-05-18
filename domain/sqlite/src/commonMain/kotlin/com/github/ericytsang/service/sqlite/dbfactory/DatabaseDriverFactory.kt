@@ -1,4 +1,4 @@
-package com.github.ericytsang.service.sqlite
+package com.github.ericytsang.service.sqlite.dbfactory
 
 import app.cash.sqldelight.db.SqlDriver
 
