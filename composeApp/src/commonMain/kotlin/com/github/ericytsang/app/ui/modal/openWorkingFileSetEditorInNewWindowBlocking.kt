@@ -17,8 +17,7 @@ fun openWorkingFileSetEditorInNewWindowBlocking(
     {
         workingFileSetEditor(
             owner = window,
-            workingFileSet = viewModel.workingFileSet,
-            addFilesToWorkingFileSet = { newFiles -> viewModel.addFiles(newFiles) },
+            viewModel = viewModel,
         )
     }
 }

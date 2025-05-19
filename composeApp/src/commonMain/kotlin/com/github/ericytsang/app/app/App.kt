@@ -18,7 +18,6 @@ import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlo
 import com.github.ericytsang.app.util.animatedThemeColors
 import com.github.ericytsang.app.util.fillMaxBackground
 import com.github.ericytsang.domain.objects.Theme
-import com.github.ericytsang.domain.objects.WorkingFileSet
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.compose_multiplatform
 import org.jetbrains.compose.resources.painterResource
@@ -36,8 +35,7 @@ fun App(
     val theme by viewModel.theme.collectAsState(Theme.DARK)
     val animatedThemeColors by animatedThemeColors(theme)
 
-    val workingFileSetState = remember { mutableStateOf(WorkingFileSet(files = emptyList())) }
-    val workingFileSet by workingFileSetState
+    val workingFileSet by workingFileSetEditorViewModel.workingFileSet.collectAsState(null)
 
     fillMaxBackground(colors = animatedThemeColors)
     {
@@ -68,13 +66,14 @@ fun App(
                 },
                 content =
                 {
-                    if (workingFileSet.files.isEmpty())
+                    val workingFileSetFiles = workingFileSet?.files
+                    if (workingFileSetFiles.isNullOrEmpty())
                     {
                         Text("Add files")
                     }
                     else
                     {
-                        Text("Edit files (${workingFileSet.files.size})")
+                        Text("Edit files (${workingFileSetFiles.size})")
                     }
                 },
             )

@@ -8,6 +8,7 @@ import com.github.ericytsang.service.sqlite.dependencyinjection.SqliteDependency
 interface RepositoryDependencyProvider
 {
     val themeRepository:ThemeRepository
+    val workingFileSetRepository:WorkingFileSetRepository
 
     companion object
     {
@@ -23,6 +24,14 @@ internal class RepositoryDependencyProviderImpl(
 {
     override val themeRepository:ThemeRepository by lazy {
         ThemeRepositoryImpl(
+            kotlinDependencyProvider = kotlinDependencyProvider,
+            sqliteDependencyProvider = sqliteDependencyProvider,
+            appInfoService = appInfoService,
+        )
+    }
+
+    override val workingFileSetRepository:WorkingFileSetRepository by lazy {
+        WorkingFileSetRepositoryImpl(
             kotlinDependencyProvider = kotlinDependencyProvider,
             sqliteDependencyProvider = sqliteDependencyProvider,
             appInfoService = appInfoService,

@@ -7,24 +7,27 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import java.awt.Dialog
+import com.github.ericytsang.app.app.WorkingFileSetEditorViewModel
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
-import com.github.ericytsang.domain.objects.WorkingFileSet
-import java.io.File
+import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
+import java.awt.Dialog
 
 @Composable
 fun workingFileSetEditor(
     owner:Dialog,
-    workingFileSet:WorkingFileSet,
-    addFilesToWorkingFileSet:(List<File>) -> Unit,
+    viewModel:WorkingFileSetEditorViewModel,
 )
 {
+    val workingFileSet by viewModel.workingFileSet.collectAsState(WorkingFileSetEmpty)
+
     fun openFilePickerToAddFiles()
     {
-        openMultiFilePicker(owner) { selectedFiles -> addFilesToWorkingFileSet(selectedFiles) }
+        openMultiFilePicker(owner) { selectedFiles -> viewModel.addFiles(selectedFiles) }
     }
 
     Column(
@@ -45,7 +48,7 @@ fun workingFileSetEditor(
         {
             items(count = workingFileSet.files.size)
             { index ->
-                Text(text = workingFileSet.files[index].absolutePath)
+                Text(text = workingFileSet.files[index].filePath)
             }
         }
     }
