@@ -10,6 +10,7 @@ import com.github.ericytsang.kotlin.KotlinDependencyProviderImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
@@ -17,7 +18,7 @@ import java.io.File
 
 interface WorkingFileSetEditorViewModel
 {
-    val configurationId:Flow<ConfigurationId?>
+    val configurationId:StateFlow<ConfigurationId?>
     fun setConfigurationId(configurationId:ConfigurationId?)
 
     val workingFileSet:Flow<WorkingFileSet>
@@ -46,7 +47,7 @@ private class WorkingFileSetEditorViewModelImpl(
     KotlinDependencyProvider by kotlinDependencyProvider
 {
     private val _configurationId = MutableStateFlow(initialConfigurationId)
-    override val configurationId:Flow<ConfigurationId?> get() = _configurationId
+    override val configurationId:StateFlow<ConfigurationId?> get() = _configurationId
 
     override fun setConfigurationId(configurationId:ConfigurationId?)
     {

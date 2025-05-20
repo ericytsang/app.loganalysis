@@ -1,6 +1,7 @@
 package com.github.ericytsang.app.app
 
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
+import com.github.ericytsang.kotlin.KotlinDependencyProviderImpl
 import com.github.ericytsang.logcatfilterparser.LogcatFilterParser
 import com.github.ericytsang.logcatfilterparser.Node
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,6 +20,11 @@ class LogViewerViewModel(
     private val logcatFilterEvaluator:LogcatFilterEvaluator,
 ):KotlinDependencyProvider by kotlinDependencyProvider
 {
+    init
+    {
+        println("LogViewerViewModel created")
+    }
+
     val concatenatedFiles:StateFlow<List<File>> get() = _concatenatedFiles
     private val _concatenatedFiles = MutableStateFlow(emptyList<File>())
 
@@ -35,8 +41,24 @@ class LogViewerViewModel(
         _logcatFilterString.value = filter
     }
 
-    val activeFilterParsed:Flow<Node> = _logcatFilterString
-        .mapLatest { filter -> logcatFilterParser.parse(filter) }
+    sealed class ParsedLogcatFilter
+    {
+        data class Parsed(val node:Node):ParsedLogcatFilter()
+        data object Empty:ParsedLogcatFilter()
+        data object Error:ParsedLogcatFilter()
+    }
+
+    val activeFilterParsed:Flow<ParsedLogcatFilter> = _logcatFilterString
+        .mapLatest { filter ->
+            when
+            {
+                filter.isBlank() -> ParsedLogcatFilter.Empty
+                else -> runCatching { logcatFilterParser.parse(filter) }.fold(
+                    onSuccess = { ParsedLogcatFilter.Parsed(it) },
+                    onFailure = { ParsedLogcatFilter.Error },
+                )
+            }
+        }
         .flowOn(dispatchers.io)
 
     fun getLogLinesFlow():Flow<List<String>> = concatenatedFiles
@@ -46,8 +68,26 @@ class LogViewerViewModel(
 
     private fun applyFilterToLogLines(
         logLines:List<String>,
-        logcatFilter:Node,
+        logcatFilter:ParsedLogcatFilter,
     ):List<String> = logLines.filter { logLine ->
-        logcatFilterEvaluator.isMatch(logLine, logcatFilter)
+        when (logcatFilter)
+        {
+            is ParsedLogcatFilter.Parsed -> logcatFilterEvaluator.isMatch(logLine, logcatFilter.node)
+            ParsedLogcatFilter.Empty -> true
+            ParsedLogcatFilter.Error -> false
+        }
+    }
+
+    companion object
+    {
+        fun createDefault(
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProviderImpl,
+            logcatFilterParser:LogcatFilterParser = LogcatFilterParser(),
+            logcatFilterEvaluator:LogcatFilterEvaluator = LogcatFilterEvaluatorImpl(),
+        ):LogViewerViewModel = LogViewerViewModel(
+            kotlinDependencyProvider = kotlinDependencyProvider,
+            logcatFilterParser = logcatFilterParser,
+            logcatFilterEvaluator = logcatFilterEvaluator,
+        )
     }
 }
