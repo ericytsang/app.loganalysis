@@ -12,6 +12,7 @@ kotlin {
     sourceSets.commonMain.dependencies {
 
         implementation(projects.lib.kotlin)
+        implementation(projects.lib.logcatFilterParser)
         implementation(projects.domain.objects)
         implementation(projects.domain.repo)
 
