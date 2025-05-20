@@ -4,7 +4,7 @@ package com.github.ericytsang.logcatfilterparser
 sealed class Node
 
 /** Leaf node representing a single filter condition */
-internal class LeafNode(
+class LeafNode(
 
     /** The field to filter (e.g., "message", "tag", "level") */
     val key:String,
@@ -26,27 +26,27 @@ internal class LeafNode(
 }
 
 /** AND node representing a conjunction of two sub-expressions */
-internal class AndNode(
-    val left:Node?,
-    val right:Node?,
+class AndNode(
+    val left:Node,
+    val right:Node,
 ):Node()
 {
     override fun toString():String = "($left & $right)"
 }
 
 /** OR node representing a disjunction of two sub-expressions */
-internal class OrNode(
-    val left:Node?,
-    val right:Node?,
+class OrNode(
+    val left:Node,
+    val right:Node,
 ):Node()
 {
     override fun toString():String = "($left | $right)"
 }
 
 /** NOT node representing a negation of one expression */
-internal class NotNode(
-    val right:Node?,
+class NotNode(
+    val child:Node,
 ):Node()
 {
-    override fun toString():String = "-($right)"
+    override fun toString():String = "-($child)"
 }
