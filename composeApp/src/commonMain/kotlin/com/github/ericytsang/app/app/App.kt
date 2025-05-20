@@ -10,9 +10,7 @@ import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlocking
@@ -40,10 +38,7 @@ fun App(
     val theme by viewModel.theme.collectAsState(Theme.DARK)
     val animatedThemeColors by animatedThemeColors(theme)
 
-    var showContent by remember { mutableStateOf(false) }
-
-    var logcatFilterTextFieldState by remember { mutableStateOf("") }
-    logViewerViewModel.setLogcatFilterString(logcatFilterTextFieldState)
+    val logcatFilterString by logViewerViewModel.logcatFilterString.collectAsState("")
 
     val workingFileSet by workingFileSetEditorViewModel.workingFileSet.collectAsState(WorkingFileSetEmpty)
     logViewerViewModel.setConcatenatedFiles(workingFileSet.files.map { File(it.filePath) })
@@ -56,11 +51,6 @@ fun App(
             horizontalAlignment = Alignment.CenterHorizontally,
         )
         {
-            Button(
-                onClick = { showContent = !showContent },
-                content = { Text("Click me!") },
-            )
-
             Button(
                 onClick = { viewModel.switchTheme() },
                 content = { Text("Toggle theme") },
@@ -89,8 +79,8 @@ fun App(
             )
 
             TextField(
-                value = logcatFilterTextFieldState,
-                onValueChange = { newValue -> logcatFilterTextFieldState = newValue },
+                value = logcatFilterString,
+                onValueChange = { newValue -> logViewerViewModel.setLogcatFilterString(newValue) },
             )
 
             val logLines by logViewerViewModel.getLogLinesFlow().collectAsState(emptyList())
