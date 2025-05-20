@@ -1,5 +1,6 @@
 package com.github.ericytsang.app.ui.modal
 
+import com.github.ericytsang.app.app.AppViewModel
 import com.github.ericytsang.app.app.WorkingFileSetEditorViewModel
 import com.github.ericytsang.app.ui.frame.workingFileSetEditor
 import com.github.ericytsang.app.util.openBlockingDialog
@@ -7,6 +8,7 @@ import java.awt.Window
 
 fun openWorkingFileSetEditorInNewWindowBlocking(
     owner:Window,
+    appViewModel:AppViewModel,
     viewModel:WorkingFileSetEditorViewModel,
 )
 {
@@ -18,6 +20,7 @@ fun openWorkingFileSetEditorInNewWindowBlocking(
         workingFileSetEditor(
             owner = window,
             viewModel = viewModel,
+            appViewModel = appViewModel,
         )
     }
 }

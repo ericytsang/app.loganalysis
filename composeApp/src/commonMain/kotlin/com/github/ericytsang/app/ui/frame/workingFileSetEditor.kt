@@ -11,9 +11,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.github.ericytsang.app.app.AppViewModel
 import com.github.ericytsang.app.app.WorkingFileSetEditorViewModel
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
+import com.github.ericytsang.app.util.animatedThemeColors
+import com.github.ericytsang.app.util.fillMaxBackground
+import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import java.awt.Dialog
 
@@ -21,8 +25,12 @@ import java.awt.Dialog
 fun workingFileSetEditor(
     owner:Dialog,
     viewModel:WorkingFileSetEditorViewModel,
+    appViewModel:AppViewModel,
 )
 {
+    val theme by appViewModel.theme.collectAsState(Theme.DARK)
+    val animatedThemeColors by animatedThemeColors(theme)
+
     val workingFileSet by viewModel.workingFileSet.collectAsState(WorkingFileSetEmpty)
 
     fun openFilePickerToAddFiles()
@@ -30,25 +38,28 @@ fun workingFileSetEditor(
         openMultiFilePicker(owner) { selectedFiles -> viewModel.addFiles(selectedFiles) }
     }
 
-    Column(
-        modifier = Modifier.Companion
-            .fillMaxSize()
-            .padding(Dimens.mttPadding),
-        horizontalAlignment = Alignment.Companion.Start,
-    )
+    fillMaxBackground(colors = animatedThemeColors)
     {
-        Button(
-            onClick = { openFilePickerToAddFiles() },
-            content = { Text("Add file(s)") },
-        )
-
-        LazyColumn(
-            modifier = Modifier.Companion.fillMaxSize(),
+        Column(
+            modifier = Modifier.Companion
+                .fillMaxSize()
+                .padding(Dimens.mttPadding),
+            horizontalAlignment = Alignment.Companion.Start,
         )
         {
-            items(count = workingFileSet.files.size)
-            { index ->
-                Text(text = workingFileSet.files[index].filePath)
+            Button(
+                onClick = { openFilePickerToAddFiles() },
+                content = { Text("Add file(s)") },
+            )
+
+            LazyColumn(
+                modifier = Modifier.Companion.fillMaxSize(),
+            )
+            {
+                items(count = workingFileSet.files.size)
+                { index ->
+                    Text(text = workingFileSet.files[index].filePath)
+                }
             }
         }
     }

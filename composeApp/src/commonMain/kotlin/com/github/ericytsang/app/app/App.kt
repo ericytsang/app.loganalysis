@@ -73,6 +73,7 @@ fun App(
                             openWorkingFileSetEditorInNewWindowBlocking(
                                 owner = window,
                                 viewModel = workingFileSetEditorViewModel,
+                                appViewModel = viewModel,
                             )
                         },
                     content =
