@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
+import androidx.compose.material.Colors
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -19,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.withStyle
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlocking
@@ -30,9 +30,7 @@ import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.awt.Window
 import java.io.File
-import kotlin.math.abs
 import kotlin.random.Random
-import kotlin.random.nextInt
 
 @Composable
 @Preview
@@ -119,24 +117,37 @@ fun App(
                 {
                     items(count = logLines.size)
                     { index ->
-                        val logLineString = buildColorCodedLogLine(
-                            logLine = logLines[index],
-                            isDarkTheme = when (theme)
-                            {
-                                Theme.LIGHT -> false
-                                Theme.DARK -> true
-                            },
-                        )
-                        Text(
-                            text = logLineString,
+                        ColorCodedLogLine(
+                            text = logLines[index],
                             modifier = Modifier.fillMaxWidth(),
-                            color = animatedThemeColors.onBackground,
+                            themeForColorCoding = theme,
                         )
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+fun ColorCodedLogLine(
+    text:String,
+    themeForColorCoding:Theme,
+    modifier: Modifier = Modifier,
+)
+{
+    val logLineString = buildColorCodedLogLine(
+        logLine = text,
+        isDarkTheme = when (themeForColorCoding)
+        {
+            Theme.LIGHT -> false
+            Theme.DARK -> true
+        },
+    )
+    Text(
+        text = logLineString,
+        modifier = modifier,
+    )
 }
 
 
