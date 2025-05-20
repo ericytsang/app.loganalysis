@@ -2,7 +2,10 @@
 
 CREATE TABLE Configurations (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  -- user-defined name for the configuration.
+  -- it could be blank, in which case the app will display a generate name
   name TEXT NOT NULL,
+  -- the time when the configuration was created
   created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
 );
 
@@ -10,6 +13,7 @@ CREATE TABLE LogFiles (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   config_id INTEGER NOT NULL,
   file_path TEXT NOT NULL,
+  -- the order in which the log files are displayed and concatenated in the UI
   order_index INTEGER NOT NULL,
   FOREIGN KEY (config_id) REFERENCES Configurations(id) ON DELETE CASCADE,
   UNIQUE (config_id, file_path),
