@@ -6,7 +6,7 @@ class LogcatFilterParser
     /**
      * Parses the input string into an AST.
      */
-    fun parse(input:String):Node?
+    fun parse(input:String):Node
     {
         val stream = Tokenizer.tokenize(input)
         val node = parseOrExpression(stream)
@@ -20,7 +20,7 @@ class LogcatFilterParser
     /**
      * Parses an expression: term ( "|" term )
      */
-    private fun parseOrExpression(stream:TokenStream):Node?
+    private fun parseOrExpression(stream:TokenStream):Node
     {
         var node = parseAndExpression(stream)
         while (stream.peek() == "|")
@@ -35,7 +35,7 @@ class LogcatFilterParser
     /**
      * Parses a term: factor ( "&" factor )
      */
-    private fun parseAndExpression(stream:TokenStream):Node?
+    private fun parseAndExpression(stream:TokenStream):Node
     {
         var node = parseNotExpression(stream)
         while (stream.peek() == "&")
@@ -50,7 +50,7 @@ class LogcatFilterParser
     /**
      * Parses an expression: term ( "|" term )
      */
-    private fun parseNotExpression(stream:TokenStream):Node?
+    private fun parseNotExpression(stream:TokenStream):Node
     {
         var node: Node? = null
         while (stream.peek() == "-")
@@ -69,7 +69,7 @@ class LogcatFilterParser
     /**
      * Parses a factor: leaf | "(" expression ")"
      */
-    private fun parseBrackets(stream:TokenStream):Node?
+    private fun parseBrackets(stream:TokenStream):Node
     {
         val token = stream.next()
         if (token == null)
