@@ -28,11 +28,15 @@ import java.io.File
 @Preview
 fun App(
     window:Window,
-    viewModel:AppViewModel = AppViewModel.create(),
-    logViewerViewModel:LogViewerViewModel = LogViewerViewModel.createDefault(),
-    workingFileSetEditorViewModel:WorkingFileSetEditorViewModel = WorkingFileSetEditorViewModel.createDefault(),
+    viewModelFactory:()->AppViewModel = { AppViewModel.create() },
+    logViewerViewModelFactory:()->LogViewerViewModel = { LogViewerViewModel.createDefault() },
+    workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel = { WorkingFileSetEditorViewModel.createDefault() },
 )
 {
+    val viewModel = remember { viewModelFactory() }
+    val logViewerViewModel = remember { logViewerViewModelFactory() }
+    val workingFileSetEditorViewModel = remember { workingFileSetEditorViewModelFactory() }
+
     val theme by viewModel.theme.collectAsState(Theme.DARK)
     val animatedThemeColors by animatedThemeColors(theme)
 
