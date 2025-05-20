@@ -33,7 +33,7 @@ fun workingFileSetEditor(
     Column(
         modifier = Modifier.Companion
             .fillMaxSize()
-            .padding(Dimens.minimumTouchTargetPadding),
+            .padding(Dimens.mttPadding),
         horizontalAlignment = Alignment.Companion.Start,
     )
     {
