@@ -50,48 +50,77 @@ private class SettingsViewModelImpl(
     MutableThemeViewModel by MutableThemeViewModel.create(),
     KotlinDependencyProvider by kotlinDependencyProvider
 {
-    private val updateRequests = Channel<String>(capacity = Channel.CONFLATED).also { channel ->
+    private val delimiterCharactersUseCase = TwoWayStringBindingUseCase(
+        uiScope = uiScope,
+        remoteStringFlow = settingsRepository.getDelimiterFlow(),
+        updateRemoteString = { newString -> settingsRepository.setDelimiter(newString) },
+        kotlinDependencyProvider = kotlinDependencyProvider,
+        nowFactory = nowFactory,
+    )
+
+    override val delimiterCharacters:Flow<String> get() = delimiterCharactersUseCase.displayString
+
+    override fun setDelimiterCharacters(delimiterCharacters:String)
+    {
+        delimiterCharactersUseCase.updateString(delimiterCharacters)
+    }
+}
+
+class TwoWayStringBindingUseCase(
+    uiScope:CoroutineScope,
+    remoteStringFlow:Flow<String>,
+    updateRemoteString:suspend (String) -> Unit,
+    private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProviderImpl,
+    private val nowFactory:NowFactory = NowFactoryImpl,
+):KotlinDependencyProvider by kotlinDependencyProvider
+{
+    private val remoteStringUpdateRequests = Channel<String>(capacity = Channel.CONFLATED).also { channel ->
         channel
             .consumeAsFlow()
             .conflate()
-            .onEach { newString -> settingsRepository.setDelimiter(newString) }
+            .onEach { newString -> updateRemoteString(newString) }
             .flowOn(dispatchers.io)
             .launchIn(uiScope)
     }
 
-    private val _delimiterCharacters = MutableStateFlow(TwoWayBindingString())
+    private val twoWayStringBinding = MutableStateFlow(TwoWayStringBinding())
 
-    private val delimiterCharactersFromDb = settingsRepository
-        .getDelimiterFlow()
+    private val collectToGetUpdatesFromRemoteSource = remoteStringFlow
         .conflate()
-        .onEach { newString -> updateInMemoryDelimiterCharactersViaDb(newString) }
+        .onEach { newString -> updateLocalStringViaDb(newString) }
         .shareIn(applicationScope, SharingStarted.WhileSubscribed(5.seconds), replay = 0)
 
-    override val delimiterCharacters:Flow<String> = _delimiterCharacters
-        .combine(delimiterCharactersFromDb) { it,_ -> it }
+    /**
+     * combines the in-memory string and the remote string to get the latest string for displaying to the user.
+     */
+    val displayString:Flow<String> = twoWayStringBinding
+        .combine(collectToGetUpdatesFromRemoteSource) { it,_ -> it }
         .map { twoWayBindingDbString -> twoWayBindingDbString.displayString }
 
-    override fun setDelimiterCharacters(delimiterCharacters:String)
+    /**
+     * updates the in-memory string and also asynchronously updates the remote string to the new string.
+     */
+    fun updateString(delimiterCharacters:String)
     {
-        updateInMemoryDelimiterCharactersViaUi(delimiterCharacters)
-        updateDbDelimiterCharacters(delimiterCharacters)
+        updateLocalStringViaUi(delimiterCharacters)
+        enqueueRemoteStringUpdate(delimiterCharacters)
     }
 
-    private fun updateDbDelimiterCharacters(newString:String)
+    private fun enqueueRemoteStringUpdate(newString:String)
     {
-        updateRequests.trySend(newString).getOrThrow()
+        remoteStringUpdateRequests.trySend(newString).getOrThrow()
     }
 
-    private fun updateInMemoryDelimiterCharactersViaDb(newString:String)
+    private fun updateLocalStringViaDb(newString:String)
     {
-        println("update via db: $newString")
-        _delimiterCharacters.value = _delimiterCharacters.value.updateViaRemote(newString, nowFactory.now())
+        println("updateLocalStringViaDb($newString)")
+        twoWayStringBinding.value = twoWayStringBinding.value.updateViaRemote(newString, nowFactory.now())
     }
 
-    private fun updateInMemoryDelimiterCharactersViaUi(newString:String)
+    private fun updateLocalStringViaUi(newString:String)
     {
-        println("update via ui: $newString")
-        _delimiterCharacters.value = _delimiterCharacters.value.updateViaUi(newString, nowFactory.now())
+        println("updateLocalStringViaUi($newString)")
+        twoWayStringBinding.value = twoWayStringBinding.value.updateViaUi(newString, nowFactory.now())
     }
 
     private sealed class FetchedString
@@ -105,7 +134,7 @@ private class SettingsViewModelImpl(
         data object Loading:FetchedString()
     }
 
-    private data class TwoWayBindingString(
+    private data class TwoWayStringBinding(
         val remoteString:FetchedString = FetchedString.Loading,
         val memoryString:FetchedString = FetchedString.Loading,
     )
@@ -113,7 +142,7 @@ private class SettingsViewModelImpl(
         fun updateViaUi(
             newString:String,
             now:Instant,
-        ):TwoWayBindingString = copy(
+        ):TwoWayStringBinding = copy(
             memoryString = FetchedString.Fetched(
                 string = newString,
                 whenUpdated = now,
@@ -123,7 +152,7 @@ private class SettingsViewModelImpl(
         fun updateViaRemote(
             newString:String,
             now:Instant,
-        ):TwoWayBindingString = copy(
+        ):TwoWayStringBinding = copy(
             remoteString = FetchedString.Fetched(
                 string = newString,
                 whenUpdated = now,
