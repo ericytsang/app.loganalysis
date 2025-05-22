@@ -31,7 +31,10 @@ CREATE TABLE Filters (
 
 CREATE TABLE Settings (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  theme TEXT NOT NULL DEFAULT 'light'
+  -- the theme of the app: 'light' or 'dark'
+  theme TEXT NOT NULL,
+  -- delimiters to look for in the logs that separate words
+  color_coding_delimiters TEXT NOT NULL
 );
 
 -- create indexes for performance
@@ -42,7 +45,7 @@ CREATE INDEX idx_filters_config_id ON Filters(config_id);
 -- insert default values into the database
 
 INSERT INTO Settings
-VALUES (1, 'light');
+VALUES (1, 'light', ':,.;!@#$%^&* ()_+=-`~|?<>\\/[]{}\"');
 
 -- everything below are SQLDelight queries
 
@@ -59,13 +62,14 @@ selectSettings:
 SELECT * FROM Settings
 WHERE id = 1;
 
-insertSettings:
-INSERT INTO Settings
-VALUES (1, 'light');
-
-updateSettings:
+updateTheme:
 UPDATE Settings
 SET theme = ?
+WHERE id = 1;
+
+updateColorCodingDelimiters:
+UPDATE Settings
+SET color_coding_delimiters = ?
 WHERE id = 1;
 
 -- endregion

@@ -1,44 +1,25 @@
 package com.github.ericytsang.app.app
 
-import com.github.ericytsang.domain.objects.Theme
-import com.github.ericytsang.domain.repo.RepositoryDependencyProvider
-import com.github.ericytsang.domain.repo.ThemeRepository
-import com.github.ericytsang.kotlin.KotlinDependencyProvider
-import com.github.ericytsang.kotlin.KotlinDependencyProviderImpl
-import kotlinx.coroutines.Job
+import com.github.ericytsang.domain.repo.DelimiterService
+import com.github.ericytsang.domain.repo.SettingsRepository
+import com.github.ericytsang.domain.repo.SettingsRepositoryImpl
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 
-interface AppViewModel
+interface AppViewModel:ThemeViewModel,DelimiterService
 {
-    val theme:Flow<Theme>
-    fun switchTheme()
-
     companion object
     {
-        fun create(
-            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProviderImpl,
-            themeRepository:ThemeRepository = RepositoryDependencyProvider.instance.themeRepository,
-        ):AppViewModel = AppViewModelImpl(
-            kotlinDependencyProvider = kotlinDependencyProvider,
-            themeRepository = themeRepository,
-        )
+        fun create():AppViewModel = AppViewModelImpl()
     }
 }
 
 private class AppViewModelImpl(
-    private val kotlinDependencyProvider:KotlinDependencyProvider,
-    private val themeRepository:ThemeRepository,
-):AppViewModel,KotlinDependencyProvider by kotlinDependencyProvider
+    private val settingsRepository:SettingsRepository = SettingsRepositoryImpl(),
+):
+    AppViewModel,
+    ThemeViewModel by ThemeViewModel.create()
 {
-    override val theme:Flow<Theme>
-        get() = themeRepository.getThemeFlow()
-
-    override fun switchTheme()
-    {
-        applicationScope.launch()
-        {
-            themeRepository.changeTheme()
-        }
-    }
+    override fun getDelimiterFlow():Flow<String> = settingsRepository.getDelimiterFlow()
+    override suspend fun setDelimiter(newDelimiters: String) = settingsRepository.setDelimiter(newDelimiters)
 }
+

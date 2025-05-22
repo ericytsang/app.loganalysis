@@ -14,12 +14,15 @@ import kotlin.text.iterator
 @Composable
 fun ColorCodedLogLine(
     text:String,
+    defaultColor:Color,
     themeForColorCoding:Theme,
+    delimiters:String,
     modifier:Modifier = Modifier.Companion,
 )
 {
     val logLineString = buildColorCodedLogLine(
         logLine = text,
+        delimiters = delimiters,
         isDarkTheme = when (themeForColorCoding)
         {
             Theme.LIGHT -> false
@@ -29,6 +32,7 @@ fun ColorCodedLogLine(
     Text(
         text = logLineString,
         modifier = modifier,
+        color = defaultColor,
     )
 }
 
@@ -39,7 +43,10 @@ fun ColorCodedLogLine(
  * @param isDarkTheme Boolean indicating if the theme is dark
  * @return Color for the word
  */
-private fun getColorForWord(word:String,isDarkTheme:Boolean):Color
+private fun getColorForWord(
+    word:String,
+    isDarkTheme:Boolean,
+):Color
 {
     // generate a random color based on the hash code of the word
     val random = Random(word.hashCode())
@@ -67,9 +74,9 @@ private fun getColorForWord(word:String,isDarkTheme:Boolean):Color
 private fun buildColorCodedLogLine(
     logLine:String,
     isDarkTheme:Boolean,
+    delimiters:String,
 ):AnnotatedString
 {
-    val delimiters = ":,\"<>(){}[]. ".toSet()
     val builder = AnnotatedString.Builder()
 
     var currentWord = StringBuilder()

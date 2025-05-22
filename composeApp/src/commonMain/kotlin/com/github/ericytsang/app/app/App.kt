@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.github.ericytsang.app.model.Dimens
+import com.github.ericytsang.app.ui.modal.openSettingsInNewWindowBlocking
 import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlocking
 import com.github.ericytsang.app.util.animatedThemeColors
 import com.github.ericytsang.app.util.fillMaxBackground
@@ -43,6 +44,7 @@ fun App(
     val animatedThemeColors by animatedThemeColors(theme)
 
     val logcatFilterString by logViewerViewModel.logcatFilterString.collectAsState("")
+    val delimiters by viewModel.getDelimiterFlow().collectAsState("")
 
     val workingFileSet by workingFileSetEditorViewModel.workingFileSet.collectAsState(WorkingFileSetEmpty)
     logViewerViewModel.setConcatenatedFiles(workingFileSet.files.map { File(it.filePath) })
@@ -62,8 +64,8 @@ fun App(
             {
                 Button(
                     modifier = Modifier.padding(end = Dimens.mttPadding),
-                    onClick = { viewModel.switchTheme() },
-                    content = { Text("Toggle theme") },
+                    onClick = { openSettingsInNewWindowBlocking(window) },
+                    content = { Text("Settings") },
                 )
 
                 Button(
@@ -115,11 +117,51 @@ fun App(
                         ColorCodedLogLine(
                             text = logLines[index],
                             modifier = Modifier.fillMaxWidth(),
+                            delimiters = delimiters,
                             themeForColorCoding = theme,
+                            defaultColor = animatedThemeColors.onBackground,
                         )
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun Settings(
+    viewModelFactory:()->SettingsViewModel = { SettingsViewModel.create() },
+)
+{
+    val viewModel = remember { viewModelFactory() }
+
+    val theme by viewModel.theme.collectAsState(Theme.DARK)
+    val animatedThemeColors by animatedThemeColors(theme)
+
+    val delimiterCharacters by viewModel.delimiterCharacters.collectAsState("")
+
+    fillMaxBackground(colors = animatedThemeColors)
+    {
+
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(Dimens.mttPadding),
+            horizontalAlignment = Alignment.Start,
+        )
+        {
+            Button(
+                modifier = Modifier.padding(bottom = Dimens.mttPadding),
+                onClick = { viewModel.switchTheme() },
+                content = { Text("Toggle theme") },
+            )
+
+            TextField(
+                value = delimiterCharacters,
+                onValueChange = { newValue -> viewModel.setDelimiterCharacters(newValue) },
+                label = { Text("delimiters") },
+                colors = TextFieldDefaults.textFieldColors(
+                    textColor = animatedThemeColors.onBackground,
+                ),
+            )
         }
     }
 }
