@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.github.ericytsang.app.model.Dimens
@@ -23,6 +24,7 @@ import com.github.ericytsang.app.util.animatedThemeColors
 import com.github.ericytsang.app.util.fillMaxBackground
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
+import kotlinx.coroutines.CoroutineScope
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.awt.Window
 import java.io.File
@@ -130,10 +132,11 @@ fun App(
 
 @Composable
 fun Settings(
-    viewModelFactory:()->SettingsViewModel = { SettingsViewModel.create() },
+    viewModelFactory:(CoroutineScope)->SettingsViewModel = { uiScope -> SettingsViewModel.create(uiScope) },
 )
 {
-    val viewModel = remember { viewModelFactory() }
+    val coroutineScope = rememberCoroutineScope()
+    val viewModel = remember { viewModelFactory(coroutineScope) }
 
     val theme by viewModel.theme.collectAsState(Theme.DARK)
     val animatedThemeColors by animatedThemeColors(theme)
