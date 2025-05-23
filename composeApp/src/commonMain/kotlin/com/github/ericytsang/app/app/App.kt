@@ -1,5 +1,6 @@
 package com.github.ericytsang.app.app
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
+import androidx.compose.material.Colors
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -17,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.modal.openSettingsInNewWindowBlocking
 import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlocking
@@ -24,7 +27,13 @@ import com.github.ericytsang.app.util.animatedThemeColors
 import com.github.ericytsang.app.util.fillMaxBackground
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
+import kotlinproject.composeapp.generated.resources.Res
+import kotlinproject.composeapp.generated.resources.compose_multiplatform
+import kotlinproject.composeapp.generated.resources.outline_match_case_24
+import kotlinproject.composeapp.generated.resources.outline_settings_24
+import kotlinproject.composeapp.generated.resources.outline_wrap_text_24
 import kotlinx.coroutines.CoroutineScope
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.awt.Window
 import java.io.File
@@ -66,12 +75,6 @@ fun App(
             {
                 Button(
                     modifier = Modifier.padding(end = Dimens.mttPadding),
-                    onClick = { openSettingsInNewWindowBlocking(window) },
-                    content = { Text("Settings") },
-                )
-
-                Button(
-                    modifier = Modifier.padding(end = Dimens.mttPadding),
                     onClick =
                         {
                             openWorkingFileSetEditorInNewWindowBlocking(
@@ -97,10 +100,27 @@ fun App(
                 TextField(
                     value = logcatFilterString,
                     onValueChange = { newValue -> logViewerViewModel.setLogcatFilterString(newValue) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.weight(1f).padding(end = Dimens.mttPadding),
                     colors = TextFieldDefaults.textFieldColors(
                         textColor = animatedThemeColors.onBackground,
                     ),
+                )
+
+                Button(
+                    modifier = Modifier.padding(end = Dimens.mttPadding),
+                    onClick = { openSettingsInNewWindowBlocking(window) },
+                    content = { IconMatchCaseOnPrimary(animatedThemeColors) },
+                )
+
+                Button(
+                    modifier = Modifier.padding(end = Dimens.mttPadding),
+                    onClick = { openSettingsInNewWindowBlocking(window) },
+                    content = { IconWrapTextOnPrimary(animatedThemeColors) },
+                )
+
+                Button(
+                    onClick = { openSettingsInNewWindowBlocking(window) },
+                    content = { IconSettingsOnPrimary(animatedThemeColors) },
                 )
             }
 
@@ -128,6 +148,45 @@ fun App(
             }
         }
     }
+}
+
+@Composable
+private fun IconSettingsOnPrimary(animatedThemeColors:Colors)
+{
+    Image(
+        painter = painterResource(Res.drawable.outline_settings_24),
+        contentDescription = "Settings",
+        colorFilter = ColorFilter.lighting(
+            multiply = animatedThemeColors.onPrimary,
+            add = animatedThemeColors.onPrimary,
+        )
+    )
+}
+
+@Composable
+private fun IconWrapTextOnPrimary(animatedThemeColors:Colors)
+{
+    Image(
+        painter = painterResource(Res.drawable.outline_wrap_text_24),
+        contentDescription = "Wrap text",
+        colorFilter = ColorFilter.lighting(
+            multiply = animatedThemeColors.onPrimary,
+            add = animatedThemeColors.onPrimary,
+        )
+    )
+}
+
+@Composable
+private fun IconMatchCaseOnPrimary(animatedThemeColors:Colors)
+{
+    Image(
+        painter = painterResource(Res.drawable.outline_match_case_24),
+        contentDescription = "Match case",
+        colorFilter = ColorFilter.lighting(
+            multiply = animatedThemeColors.onPrimary,
+            add = animatedThemeColors.onPrimary,
+        )
+    )
 }
 
 @Composable
