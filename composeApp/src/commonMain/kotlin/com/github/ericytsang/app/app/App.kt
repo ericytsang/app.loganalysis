@@ -29,6 +29,7 @@ import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.compose_multiplatform
+import kotlinproject.composeapp.generated.resources.outline_contract_edit_24
 import kotlinproject.composeapp.generated.resources.outline_match_case_24
 import kotlinproject.composeapp.generated.resources.outline_settings_24
 import kotlinproject.composeapp.generated.resources.outline_wrap_text_24
@@ -76,25 +77,14 @@ fun App(
                 Button(
                     modifier = Modifier.padding(end = Dimens.mttPadding),
                     onClick =
-                        {
-                            openWorkingFileSetEditorInNewWindowBlocking(
-                                owner = window,
-                                viewModel = workingFileSetEditorViewModel,
-                                appViewModel = viewModel,
-                            )
-                        },
-                    content =
-                        {
-                            val workingFileSetFiles = workingFileSet.files
-                            if (workingFileSetFiles.isEmpty())
-                            {
-                                Text("Add files")
-                            }
-                            else
-                            {
-                                Text("Edit files (${workingFileSetFiles.size})")
-                            }
-                        },
+                    {
+                        openWorkingFileSetEditorInNewWindowBlocking(
+                            owner = window,
+                            viewModel = workingFileSetEditorViewModel,
+                            appViewModel = viewModel,
+                        )
+                    },
+                    content = { IconEditLogFilesOnPrimary(animatedThemeColors) },
                 )
 
                 TextField(
@@ -182,6 +172,19 @@ private fun IconMatchCaseOnPrimary(animatedThemeColors:Colors)
     Image(
         painter = painterResource(Res.drawable.outline_match_case_24),
         contentDescription = "Match case",
+        colorFilter = ColorFilter.lighting(
+            multiply = animatedThemeColors.onPrimary,
+            add = animatedThemeColors.onPrimary,
+        )
+    )
+}
+
+@Composable
+private fun IconEditLogFilesOnPrimary(animatedThemeColors:Colors)
+{
+    Image(
+        painter = painterResource(Res.drawable.outline_contract_edit_24),
+        contentDescription = "Edit log files",
         colorFilter = ColorFilter.lighting(
             multiply = animatedThemeColors.onPrimary,
             add = animatedThemeColors.onPrimary,
