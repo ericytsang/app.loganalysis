@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.app
+package com.github.ericytsang.app.ui.component
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable

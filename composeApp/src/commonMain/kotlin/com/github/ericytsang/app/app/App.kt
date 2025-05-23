@@ -20,6 +20,7 @@ import com.github.ericytsang.app.ui.asset.IconEditLogFilesOnPrimary
 import com.github.ericytsang.app.ui.asset.IconMatchCaseOnPrimary
 import com.github.ericytsang.app.ui.asset.IconSettingsOnPrimary
 import com.github.ericytsang.app.ui.asset.IconWrapTextOnPrimary
+import com.github.ericytsang.app.ui.component.ColorCodedLogLine
 import com.github.ericytsang.app.ui.modal.openSettingsInNewWindowBlocking
 import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlocking
 import com.github.ericytsang.app.util.animatedThemeColors

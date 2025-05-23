@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.app
+package com.github.ericytsang.app.util
 
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import com.github.ericytsang.kotlin.KotlinDependencyProviderImpl

@@ -1,5 +1,7 @@
 package com.github.ericytsang.app.app
 
+import com.github.ericytsang.app.util.LogcatFilterEvaluator
+import com.github.ericytsang.app.util.LogcatFilterEvaluatorImpl
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import com.github.ericytsang.kotlin.KotlinDependencyProviderImpl
 import com.github.ericytsang.logcatfilterparser.LogcatFilterParser

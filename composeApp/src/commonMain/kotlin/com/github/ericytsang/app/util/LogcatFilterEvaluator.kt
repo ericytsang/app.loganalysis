@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.app
+package com.github.ericytsang.app.util
 
 import com.github.ericytsang.logcatfilterparser.AndNode
 import com.github.ericytsang.logcatfilterparser.LeafNode
