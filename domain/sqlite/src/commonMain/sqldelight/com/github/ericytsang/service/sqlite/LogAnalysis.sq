@@ -34,7 +34,9 @@ CREATE TABLE Settings (
   -- the theme of the app: 'light' or 'dark'
   theme TEXT NOT NULL,
   -- delimiters to look for in the logs that separate words
-  color_coding_delimiters TEXT NOT NULL
+  color_coding_delimiters TEXT NOT NULL,
+  -- whether to wrap the text in the log viewer: 1 for true, 0 for false
+  should_wrap_text INTEGER NOT NULL
 );
 
 -- create indexes for performance
@@ -45,7 +47,7 @@ CREATE INDEX idx_filters_config_id ON Filters(config_id);
 -- insert default values into the database
 
 INSERT INTO Settings
-VALUES (1, 'light', ':,.;!@#$%^&* ()_+=-`~|?<>\\/[]{}\"');
+VALUES (1, 'light', ':,.;!@#$%^&* ()_+=-`~|?<>\\/[]{}\"', 0);
 
 -- everything below are SQLDelight queries
 
@@ -70,6 +72,11 @@ WHERE id = 1;
 updateColorCodingDelimiters:
 UPDATE Settings
 SET color_coding_delimiters = ?
+WHERE id = 1;
+
+updateShouldWrapText:
+UPDATE Settings
+SET should_wrap_text = ?
 WHERE id = 1;
 
 -- endregion

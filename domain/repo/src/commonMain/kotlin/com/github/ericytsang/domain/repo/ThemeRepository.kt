@@ -16,13 +16,44 @@ interface SettingsRepository
 {
     fun getDelimiterFlow():Flow<String>
     suspend fun setDelimiter(newDelimiters:String)
+
     fun getThemeFlow():Flow<Theme>
     suspend fun changeTheme()
+
+    fun getShouldWrapTextFlow():Flow<Boolean>
+    suspend fun toggleShouldWrapText(shouldWrapText:Boolean)
 }
 
-class SettingsRepositoryImpl:SettingsRepository,
+class SettingsRepositoryImpl(
+    private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProviderImpl,
+    private val sqliteDependencyProvider:SqliteDependencyProvider = SqliteDependencyProviderImpl,
+    private val appInfoService:AppInfoService = AppInfoServiceImpl(),
+)
+:
+    SettingsRepository,
+    KotlinDependencyProvider by kotlinDependencyProvider,
+    SqliteDependencyProvider by sqliteDependencyProvider,
     DelimiterService by DelimiterService.createDefault(),
     ThemeService by ThemeService.createDefault()
+{
+    private val database by lazy { databaseFactory.getDatabase(appInfoService.getAppPackageName()) }
+
+    override fun getShouldWrapTextFlow():Flow<Boolean> = database.logAnalysisQueries.selectSettings().asFlow()
+        .mapToList(dispatchers.io)
+        .map { entities -> entities.firstOrNull() }
+        .map { settingsEntity -> settingsEntity?.should_wrap_text != 0L }
+        .flowOn(dispatchers.io)
+
+    override suspend fun toggleShouldWrapText(shouldWrapText:Boolean) = withContext(dispatchers.io)
+    {
+        database.transaction()
+        {
+            val settings = database.logAnalysisQueries.selectSettings().executeAsOne()
+            val currentShouldWrapText = settings.should_wrap_text != 0L
+            database.logAnalysisQueries.updateShouldWrapText(if (currentShouldWrapText) 0L else 1L)
+        }
+    }
+}
 
 interface DelimiterService
 {
