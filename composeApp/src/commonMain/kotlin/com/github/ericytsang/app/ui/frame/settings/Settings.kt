@@ -14,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.github.ericytsang.app.ui.frame.settings.SettingsViewModel
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.util.animatedThemeColors
 import com.github.ericytsang.app.util.fillMaxBackground
@@ -23,7 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun Settings(
-    viewModelFactory:(CoroutineScope)->SettingsViewModel = { uiScope -> SettingsViewModel.Companion.create(uiScope) },
+    viewModelFactory:(CoroutineScope)->SettingsViewModel = { uiScope -> SettingsViewModel.create(uiScope) },
 )
 {
     val coroutineScope = rememberCoroutineScope()
@@ -32,7 +31,8 @@ fun Settings(
     val theme by viewModel.theme.collectAsState(Theme.DARK)
     val animatedThemeColors by animatedThemeColors(theme)
 
-    val delimiterCharacters by viewModel.delimiterCharacters.collectAsState("")
+    val delimiterCharactersText by viewModel.delimiterCharactersText.collectAsState("")
+    val delimiterCharactersEnabled by viewModel.delimiterCharactersEnabled.collectAsState(false)
 
     fillMaxBackground(colors = animatedThemeColors)
     {
@@ -49,7 +49,8 @@ fun Settings(
             )
 
             TextField(
-                value = delimiterCharacters,
+                value = delimiterCharactersText,
+                enabled = delimiterCharactersEnabled,
                 onValueChange = { newValue -> viewModel.setDelimiterCharacters(newValue) },
                 label = { Text("delimiters") },
                 colors = TextFieldDefaults.textFieldColors(

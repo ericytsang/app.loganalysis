@@ -1,18 +1,29 @@
 package com.github.ericytsang.app.ui.frame.settings
 
+import com.github.ericytsang.app.ui.frame.settings.SettingsViewModel.DelimiterCharactersState
 import com.github.ericytsang.app.usecase.MutableThemeUseCase
-import com.github.ericytsang.app.util.NowFactory
-import com.github.ericytsang.app.util.TwoWayStringBindingUseCase
+import com.github.ericytsang.app.util.LatestJobExecutor
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.DelimiterRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 interface SettingsViewModel:MutableThemeUseCase
 {
-    val delimiterCharacters:Flow<String>
+    val delimiterCharactersEnabled:Flow<Boolean>
+    val delimiterCharactersText:Flow<String>
     fun setDelimiterCharacters(delimiterCharacters:String)
+
+    sealed class DelimiterCharactersState
+    {
+        object LoadingInitialValueFromDb:DelimiterCharactersState()
+        data class InMemoryValue(val delimiterCharacters:String):DelimiterCharactersState()
+    }
 
     companion object
     {
@@ -20,12 +31,10 @@ interface SettingsViewModel:MutableThemeUseCase
             uiScope:CoroutineScope,
             kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
             delimiterRepository:DelimiterRepository = RepositoryDependencyProvider.Companion.instance.delimiterRepository,
-            nowFactory:NowFactory = NowFactory.Companion.instance,
         ):SettingsViewModel = SettingsViewModelImpl(
             uiScope = uiScope,
             kotlinDependencyProvider = kotlinDependencyProvider,
             delimiterRepository = delimiterRepository,
-            nowFactory = nowFactory,
         )
     }
 }
@@ -34,23 +43,52 @@ private class SettingsViewModelImpl(
     uiScope:CoroutineScope,
     private val kotlinDependencyProvider:KotlinDependencyProvider,
     private val delimiterRepository:DelimiterRepository,
-    private val nowFactory:NowFactory,
 ):SettingsViewModel,
     MutableThemeUseCase by MutableThemeUseCase.Companion.create(),
     KotlinDependencyProvider by kotlinDependencyProvider
 {
-    private val delimiterCharactersUseCase = TwoWayStringBindingUseCase(
-        uiScope = uiScope,
-        remoteStringFlow = delimiterRepository.getDelimiterFlow(),
-        updateRemoteString = { newString -> delimiterRepository.setDelimiter(newString) },
-        kotlinDependencyProvider = kotlinDependencyProvider,
-        nowFactory = nowFactory,
-    )
+    private val delimiterCharactersFlow =
+        MutableStateFlow<DelimiterCharactersState>(DelimiterCharactersState.LoadingInitialValueFromDb)
 
-    override val delimiterCharacters:Flow<String> get() = delimiterCharactersUseCase.displayString
+    init
+    {
+        uiScope.launch(dispatchers.io)
+        {
+            val valueFromDb = delimiterRepository.getDelimiterFlow().first()
+            delimiterCharactersFlow.value = DelimiterCharactersState.InMemoryValue(valueFromDb)
+        }
+    }
+
+    override val delimiterCharactersEnabled:Flow<Boolean> = delimiterCharactersFlow.map { delimiterCharactersState ->
+        when (delimiterCharactersState)
+        {
+            is DelimiterCharactersState.LoadingInitialValueFromDb -> false
+            is DelimiterCharactersState.InMemoryValue -> true
+        }
+    }
+
+    override val delimiterCharactersText:Flow<String> = delimiterCharactersFlow.map { delimiterCharactersState ->
+        when (delimiterCharactersState)
+        {
+            is DelimiterCharactersState.LoadingInitialValueFromDb -> ""
+            is DelimiterCharactersState.InMemoryValue -> delimiterCharactersState.delimiterCharacters
+        }
+    }
 
     override fun setDelimiterCharacters(delimiterCharacters:String)
     {
-        delimiterCharactersUseCase.updateString(delimiterCharacters)
+        delimiterCharactersFlow.value = DelimiterCharactersState.InMemoryValue(delimiterCharacters)
+        executor.submit()
+        {
+            delimiterRepository.setDelimiter(delimiterCharacters)
+        }
+    }
+
+    companion object
+    {
+        private val executor = LatestJobExecutor(
+            scope = KotlinDependencyProvider.instance.applicationScope,
+            coroutineDispatcher = KotlinDependencyProvider.instance.dispatchers.io,
+        )
     }
 }
