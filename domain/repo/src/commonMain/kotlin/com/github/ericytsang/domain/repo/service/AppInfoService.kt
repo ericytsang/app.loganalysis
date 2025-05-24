@@ -1,6 +1,6 @@
 package com.github.ericytsang.domain.repo.service
 
-interface AppInfoService
+internal interface AppInfoService
 {
     fun getAppPackageName():String
 
