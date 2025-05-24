@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.github.ericytsang.app.model.Dimens
@@ -27,6 +28,7 @@ import com.github.ericytsang.app.util.animatedThemeColors
 import com.github.ericytsang.app.util.fillMaxBackground
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
+import kotlinx.coroutines.CoroutineScope
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.awt.Window
 import java.io.File
@@ -35,12 +37,13 @@ import java.io.File
 @Preview
 fun App(
     window:Window,
-    viewModelFactory:()->AppViewModel = { AppViewModel.create() },
+    viewModelFactory:(CoroutineScope)->AppViewModel = { uiScope -> AppViewModel.create(uiScope) },
     logViewerViewModelFactory:()->LogViewerViewModel = { LogViewerViewModel.createDefault() },
     workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel = { WorkingFileSetEditorViewModel.createDefault() },
 )
 {
-    val viewModel = remember { viewModelFactory() }
+    val uiScope = rememberCoroutineScope()
+    val viewModel = remember { viewModelFactory(uiScope) }
     val logViewerViewModel = remember { logViewerViewModelFactory() }
     val workingFileSetEditorViewModel = remember { workingFileSetEditorViewModelFactory() }
 
@@ -131,4 +134,3 @@ fun App(
         }
     }
 }
-

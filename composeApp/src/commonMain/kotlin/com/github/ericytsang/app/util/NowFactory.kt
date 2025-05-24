@@ -5,9 +5,14 @@ import java.time.Instant
 interface NowFactory
 {
     fun now():Instant
+
+    companion object
+    {
+        val instance:NowFactory get() = NowFactoryImpl
+    }
 }
 
-object NowFactoryImpl:NowFactory
+internal object NowFactoryImpl:NowFactory
 {
     override fun now():Instant = Instant.now()
 }

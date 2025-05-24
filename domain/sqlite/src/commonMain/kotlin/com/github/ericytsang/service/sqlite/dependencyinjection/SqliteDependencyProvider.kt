@@ -5,9 +5,14 @@ import com.github.ericytsang.service.sqlite.dbfactory.DatabaseFactory
 interface SqliteDependencyProvider
 {
     val databaseFactory:DatabaseFactory
+
+    companion object
+    {
+        val instance:SqliteDependencyProvider by lazy { SqliteDependencyProviderImpl }
+    }
 }
 
-object SqliteDependencyProviderImpl:SqliteDependencyProvider
+internal object SqliteDependencyProviderImpl:SqliteDependencyProvider
 {
-    override val databaseFactory:DatabaseFactory by lazy { DatabaseFactory() }
+    override val databaseFactory:DatabaseFactory by lazy { DatabaseFactory.createDefault() }
 }

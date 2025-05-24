@@ -1,4 +1,4 @@
-package com.github.ericytsang.domain.repo
+package com.github.ericytsang.domain.repo.repo
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
@@ -9,7 +9,7 @@ import com.github.ericytsang.domain.objects.WorkingFileSet
 import com.github.ericytsang.domain.objects.WorkingFileSetSelected
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import com.github.ericytsang.service.sqlite.LogFiles
-import com.github.ericytsang.service.sqlite.dependencyinjection.SqliteDependencyProvider
+import com.github.ericytsang.service.sqlite.dbfactory.DatabaseService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -26,23 +26,21 @@ interface WorkingFileSetRepository
     suspend fun removeFiles(configurationId:ConfigurationId,files:List<File>)
 }
 
-class WorkingFileSetRepositoryImpl(
+internal class WorkingFileSetRepositoryImpl(
     private val kotlinDependencyProvider:KotlinDependencyProvider,
-    private val sqliteDependencyProvider:SqliteDependencyProvider,
-    private val appInfoService:AppInfoService,
+    private val databaseService:DatabaseService,
 ):WorkingFileSetRepository,
-    KotlinDependencyProvider by kotlinDependencyProvider,
-    SqliteDependencyProvider by sqliteDependencyProvider
+    KotlinDependencyProvider by kotlinDependencyProvider
 {
-    private val database by lazy { databaseFactory.getDatabase(appInfoService.getAppPackageName()) }
+    private val database get() = databaseService
 
-    private val queries get() = database.logAnalysisQueries
+    private val queries get() = database.queries
 
     override suspend fun createNewWorkingFileSet(
         newFiles:List<File>,
     ):ConfigurationId = withContext(dispatchers.io)
     {
-        database.transactionWithResult {
+        database.transaction {
             queries.insertConfiguration("").value
             val newConfigurationId = queries.lastInsertId().executeAsOne()
             newFiles.forEachIndexed { index,file ->

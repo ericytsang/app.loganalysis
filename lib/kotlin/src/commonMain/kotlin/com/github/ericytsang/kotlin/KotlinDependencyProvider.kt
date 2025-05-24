@@ -6,9 +6,14 @@ interface KotlinDependencyProvider
 {
     val dispatchers:CoroutineDispatcherProvider
     val applicationScope:CoroutineScope
+
+    companion object
+    {
+        val instance:KotlinDependencyProvider by lazy { KotlinDependencyProviderImpl }
+    }
 }
 
-object KotlinDependencyProviderImpl:KotlinDependencyProvider
+internal object KotlinDependencyProviderImpl:KotlinDependencyProvider
 {
     override val dispatchers:CoroutineDispatcherProvider = CoroutineDispatcherProviderImpl()
     override val applicationScope:CoroutineScope = CoroutineScope(dispatchers.main)

@@ -3,24 +3,47 @@ package com.github.ericytsang.service.sqlite.dbfactory
 import app.cash.sqldelight.db.SqlDriver
 import com.github.ericytsang.service.sqlite.SqlDelightDatabase
 
-class DatabaseFactory()
+interface DatabaseFactory
 {
-    private val driverFactory = DatabaseDriverFactory()
+    fun getDatabase(appPackageName:String):DatabaseService
 
-    private val existingDatabases = mutableMapOf<String,SqlDelightDatabase>()
+    companion object
+    {
+        fun createDefault():DatabaseFactory = DatabaseFactoryCreateCacheImpl(
+            delegate = DatabaseFactoryCreateNewInstanceImpl(),
+        )
+    }
+}
+
+internal class DatabaseFactoryCreateCacheImpl(
+    private val delegate: DatabaseFactory,
+):DatabaseFactory
+{
+    private val existingDatabases = mutableMapOf<String,DatabaseService>()
+
+    override fun getDatabase(appPackageName:String):DatabaseService =
+        getSqlDelightDatabase(appPackageName)
 
     /**
      * returns a database connection to a [SqlDelightDatabase] SQLite DB.
      * if the database connection already exists, it will be reused.
      */
-    fun getDatabase(appPackageName:String):SqlDelightDatabase
-    {
-        return synchronized(existingDatabases) {
-            existingDatabases.getOrPut(appPackageName) {
-                createDatabase(appPackageName)
-            }
+    private fun getSqlDelightDatabase(
+        appPackageName:String,
+    ):DatabaseService = synchronized(existingDatabases) {
+        existingDatabases.getOrPut(appPackageName) {
+            delegate.getDatabase(appPackageName)
         }
     }
+}
+
+
+internal class DatabaseFactoryCreateNewInstanceImpl:DatabaseFactory
+{
+    private val driverFactory = DatabaseDriverFactory()
+
+    override fun getDatabase(appPackageName:String):DatabaseService =
+        DatabaseServiceImpl(createDatabase(appPackageName))
 
     /**
      * creates a new database connection to a [SqlDelightDatabase] SQLite DB.

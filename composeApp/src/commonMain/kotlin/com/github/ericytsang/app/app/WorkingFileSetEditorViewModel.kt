@@ -3,10 +3,9 @@ package com.github.ericytsang.app.app
 import com.github.ericytsang.domain.objects.ConfigurationId
 import com.github.ericytsang.domain.objects.WorkingFileSet
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
-import com.github.ericytsang.domain.repo.RepositoryDependencyProvider
-import com.github.ericytsang.domain.repo.WorkingFileSetRepository
+import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
+import com.github.ericytsang.domain.repo.repo.WorkingFileSetRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
-import com.github.ericytsang.kotlin.KotlinDependencyProviderImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +28,7 @@ interface WorkingFileSetEditorViewModel
     companion object
     {
         fun createDefault(
-            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProviderImpl,
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
             workingFileSetRepository:WorkingFileSetRepository = RepositoryDependencyProvider.instance.workingFileSetRepository,
         ):WorkingFileSetEditorViewModel = WorkingFileSetEditorViewModelImpl(
             kotlinDependencyProvider = kotlinDependencyProvider,

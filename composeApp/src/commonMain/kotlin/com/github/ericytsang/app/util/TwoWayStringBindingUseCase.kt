@@ -1,7 +1,6 @@
 package com.github.ericytsang.app.util
 
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
-import com.github.ericytsang.kotlin.KotlinDependencyProviderImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +23,7 @@ class TwoWayStringBindingUseCase(
     uiScope:CoroutineScope,
     remoteStringFlow:Flow<String>,
     updateRemoteString:suspend (String) -> Unit,
-    private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProviderImpl,
+    private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
     private val nowFactory:NowFactory = NowFactoryImpl,
 ):KotlinDependencyProvider by kotlinDependencyProvider
 {

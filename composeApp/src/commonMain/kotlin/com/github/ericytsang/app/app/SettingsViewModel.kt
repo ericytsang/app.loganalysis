@@ -1,16 +1,14 @@
 package com.github.ericytsang.app.app
 
 import com.github.ericytsang.app.util.NowFactory
-import com.github.ericytsang.app.util.NowFactoryImpl
 import com.github.ericytsang.app.util.TwoWayStringBindingUseCase
-import com.github.ericytsang.domain.repo.RepositoryDependencyProvider
-import com.github.ericytsang.domain.repo.SettingsRepository
+import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
+import com.github.ericytsang.domain.repo.repo.DelimiterRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
-import com.github.ericytsang.kotlin.KotlinDependencyProviderImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
-interface SettingsViewModel:MutableThemeViewModel
+interface SettingsViewModel:MutableThemeUseCase
 {
     val delimiterCharacters:Flow<String>
     fun setDelimiterCharacters(delimiterCharacters:String)
@@ -19,29 +17,31 @@ interface SettingsViewModel:MutableThemeViewModel
     {
         fun create(
             uiScope:CoroutineScope,
-            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProviderImpl,
-            settingsRepository:SettingsRepository = RepositoryDependencyProvider.Companion.instance.settingsRepository,
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+            delimiterRepository:DelimiterRepository = RepositoryDependencyProvider.Companion.instance.delimiterRepository,
+            nowFactory: NowFactory = NowFactory.instance,
         ):SettingsViewModel = SettingsViewModelImpl(
             uiScope = uiScope,
             kotlinDependencyProvider = kotlinDependencyProvider,
-            settingsRepository = settingsRepository,
+            delimiterRepository = delimiterRepository,
+            nowFactory = nowFactory,
         )
     }
 }
 
 private class SettingsViewModelImpl(
     uiScope:CoroutineScope,
-    private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProviderImpl,
-    private val settingsRepository:SettingsRepository = RepositoryDependencyProvider.Companion.instance.settingsRepository,
-    private val nowFactory:NowFactory = NowFactoryImpl,
+    private val kotlinDependencyProvider:KotlinDependencyProvider,
+    private val delimiterRepository:DelimiterRepository,
+    private val nowFactory:NowFactory,
 ):SettingsViewModel,
-    MutableThemeViewModel by MutableThemeViewModel.create(),
+    MutableThemeUseCase by MutableThemeUseCase.create(),
     KotlinDependencyProvider by kotlinDependencyProvider
 {
     private val delimiterCharactersUseCase = TwoWayStringBindingUseCase(
         uiScope = uiScope,
-        remoteStringFlow = settingsRepository.getDelimiterFlow(),
-        updateRemoteString = { newString -> settingsRepository.setDelimiter(newString) },
+        remoteStringFlow = delimiterRepository.getDelimiterFlow(),
+        updateRemoteString = { newString -> delimiterRepository.setDelimiter(newString) },
         kotlinDependencyProvider = kotlinDependencyProvider,
         nowFactory = nowFactory,
     )

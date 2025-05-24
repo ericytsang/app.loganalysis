@@ -3,7 +3,6 @@ package com.github.ericytsang.app.app
 import com.github.ericytsang.app.util.LogcatFilterEvaluator
 import com.github.ericytsang.app.util.LogcatFilterEvaluatorImpl
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
-import com.github.ericytsang.kotlin.KotlinDependencyProviderImpl
 import com.github.ericytsang.logcatfilterparser.LogcatFilterParser
 import com.github.ericytsang.logcatfilterparser.Node
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -83,7 +82,7 @@ class LogViewerViewModel(
     companion object
     {
         fun createDefault(
-            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProviderImpl,
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
             logcatFilterParser:LogcatFilterParser = LogcatFilterParser(),
             logcatFilterEvaluator:LogcatFilterEvaluator = LogcatFilterEvaluatorImpl(),
         ):LogViewerViewModel = LogViewerViewModel(

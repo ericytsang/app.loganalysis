@@ -1,25 +1,76 @@
 package com.github.ericytsang.app.app
 
-import com.github.ericytsang.domain.repo.DelimiterService
-import com.github.ericytsang.domain.repo.SettingsRepository
-import com.github.ericytsang.domain.repo.SettingsRepositoryImpl
+import com.github.ericytsang.domain.repo.repo.DelimiterRepository
+import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
+import com.github.ericytsang.domain.repo.repo.SettingsRepository
+import com.github.ericytsang.kotlin.KotlinDependencyProvider
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
-interface AppViewModel:ThemeViewModel,DelimiterService
+interface AppViewModel:ThemeUseCase,DelimiterRepository
 {
     companion object
     {
-        fun create():AppViewModel = AppViewModelImpl()
+        fun create(
+            uiScope: CoroutineScope,
+            kotlinDependencyProvider: KotlinDependencyProvider = KotlinDependencyProvider.instance,
+            settingsRepository:SettingsRepository = RepositoryDependencyProvider.instance.settingsRepository,
+            delimiterRepository:DelimiterRepository = RepositoryDependencyProvider.instance.delimiterRepository,
+        ):AppViewModel = AppViewModelImpl(
+            uiScope = uiScope,
+            kotlinDependencyProvider = kotlinDependencyProvider,
+            settingsRepository = settingsRepository,
+            delimiterRepository = delimiterRepository,
+        )
     }
 }
 
 private class AppViewModelImpl(
-    private val settingsRepository:SettingsRepository = SettingsRepositoryImpl(),
+    uiScope: CoroutineScope,
+    private val kotlinDependencyProvider: KotlinDependencyProvider,
+    private val settingsRepository:SettingsRepository,
+    private val delimiterRepository:DelimiterRepository,
 ):
     AppViewModel,
-    ThemeViewModel by ThemeViewModel.create()
+    ThemeUseCase by ThemeUseCase.create(),
+    KotlinDependencyProvider by kotlinDependencyProvider,
+    DelimiterRepository by delimiterRepository
 {
-    override fun getDelimiterFlow():Flow<String> = settingsRepository.getDelimiterFlow()
-    override suspend fun setDelimiter(newDelimiters: String) = settingsRepository.setDelimiter(newDelimiters)
+    // region should wrap long text setting
+
+    /**
+     * the UX for this is to:
+     * - have a toggle button on the log viewer window
+     * - the setting is not synced with other active instances of the app
+     * - the setting is only applied to the current instance, and future new instances of the app
+     */
+    private val _shouldWrapLongTextFlow = MutableStateFlow<Boolean?>(null)
+
+    init
+    {
+        uiScope.launch(dispatchers.io)
+        {
+            _shouldWrapLongTextFlow.value = settingsRepository.getShouldWrapTextFlow().first()
+        }
+    }
+
+    fun getWordWrapFlow():Flow<Boolean> = _shouldWrapLongTextFlow.filterNotNull()
+
+    fun toggleWordWrap()
+    {
+        val oldValue = _shouldWrapLongTextFlow.value ?: return
+        val newValue = !oldValue
+        _shouldWrapLongTextFlow.value = newValue
+        applicationScope.launch(dispatchers.io)
+        {
+            settingsRepository.setShouldWrapText(newValue)
+        }
+    }
+
+    // endregion
 }
 

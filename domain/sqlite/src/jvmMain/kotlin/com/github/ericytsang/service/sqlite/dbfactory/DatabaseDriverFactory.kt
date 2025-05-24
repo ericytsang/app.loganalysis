@@ -11,7 +11,7 @@ import java.util.Properties
  * It creates a SQLite database driver using the JDBC driver.
  * The database file is stored in the user's home directory.
  */
-actual class DatabaseDriverFactory
+internal actual class DatabaseDriverFactory
 {
     actual fun createDriver(appPackageName:String):SqlDriver
     {
