@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.app
+package com.github.ericytsang.app.ui.frame.app
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,12 +16,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.github.ericytsang.app.ui.frame.app.AppViewModel
+import com.github.ericytsang.app.ui.frame.app.LogViewerViewModel
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.asset.IconEditLogFilesOnPrimary
 import com.github.ericytsang.app.ui.asset.IconMatchCaseOnPrimary
 import com.github.ericytsang.app.ui.asset.IconSettingsOnPrimary
 import com.github.ericytsang.app.ui.asset.IconWrapTextOnPrimary
 import com.github.ericytsang.app.ui.component.ColorCodedLogLine
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
 import com.github.ericytsang.app.ui.modal.openSettingsInNewWindowBlocking
 import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlocking
 import com.github.ericytsang.app.util.animatedThemeColors
@@ -37,8 +40,8 @@ import java.io.File
 @Preview
 fun App(
     window:Window,
-    viewModelFactory:(CoroutineScope)->AppViewModel = { uiScope -> AppViewModel.create(uiScope) },
-    logViewerViewModelFactory:()->LogViewerViewModel = { LogViewerViewModel.createDefault() },
+    viewModelFactory:(CoroutineScope)->AppViewModel = { uiScope -> AppViewModel.Companion.create(uiScope) },
+    logViewerViewModelFactory:()->LogViewerViewModel = { LogViewerViewModel.Companion.createDefault() },
     workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel = { WorkingFileSetEditorViewModel.createDefault() },
 )
 {

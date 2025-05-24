@@ -1,5 +1,6 @@
-package com.github.ericytsang.app.app
+package com.github.ericytsang.app.ui.frame.settings
 
+import com.github.ericytsang.app.usecase.MutableThemeUseCase
 import com.github.ericytsang.app.util.NowFactory
 import com.github.ericytsang.app.util.TwoWayStringBindingUseCase
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
@@ -17,9 +18,9 @@ interface SettingsViewModel:MutableThemeUseCase
     {
         fun create(
             uiScope:CoroutineScope,
-            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
             delimiterRepository:DelimiterRepository = RepositoryDependencyProvider.Companion.instance.delimiterRepository,
-            nowFactory: NowFactory = NowFactory.instance,
+            nowFactory:NowFactory = NowFactory.Companion.instance,
         ):SettingsViewModel = SettingsViewModelImpl(
             uiScope = uiScope,
             kotlinDependencyProvider = kotlinDependencyProvider,
@@ -35,7 +36,7 @@ private class SettingsViewModelImpl(
     private val delimiterRepository:DelimiterRepository,
     private val nowFactory:NowFactory,
 ):SettingsViewModel,
-    MutableThemeUseCase by MutableThemeUseCase.create(),
+    MutableThemeUseCase by MutableThemeUseCase.Companion.create(),
     KotlinDependencyProvider by kotlinDependencyProvider
 {
     private val delimiterCharactersUseCase = TwoWayStringBindingUseCase(

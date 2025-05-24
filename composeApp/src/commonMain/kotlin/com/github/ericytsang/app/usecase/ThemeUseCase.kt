@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.app
+package com.github.ericytsang.app.usecase
 
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider

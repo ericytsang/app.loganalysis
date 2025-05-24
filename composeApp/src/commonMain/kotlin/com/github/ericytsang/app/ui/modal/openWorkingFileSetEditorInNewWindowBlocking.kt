@@ -1,8 +1,8 @@
 package com.github.ericytsang.app.ui.modal
 
-import com.github.ericytsang.app.app.AppViewModel
-import com.github.ericytsang.app.app.WorkingFileSetEditorViewModel
-import com.github.ericytsang.app.ui.frame.workingFileSetEditor
+import com.github.ericytsang.app.ui.frame.app.AppViewModel
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditor
 import com.github.ericytsang.app.util.openBlockingDialog
 import java.awt.Window
 
@@ -17,7 +17,7 @@ fun openWorkingFileSetEditorInNewWindowBlocking(
         title = "Working File Set Editor",
     )
     {
-        workingFileSetEditor(
+        WorkingFileSetEditor(
             owner = window,
             viewModel = viewModel,
             appViewModel = appViewModel,

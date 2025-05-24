@@ -1,7 +1,8 @@
-package com.github.ericytsang.app.app
+package com.github.ericytsang.app.ui.frame.app
 
-import com.github.ericytsang.domain.repo.repo.DelimiterRepository
+import com.github.ericytsang.app.usecase.ThemeUseCase
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
+import com.github.ericytsang.domain.repo.repo.DelimiterRepository
 import com.github.ericytsang.domain.repo.repo.SettingsRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.CoroutineScope
@@ -16,10 +17,10 @@ interface AppViewModel:ThemeUseCase,DelimiterRepository
     companion object
     {
         fun create(
-            uiScope: CoroutineScope,
-            kotlinDependencyProvider: KotlinDependencyProvider = KotlinDependencyProvider.instance,
-            settingsRepository:SettingsRepository = RepositoryDependencyProvider.instance.settingsRepository,
-            delimiterRepository:DelimiterRepository = RepositoryDependencyProvider.instance.delimiterRepository,
+            uiScope:CoroutineScope,
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
+            settingsRepository:SettingsRepository = RepositoryDependencyProvider.Companion.instance.settingsRepository,
+            delimiterRepository:DelimiterRepository = RepositoryDependencyProvider.Companion.instance.delimiterRepository,
         ):AppViewModel = AppViewModelImpl(
             uiScope = uiScope,
             kotlinDependencyProvider = kotlinDependencyProvider,
@@ -30,13 +31,13 @@ interface AppViewModel:ThemeUseCase,DelimiterRepository
 }
 
 private class AppViewModelImpl(
-    uiScope: CoroutineScope,
-    private val kotlinDependencyProvider: KotlinDependencyProvider,
+    uiScope:CoroutineScope,
+    private val kotlinDependencyProvider:KotlinDependencyProvider,
     private val settingsRepository:SettingsRepository,
     private val delimiterRepository:DelimiterRepository,
 ):
     AppViewModel,
-    ThemeUseCase by ThemeUseCase.create(),
+    ThemeUseCase by ThemeUseCase.Companion.create(),
     KotlinDependencyProvider by kotlinDependencyProvider,
     DelimiterRepository by delimiterRepository
 {
@@ -73,4 +74,3 @@ private class AppViewModelImpl(
 
     // endregion
 }
-

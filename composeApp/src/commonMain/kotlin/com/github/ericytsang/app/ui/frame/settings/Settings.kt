@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.app
+package com.github.ericytsang.app.ui.frame.settings
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.github.ericytsang.app.ui.frame.settings.SettingsViewModel
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.util.animatedThemeColors
 import com.github.ericytsang.app.util.fillMaxBackground
@@ -22,7 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun Settings(
-    viewModelFactory:(CoroutineScope)->SettingsViewModel = { uiScope -> SettingsViewModel.create(uiScope) },
+    viewModelFactory:(CoroutineScope)->SettingsViewModel = { uiScope -> SettingsViewModel.Companion.create(uiScope) },
 )
 {
     val coroutineScope = rememberCoroutineScope()

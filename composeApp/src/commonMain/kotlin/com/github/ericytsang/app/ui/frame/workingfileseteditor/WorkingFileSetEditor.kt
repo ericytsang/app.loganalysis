@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.frame
+package com.github.ericytsang.app.ui.frame.workingfileseteditor
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,8 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.github.ericytsang.app.app.AppViewModel
-import com.github.ericytsang.app.app.WorkingFileSetEditorViewModel
+import com.github.ericytsang.app.ui.frame.app.AppViewModel
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
 import com.github.ericytsang.app.util.animatedThemeColors
@@ -22,7 +21,7 @@ import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import java.awt.Dialog
 
 @Composable
-fun workingFileSetEditor(
+fun WorkingFileSetEditor(
     owner:Dialog,
     viewModel:WorkingFileSetEditorViewModel,
     appViewModel:AppViewModel,

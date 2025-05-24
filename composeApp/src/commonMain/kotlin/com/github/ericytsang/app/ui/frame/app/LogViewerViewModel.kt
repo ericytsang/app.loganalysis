@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.app
+package com.github.ericytsang.app.ui.frame.app
 
 import com.github.ericytsang.app.util.LogcatFilterEvaluator
 import com.github.ericytsang.app.util.LogcatFilterEvaluatorImpl
@@ -82,7 +82,7 @@ class LogViewerViewModel(
     companion object
     {
         fun createDefault(
-            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
             logcatFilterParser:LogcatFilterParser = LogcatFilterParser(),
             logcatFilterEvaluator:LogcatFilterEvaluator = LogcatFilterEvaluatorImpl(),
         ):LogViewerViewModel = LogViewerViewModel(
