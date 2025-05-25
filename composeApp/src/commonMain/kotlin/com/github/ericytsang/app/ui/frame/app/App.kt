@@ -136,6 +136,7 @@ fun App(
                             delimiters = delimiters,
                             themeForColorCoding = theme,
                             defaultColor = animatedThemeColors.onBackground,
+                            softWrap = shouldWrapText,
                         )
                     }
                 }

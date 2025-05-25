@@ -17,6 +17,7 @@ fun ColorCodedLogLine(
     defaultColor:Color,
     themeForColorCoding:Theme,
     delimiters:String,
+    softWrap:Boolean,
     modifier:Modifier = Modifier.Companion,
 )
 {
@@ -33,6 +34,7 @@ fun ColorCodedLogLine(
         text = logLineString,
         modifier = modifier,
         color = defaultColor,
+        softWrap = softWrap,
     )
 }
 
