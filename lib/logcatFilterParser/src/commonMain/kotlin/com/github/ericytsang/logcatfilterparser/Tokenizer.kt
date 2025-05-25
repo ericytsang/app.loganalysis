@@ -34,24 +34,34 @@ internal object Tokenizer
         val buffer = StringBuilder()
         var inQuote:Char? = null
 
-        for (i in 0..<input.length)
+        val inputIterator = input.iterator()
+        while (inputIterator.hasNext())
         {
-            val c = input[i]
-            if (c == '"' || c == '\'')
+            val c = inputIterator.next()
+
+            // handle start of quoted string
+            if (inQuote == null && c in "'\"")
             {
-                if (inQuote == c)
-                {
-                    buffer.append(c)
-                    tokens.add(buffer.toString())
-                    buffer.setLength(0)
-                    inQuote = null
-                }
-                else
-                {
-                    buffer.append(c)
-                    inQuote = c
-                }
+                buffer.append(c)
+                inQuote = c
             }
+
+            // handle end of quoted string
+            else if (inQuote == c)
+            {
+                buffer.append(c)
+                tokens.add(buffer.toString())
+                buffer.setLength(0)
+                inQuote = null
+            }
+
+            // handle escaped characters
+            else if (inQuote != null && c == '\\')
+            {
+                buffer.append(inputIterator.next()) // append the next character
+            }
+
+            // handle characters inside quotes, spaces, and operators
             else if (inQuote != null)
             {
                 buffer.append(c)

@@ -110,56 +110,66 @@ class LogcatFilterParser
     private fun parseLeaf(token:String):LeafNode
     {
         var token = token
-        if (token.startsWith("\""))
+        val colonIndex by lazy { token.indexOf(":") }
+
+        // Quoted string without key, treat as message filter
+        return if (getQuotedStringValue(token) != token)
         {
-            // Quoted string without key, treat as message filter
-            val value = token.substring(1,token.length-1) // remove quotes
-            return LeafNode(
+            val value = getQuotedStringValue(token)
+            LeafNode(
                 key = "message",
                 value = value,
                 regex = false,
                 caseSensitive = false,
             )
         }
+        else if (colonIndex != -1)
+        {
+            var key = token.substring(0,colonIndex)
+            var value = token.substring(colonIndex+1)
+            var regex = false
+            var caseSensitive = false
+            while (key.endsWith("~") || key.endsWith("^"))
+            {
+                when
+                {
+                    key.endsWith("~") -> regex = true
+                    key.endsWith("^") -> caseSensitive = true
+                }
+                key = key.substring(0,key.length-1)
+            }
+            value = getQuotedStringValue(value)
+            LeafNode(
+                key = key,
+                value = value,
+                regex = regex,
+                caseSensitive = caseSensitive,
+            )
+        }
         else
         {
-            val colonIndex = token.indexOf(":")
-            if (colonIndex != -1)
-            {
-                var key = token.substring(0,colonIndex)
-                var value = token.substring(colonIndex+1)
-                var regex = false
-                var caseSensitive = false
-                while (key.endsWith("~") || key.endsWith("^"))
-                {
-                    when
-                    {
-                        key.endsWith("~") -> regex = true
-                        key.endsWith("^") -> caseSensitive = true
-                    }
-                    key = key.substring(0,key.length-1)
-                }
-                if (value.startsWith("\"") && value.endsWith("\""))
-                {
-                    value = value.substring(1,value.length-1)
-                }
-                return LeafNode(
-                    key = key,
-                    value = value,
-                    regex = regex,
-                    caseSensitive = caseSensitive,
-                )
-            }
-            else
-            {
-                // Simple unquoted string, treat as message filter
-                return LeafNode(
-                    key = "message",
-                    value = token,
-                    regex = false,
-                    caseSensitive = false,
-                )
-            }
+            // Simple unquoted string, treat as message filter
+            LeafNode(
+                key = "message",
+                value = token,
+                regex = false,
+                caseSensitive = false,
+            )
+        }
+    }
+
+    /**
+     * Extracts the value from a quoted string, removing the quotes.
+     * If the token is not quoted, it returns the token as is.
+     * This handles both single and double quotes.
+     */
+    private fun getQuotedStringValue(token:String):String
+    {
+        return when
+        {
+            token.startsWith("\"") && token.endsWith("\"") -> token.substring(1,token.length-1)
+            token.startsWith("'") && token.endsWith("'") -> token.substring(1,token.length-1)
+            else -> token
         }
     }
 }
