@@ -114,7 +114,12 @@ class LogcatFilterParser
         {
             // Quoted string without key, treat as message filter
             val value = token.substring(1,token.length-1) // remove quotes
-            return LeafNode("message",value,false)
+            return LeafNode(
+                key = "message",
+                value = value,
+                regex = false,
+                caseSensitive = false,
+            )
         }
         else
         {
@@ -124,21 +129,36 @@ class LogcatFilterParser
                 var key = token.substring(0,colonIndex)
                 var value = token.substring(colonIndex+1)
                 var regex = false
-                if (key.endsWith("~"))
+                var caseSensitive = false
+                while (key.endsWith("~") || key.endsWith("^"))
                 {
-                    regex = true
+                    when
+                    {
+                        key.endsWith("~") -> regex = true
+                        key.endsWith("^") -> caseSensitive = true
+                    }
                     key = key.substring(0,key.length-1)
                 }
                 if (value.startsWith("\"") && value.endsWith("\""))
                 {
                     value = value.substring(1,value.length-1)
                 }
-                return LeafNode(key,value,regex)
+                return LeafNode(
+                    key = key,
+                    value = value,
+                    regex = regex,
+                    caseSensitive = caseSensitive,
+                )
             }
             else
             {
                 // Simple unquoted string, treat as message filter
-                return LeafNode("message",token,false)
+                return LeafNode(
+                    key = "message",
+                    value = token,
+                    regex = false,
+                    caseSensitive = false,
+                )
             }
         }
     }

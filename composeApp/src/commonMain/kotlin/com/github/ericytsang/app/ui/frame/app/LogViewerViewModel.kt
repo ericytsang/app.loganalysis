@@ -26,6 +26,8 @@ class LogViewerViewModel(
         println("LogViewerViewModel created")
     }
 
+    // region concatenated files
+
     val concatenatedFiles:StateFlow<List<File>> get() = _concatenatedFiles
     private val _concatenatedFiles = MutableStateFlow(emptyList<File>())
 
@@ -33,6 +35,10 @@ class LogViewerViewModel(
     {
         _concatenatedFiles.value = files
     }
+
+    // endregion
+
+    // region logcat filter string
 
     val logcatFilterString:StateFlow<String> get() = _logcatFilterString
     private val _logcatFilterString = MutableStateFlow("")
@@ -62,22 +68,46 @@ class LogViewerViewModel(
         }
         .flowOn(dispatchers.io)
 
-    fun getLogLinesFlow():Flow<List<String>> = concatenatedFiles
+    // endregion
+
+    // region case sensitivity
+
+    val isCaseSensitive:StateFlow<Boolean> get() = _isCaseSensitive
+    private val _isCaseSensitive = MutableStateFlow(false)
+
+    fun setCaseSensitive(isCaseSensitive:Boolean)
+    {
+        _isCaseSensitive.value = isCaseSensitive
+    }
+
+    // endregion
+
+    // region log lines
+
+    private val fileLines = concatenatedFiles
         .mapLatest { files -> files.flatMap { file -> file.readLines() } }
-        .combine(activeFilterParsed, ::applyFilterToLogLines)
-        .flowOn(dispatchers.io)
+
+    fun getLogLinesFlow():Flow<List<String>> =
+        combine(fileLines,activeFilterParsed,isCaseSensitive,::applyFilterToLogLines).flowOn(dispatchers.io)
 
     private fun applyFilterToLogLines(
         logLines:List<String>,
         logcatFilter:ParsedLogcatFilter,
+        isCaseSensitive:Boolean,
     ):List<String> = logLines.filter { logLine ->
         when (logcatFilter)
         {
-            is ParsedLogcatFilter.Parsed -> logcatFilterEvaluator.isMatch(logLine, logcatFilter.node)
+            is ParsedLogcatFilter.Parsed -> logcatFilterEvaluator.isMatch(
+                caseSensitive = isCaseSensitive,
+                logLine = logLine,
+                logcatFilter = logcatFilter.node,
+            )
             ParsedLogcatFilter.Empty -> true
             ParsedLogcatFilter.Error -> false
         }
     }
+
+    // endregion
 
     companion object
     {

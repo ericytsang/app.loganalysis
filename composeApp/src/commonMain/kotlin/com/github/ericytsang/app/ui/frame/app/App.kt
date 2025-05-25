@@ -56,11 +56,11 @@ fun App(
 
     val logcatFilterString by logViewerViewModel.logcatFilterString.collectAsState("")
     val delimiters by viewModel.getDelimiterFlow().collectAsState("")
+    val shouldMatchCase by logViewerViewModel.isCaseSensitive.collectAsState(false)
 
     val workingFileSet by workingFileSetEditorViewModel.workingFileSet.collectAsState(WorkingFileSetEmpty)
     logViewerViewModel.setConcatenatedFiles(workingFileSet.files.map { File(it.filePath) })
 
-    var shouldMatchCase by remember { mutableStateOf(false) }
     var shouldWrapText by remember { mutableStateOf(false) }
 
     fillMaxBackground(colors = animatedThemeColors)
@@ -100,7 +100,7 @@ fun App(
 
                 ToggleButton(
                     modifier = Modifier.padding(end = Dimens.mttPadding),
-                    onClick = { shouldMatchCase = !shouldMatchCase },
+                    onClick = { logViewerViewModel.setCaseSensitive(!logViewerViewModel.isCaseSensitive.value) },
                     isToggled = shouldMatchCase,
                     content = { contentColor -> IconMatchCaseOnPrimary(contentColor) },
                 )

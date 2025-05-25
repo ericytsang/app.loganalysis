@@ -13,12 +13,16 @@ class LeafNode(
     val value:String,
 
     /** True if the match is a regex (e.g., message~:...) */
-    val regex:Boolean
+    val regex:Boolean,
+
+    /** True if the match is a vase sensitive (e.g., message^:...) */
+    val caseSensitive:Boolean,
 ):Node()
 {
     override fun toString():String = buildString()
     {
         append(key)
+        append(if (caseSensitive) "^" else "")
         append(if (regex) "~" else "")
         append(":")
         append(if (' ' in value) "\"$value\"" else value)
