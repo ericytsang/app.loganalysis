@@ -1,5 +1,6 @@
 package com.github.ericytsang.app.ui.frame.app
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,17 +8,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonColors
+import androidx.compose.material.ButtonDefaults.buttonColors
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.github.ericytsang.app.ui.frame.app.AppViewModel
-import com.github.ericytsang.app.ui.frame.app.LogViewerViewModel
+import androidx.compose.ui.graphics.Color
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.asset.IconEditLogFilesOnPrimary
 import com.github.ericytsang.app.ui.asset.IconMatchCaseOnPrimary
@@ -59,6 +64,9 @@ fun App(
     val workingFileSet by workingFileSetEditorViewModel.workingFileSet.collectAsState(WorkingFileSetEmpty)
     logViewerViewModel.setConcatenatedFiles(workingFileSet.files.map { File(it.filePath) })
 
+    var shouldMatchCase by remember { mutableStateOf(false) }
+    var shouldWrapText by remember { mutableStateOf(false) }
+
     fillMaxBackground(colors = animatedThemeColors)
     {
 
@@ -82,7 +90,7 @@ fun App(
                             appViewModel = viewModel,
                         )
                     },
-                    content = { IconEditLogFilesOnPrimary(animatedThemeColors) },
+                    content = { IconEditLogFilesOnPrimary(animatedThemeColors.onPrimary) },
                 )
 
                 TextField(
@@ -94,21 +102,23 @@ fun App(
                     ),
                 )
 
-                Button(
+                ToggleButton(
                     modifier = Modifier.padding(end = Dimens.mttPadding),
-                    onClick = { openSettingsInNewWindowBlocking(window) },
-                    content = { IconMatchCaseOnPrimary(animatedThemeColors) },
+                    onClick = { shouldMatchCase = !shouldMatchCase },
+                    isToggled = shouldMatchCase,
+                    content = { contentColor -> IconMatchCaseOnPrimary(contentColor) },
+                )
+
+                ToggleButton(
+                    modifier = Modifier.padding(end = Dimens.mttPadding),
+                    onClick = { shouldWrapText = !shouldWrapText },
+                    isToggled = shouldWrapText,
+                    content = { contentColor -> IconWrapTextOnPrimary(contentColor) },
                 )
 
                 Button(
-                    modifier = Modifier.padding(end = Dimens.mttPadding),
                     onClick = { openSettingsInNewWindowBlocking(window) },
-                    content = { IconWrapTextOnPrimary(animatedThemeColors) },
-                )
-
-                Button(
-                    onClick = { openSettingsInNewWindowBlocking(window) },
-                    content = { IconSettingsOnPrimary(animatedThemeColors) },
+                    content = { IconSettingsOnPrimary(animatedThemeColors.onPrimary) },
                 )
             }
 
@@ -136,4 +146,31 @@ fun App(
             }
         }
     }
+}
+
+@Composable
+fun ToggleButton(
+    modifier:Modifier,
+    onClick:()->Unit,
+    isToggled:Boolean,
+    isNotToggledColors:ButtonColors = buttonColors(),
+    isToggledColors:ButtonColors = buttonColors(MaterialTheme.colors.secondary),
+    content:@Composable (contentColor:Color)->Unit,
+)
+{
+    val targetButtonColors = if (isToggled) isToggledColors else isNotToggledColors
+    val targetContentColor by targetButtonColors.contentColor(true)
+    val contentColor by animateColorAsState(targetContentColor)
+    val targetBackgroundColor by targetButtonColors.backgroundColor(true)
+    val backgroundColor by animateColorAsState(targetBackgroundColor)
+    val colors = buttonColors(
+        backgroundColor = backgroundColor,
+        contentColor = contentColor,
+    )
+    Button(
+        modifier = modifier,
+        onClick = onClick,
+        colors = colors,
+        content = { content(contentColor) },
+    )
 }
