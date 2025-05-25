@@ -8,6 +8,13 @@ import com.github.ericytsang.logcatfilterparser.OrNode
 
 interface LogcatFilterEvaluator
 {
+    /**
+     * evaluates whether a log line matches the given logcat filter.
+     * @param caseSensitive Whether the match should be case-sensitive. otherwise,
+     * it will use the case-sensitivity of the leaf node.
+     * @param logLine The log line to evaluate against the [logcatFilter].
+     * @param logcatFilter The logcat filter to evaluate against.
+     */
     fun isMatch(
         caseSensitive:Boolean,
         logLine:String,
