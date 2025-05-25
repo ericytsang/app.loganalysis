@@ -32,27 +32,27 @@ internal object Tokenizer
     {
         val tokens:MutableList<String> = mutableListOf<String>()
         val buffer = StringBuilder()
-        var inQuote = false
+        var inQuote:Char? = null
 
         for (i in 0..<input.length)
         {
             val c = input[i]
-            if (c == '"')
+            if (c == '"' || c == '\'')
             {
-                if (inQuote)
+                if (inQuote == c)
                 {
                     buffer.append(c)
                     tokens.add(buffer.toString())
                     buffer.setLength(0)
-                    inQuote = false
+                    inQuote = null
                 }
                 else
                 {
                     buffer.append(c)
-                    inQuote = true
+                    inQuote = c
                 }
             }
-            else if (inQuote)
+            else if (inQuote != null)
             {
                 buffer.append(c)
             }
@@ -64,7 +64,7 @@ internal object Tokenizer
                     buffer.setLength(0)
                 }
             }
-            else if (c in "&|()-")
+            else if (c in OPERATORS)
             {
                 if (buffer.isNotEmpty())
                 {
