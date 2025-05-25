@@ -61,7 +61,7 @@ fun App(
     val workingFileSet by workingFileSetEditorViewModel.workingFileSet.collectAsState(WorkingFileSetEmpty)
     logViewerViewModel.setConcatenatedFiles(workingFileSet.files.map { File(it.filePath) })
 
-    var shouldWrapText by remember { mutableStateOf(false) }
+    val shouldWrapText by viewModel.getWordWrapFlow().collectAsState(false)
 
     fillMaxBackground(colors = animatedThemeColors)
     {
@@ -107,7 +107,7 @@ fun App(
 
                 ToggleButton(
                     modifier = Modifier.padding(end = Dimens.mttPadding),
-                    onClick = { shouldWrapText = !shouldWrapText },
+                    onClick = { viewModel.toggleWordWrap() },
                     isToggled = shouldWrapText,
                     content = { contentColor -> IconWrapTextOnPrimary(contentColor) },
                 )

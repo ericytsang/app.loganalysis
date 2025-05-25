@@ -14,6 +14,10 @@ import kotlinx.coroutines.launch
 
 interface AppViewModel:ThemeUseCase,DelimiterRepository
 {
+    fun getWordWrapFlow():Flow<Boolean>
+
+    fun toggleWordWrap()
+
     companion object
     {
         fun create(
@@ -59,9 +63,9 @@ private class AppViewModelImpl(
         }
     }
 
-    fun getWordWrapFlow():Flow<Boolean> = _shouldWrapLongTextFlow.filterNotNull()
+    override fun getWordWrapFlow():Flow<Boolean> = _shouldWrapLongTextFlow.filterNotNull()
 
-    fun toggleWordWrap()
+    override fun toggleWordWrap()
     {
         val oldValue = _shouldWrapLongTextFlow.value ?: return
         val newValue = !oldValue
