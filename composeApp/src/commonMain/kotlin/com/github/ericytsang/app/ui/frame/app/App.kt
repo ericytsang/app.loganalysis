@@ -1,6 +1,5 @@
 package com.github.ericytsang.app.ui.frame.app
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,9 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
-import androidx.compose.material.ButtonColors
-import androidx.compose.material.ButtonDefaults.buttonColors
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -22,13 +18,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.asset.IconEditLogFilesOnPrimary
 import com.github.ericytsang.app.ui.asset.IconMatchCaseOnPrimary
 import com.github.ericytsang.app.ui.asset.IconSettingsOnPrimary
 import com.github.ericytsang.app.ui.asset.IconWrapTextOnPrimary
 import com.github.ericytsang.app.ui.component.ColorCodedLogLine
+import com.github.ericytsang.app.ui.component.ToggleButton
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
 import com.github.ericytsang.app.ui.modal.openSettingsInNewWindowBlocking
 import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlocking
@@ -148,29 +144,3 @@ fun App(
     }
 }
 
-@Composable
-fun ToggleButton(
-    modifier:Modifier,
-    onClick:()->Unit,
-    isToggled:Boolean,
-    isNotToggledColors:ButtonColors = buttonColors(),
-    isToggledColors:ButtonColors = buttonColors(MaterialTheme.colors.secondary),
-    content:@Composable (contentColor:Color)->Unit,
-)
-{
-    val targetButtonColors = if (isToggled) isToggledColors else isNotToggledColors
-    val targetContentColor by targetButtonColors.contentColor(true)
-    val contentColor by animateColorAsState(targetContentColor)
-    val targetBackgroundColor by targetButtonColors.backgroundColor(true)
-    val backgroundColor by animateColorAsState(targetBackgroundColor)
-    val colors = buttonColors(
-        backgroundColor = backgroundColor,
-        contentColor = contentColor,
-    )
-    Button(
-        modifier = modifier,
-        onClick = onClick,
-        colors = colors,
-        content = { content(contentColor) },
-    )
-}
