@@ -61,11 +61,13 @@ internal object Tokenizer
                 buffer.append(inputIterator.next()) // append the next character
             }
 
-            // handle characters inside quotes, spaces, and operators
+            // handle characters inside quotes
             else if (inQuote != null)
             {
                 buffer.append(c)
             }
+
+            // handle whitespace as token delimiters when outside of quotes
             else if (c == ' ')
             {
                 if (buffer.isNotEmpty())
@@ -74,6 +76,7 @@ internal object Tokenizer
                     buffer.setLength(0)
                 }
             }
+
             else if (c in OPERATORS)
             {
                 if (buffer.isNotEmpty())
