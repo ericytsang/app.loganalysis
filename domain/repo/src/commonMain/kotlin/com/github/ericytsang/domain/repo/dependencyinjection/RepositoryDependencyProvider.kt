@@ -1,5 +1,7 @@
 package com.github.ericytsang.domain.repo.dependencyinjection
 
+import com.github.ericytsang.domain.repo.repo.ConfigurationRepository
+import com.github.ericytsang.domain.repo.repo.ConfigurationRepositoryImpl
 import com.github.ericytsang.domain.repo.repo.DelimiterRepository
 import com.github.ericytsang.domain.repo.repo.DelimiterRepositoryImpl
 import com.github.ericytsang.domain.repo.repo.SettingsRepository
@@ -17,6 +19,7 @@ interface RepositoryDependencyProvider
     val themeRepository:ThemeRepository
     val delimiterRepository:DelimiterRepository
     val workingFileSetRepository:WorkingFileSetRepository
+    val configurationRepository:ConfigurationRepository
 
     companion object
     {
@@ -52,6 +55,13 @@ internal class RepositoryDependencyProviderImpl(
 
     override val workingFileSetRepository:WorkingFileSetRepository by lazy {
         WorkingFileSetRepositoryImpl(
+            kotlinDependencyProvider = kotlinDependencyProvider,
+            databaseService = databaseServiceProvider.databaseService,
+        )
+    }
+
+    override val configurationRepository:ConfigurationRepository by lazy {
+        ConfigurationRepositoryImpl(
             kotlinDependencyProvider = kotlinDependencyProvider,
             databaseService = databaseServiceProvider.databaseService,
         )

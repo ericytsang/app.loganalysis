@@ -3,12 +3,11 @@ package com.github.ericytsang.domain.repo.repo
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.github.ericytsang.domain.objects.ConfigurationId
-import com.github.ericytsang.domain.objects.LogFile
 import com.github.ericytsang.domain.objects.OrderIndex
 import com.github.ericytsang.domain.objects.WorkingFileSet
 import com.github.ericytsang.domain.objects.WorkingFileSetSelected
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
-import com.github.ericytsang.service.sqlite.LogFiles
+import com.github.ericytsang.service.sqlite.LogFile
 import com.github.ericytsang.service.sqlite.dbfactory.DatabaseService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
@@ -41,7 +40,9 @@ internal class WorkingFileSetRepositoryImpl(
     ):ConfigurationId = withContext(dispatchers.io)
     {
         database.transaction {
-            queries.insertConfiguration("").value
+            val lastUpdated = queries.selectLastUpdatedConfiguration().executeAsOneOrNull()
+            val updateSequence = lastUpdated?.update_sequence?.plus(1) ?: 1L
+            queries.insertConfiguration("",updateSequence,"")
             val newConfigurationId = queries.lastInsertId().executeAsOne()
             newFiles.forEachIndexed { index,file ->
                 queries.insertLogFile(
@@ -108,8 +109,8 @@ internal class WorkingFileSetRepositoryImpl(
     companion object
     {
         private fun parseLogFileToDomainObject(
-            logFile:LogFiles,
-        ):LogFile = LogFile(
+            logFile:LogFile,
+        ):com.github.ericytsang.domain.objects.LogFile = com.github.ericytsang.domain.objects.LogFile(
             filePath = logFile.file_path,
             orderIndex = OrderIndex(logFile.order_index),
         )

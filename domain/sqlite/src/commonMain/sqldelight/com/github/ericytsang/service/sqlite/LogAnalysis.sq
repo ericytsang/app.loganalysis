@@ -1,31 +1,61 @@
 -- create tables
 
-CREATE TABLE Configurations (
+CREATE TABLE Configuration (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   -- user-defined name for the configuration.
   -- it could be blank, in which case the app will display a generate name
   name TEXT NOT NULL,
   -- the time when the configuration was created
-  created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+  update_sequence INTEGER NOT NULL,
+  -- the current logcat filter that is inputted into the text field
+  logcat_filter TEXT NOT NULL
 );
 
-CREATE TABLE LogFiles (
+CREATE TABLE LogFile (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   config_id INTEGER NOT NULL,
   file_path TEXT NOT NULL,
   -- the order in which the log files are displayed and concatenated in the UI
   order_index INTEGER NOT NULL,
-  FOREIGN KEY (config_id) REFERENCES Configurations(id) ON DELETE CASCADE,
+  FOREIGN KEY (config_id) REFERENCES Configuration(id) ON DELETE CASCADE,
   UNIQUE (config_id, file_path),
   CHECK (order_index >= 0)
 );
 
-CREATE TABLE Filters (
+-- "exclude" filters are used to exclude log lines that match the filter string
+CREATE TABLE ExcludeFilter (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  filter_string TEXT NOT NULL,
+  is_case_sensitive INTEGER NOT NULL,
+  is_regex INTEGER NOT NULL,
+  is_active INTEGER NOT NULL,
+  order_index INTEGER NOT NULL,
+  config_id INTEGER,
+  FOREIGN KEY (config_id) REFERENCES Configuration(id) ON DELETE CASCADE,
+  UNIQUE (filter_string, config_id)
+);
+
+-- "include" filter used to include log lines that match the filter string
+CREATE TABLE IncludeFilter (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  filter_string TEXT NOT NULL,
+  is_case_sensitive INTEGER NOT NULL,
+  is_regex INTEGER NOT NULL,
+  is_active INTEGER NOT NULL,
+  order_index INTEGER NOT NULL,
+  config_id INTEGER,
+  FOREIGN KEY (config_id) REFERENCES Configuration(id) ON DELETE CASCADE,
+  UNIQUE (filter_string, config_id)
+);
+
+-- logcat filter used to include log lines that match the filter string
+CREATE TABLE LogCatFilter (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   filter_string TEXT NOT NULL,
   config_id INTEGER,
-  created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
-  FOREIGN KEY (config_id) REFERENCES Configurations(id) ON DELETE SET NULL,
+  order_index INTEGER NOT NULL,
+  is_active INTEGER NOT NULL,
+  FOREIGN KEY (config_id) REFERENCES Configuration(id) ON DELETE CASCADE,
   UNIQUE (filter_string, config_id)
 );
 
@@ -38,11 +68,6 @@ CREATE TABLE Settings (
   -- whether to wrap the text in the log viewer: 1 for true, 0 for false
   should_wrap_text INTEGER NOT NULL
 );
-
--- create indexes for performance
-
-CREATE INDEX idx_logfiles_config_id ON LogFiles(config_id);
-CREATE INDEX idx_filters_config_id ON Filters(config_id);
 
 -- insert default values into the database
 
@@ -84,37 +109,56 @@ WHERE id = 1;
 -- region configurations
 
 insertConfiguration:
-INSERT INTO Configurations (name)
-VALUES (?);
+INSERT INTO Configuration (name, update_sequence, logcat_filter)
+VALUES (?, ?, ?);
+
+updateConfiguration:
+UPDATE Configuration
+SET name = ?,
+    update_sequence = ?,
+    logcat_filter = ?
+WHERE id = ?;
 
 selectAllConfigurations:
-SELECT * FROM Configurations
-ORDER BY created_at DESC;
+SELECT * FROM Configuration
+ORDER BY update_sequence DESC;
+
+selectNConfigurationsUpdatedAfter:
+SELECT * FROM Configuration
+WHERE update_sequence >= ?
+ORDER BY update_sequence ASC
+LIMIT ?;
+
+selectNConfigurationsUpdatedBefore:
+SELECT * FROM Configuration
+WHERE update_sequence <= ?
+ORDER BY update_sequence DESC
+LIMIT ?;
+
+selectLastUpdatedConfiguration:
+SELECT * FROM Configuration
+ORDER BY update_sequence DESC
+LIMIT 1;
+
+deleteConfiguration:
+DELETE FROM Configuration
+WHERE id = ?;
 
 -- endregion
 
 -- region log files
 
 insertLogFile:
-INSERT INTO LogFiles (config_id, file_path, order_index)
+INSERT INTO LogFile (config_id, file_path, order_index)
 VALUES (?, ?, ?);
+
+selectLogFilesForConfig:
+SELECT * FROM LogFile
+WHERE config_id = ?
+ORDER BY order_index;
 
 -- endregion
 
 -- region filters
-
-selectLogFilesForConfig:
-SELECT * FROM LogFiles
-WHERE config_id = ?
-ORDER BY order_index;
-
-insertFilter:
-INSERT INTO Filters (filter_string, config_id)
-VALUES (?, ?);
-
-selectFilters:
-SELECT * FROM Filters
-WHERE config_id IS NULL OR config_id = ?
-ORDER BY created_at DESC;
 
 -- endregion
