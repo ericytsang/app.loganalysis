@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.flowOn
  * - user can press on a open icon on the item to open that project in a log viewer window
  * - user can press on an edit icon to open the working file set editor window
  */
-interface ProjectBrowserViewModel:ThemeUseCase
+interface ProjectBrowserViewModel
 {
     val getProjectsFlow:Flow<List<ProjectListItemModel>>
 
@@ -41,6 +41,17 @@ interface ProjectBrowserViewModel:ThemeUseCase
      * visible items count (plus some buffer).
      */
     fun loadMoreItems(request:LoadMoreItemsRequest)
+
+    companion object
+    {
+        fun create(
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+            configurationRepository:ConfigurationRepository = RepositoryDependencyProvider.instance.configurationRepository,
+        ):ProjectBrowserViewModel = ProjectBrowserViewModelImpl(
+            kotlinDependencyProvider = kotlinDependencyProvider,
+            configurationRepository = configurationRepository,
+        )
+    }
 }
 
 sealed interface LoadMoreItemsRequest
@@ -63,11 +74,10 @@ sealed class ProjectListItemModel
     ):ProjectListItemModel(),LoadMoreItemsRequest
 }
 
-class ProjectBrowserViewModelImpl(
-    private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
-    private val configurationRepository:ConfigurationRepository = RepositoryDependencyProvider.instance.configurationRepository,
+internal class ProjectBrowserViewModelImpl(
+    private val kotlinDependencyProvider:KotlinDependencyProvider,
+    private val configurationRepository:ConfigurationRepository,
 ):ProjectBrowserViewModel,
-    ThemeUseCase by ThemeUseCase.create(),
     KotlinDependencyProvider by kotlinDependencyProvider
 {
     private val maxInMemoryItemsCount = MutableStateFlow(200)

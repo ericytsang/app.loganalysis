@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.github.ericytsang.app.model.Dimens
+import com.github.ericytsang.app.usecase.ThemeUseCase
 import com.github.ericytsang.app.util.animatedThemeColors
 import com.github.ericytsang.domain.objects.Theme
 import kotlinx.coroutines.CoroutineScope
@@ -18,10 +19,11 @@ import kotlinx.coroutines.CoroutineScope
 fun ProjectListItem(
     item:ProjectListItemModel,
     projectBrowserViewModel:ProjectBrowserViewModel,
+    themeUseCase:ThemeUseCase = ThemeUseCase.create(),
     viewModelFactory: (CoroutineScope,ProjectListItemModel.Project) -> ProjectListItemViewModel,
 )
 {
-    val targetTheme by projectBrowserViewModel.theme.collectAsState(Theme.DARK)
+    val targetTheme by themeUseCase.theme.collectAsState(Theme.DARK)
     val themeColors by animatedThemeColors(targetTheme)
     val coroutineScope = rememberCoroutineScope()
     key(item)

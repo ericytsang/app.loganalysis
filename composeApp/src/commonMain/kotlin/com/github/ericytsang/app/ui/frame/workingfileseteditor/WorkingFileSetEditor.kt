@@ -11,9 +11,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.github.ericytsang.app.ui.frame.app.AppViewModel
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
+import com.github.ericytsang.app.usecase.ThemeUseCase
 import com.github.ericytsang.app.util.animatedThemeColors
 import com.github.ericytsang.app.util.fillMaxBackground
 import com.github.ericytsang.domain.objects.Theme
@@ -24,10 +24,10 @@ import java.awt.Dialog
 fun WorkingFileSetEditor(
     owner:Dialog,
     viewModel:WorkingFileSetEditorViewModel,
-    appViewModel:AppViewModel,
+    themeUseCase:ThemeUseCase,
 )
 {
-    val theme by appViewModel.theme.collectAsState(Theme.DARK)
+    val theme by themeUseCase.theme.collectAsState(Theme.DARK)
     val animatedThemeColors by animatedThemeColors(theme)
 
     val workingFileSet by viewModel.workingFileSet.collectAsState(WorkingFileSetEmpty)

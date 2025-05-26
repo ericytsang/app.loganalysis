@@ -4,12 +4,17 @@ import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependenc
 import com.github.ericytsang.domain.repo.repo.ConfigurationRepository
 import com.github.ericytsang.domain.repo.repo.WorkingFileSetRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 interface ProjectListItemViewModel
 {
@@ -35,6 +40,7 @@ interface ProjectListItemViewModel
 }
 
 class ProjectListItemViewModelImpl(
+    uiScope: CoroutineScope,
     private val project:ProjectListItemModel.Project,
     kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
     private val configurationRepository:ConfigurationRepository = RepositoryDependencyProvider.Companion.instance.configurationRepository,
@@ -95,6 +101,7 @@ class ProjectListItemViewModelImpl(
 
         // there is a common prefix, so we will shorten the file paths to show only the part after the common prefix
         val shortenedFilePaths = filePaths.joinToString { it.removePrefix(commonPrefixAmongFilePaths) }
-        "$commonPrefixAmongFilePaths... [$shortenedFilePaths]"
+        emit("$commonPrefixAmongFilePaths... [$shortenedFilePaths]")
     }.flowOn(dispatchers.io)
+        .shareIn(uiScope,SharingStarted.WhileSubscribed(5.seconds))
 }
