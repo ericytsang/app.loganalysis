@@ -3,11 +3,12 @@ package com.github.ericytsang.domain.repo.repo
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.github.ericytsang.domain.objects.ConfigurationId
+import com.github.ericytsang.domain.objects.LogFile
 import com.github.ericytsang.domain.objects.OrderIndex
 import com.github.ericytsang.domain.objects.WorkingFileSet
 import com.github.ericytsang.domain.objects.WorkingFileSetSelected
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
-import com.github.ericytsang.service.sqlite.LogFile
+import com.github.ericytsang.service.sqlite.LogFileEntity
 import com.github.ericytsang.service.sqlite.dbfactory.DatabaseService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
@@ -109,8 +110,8 @@ internal class WorkingFileSetRepositoryImpl(
     companion object
     {
         private fun parseLogFileToDomainObject(
-            logFile:LogFile,
-        ):com.github.ericytsang.domain.objects.LogFile = com.github.ericytsang.domain.objects.LogFile(
+            logFile:LogFileEntity,
+        ):LogFile = LogFile(
             filePath = logFile.file_path,
             orderIndex = OrderIndex(logFile.order_index),
         )
