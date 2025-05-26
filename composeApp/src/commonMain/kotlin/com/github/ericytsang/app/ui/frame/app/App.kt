@@ -19,10 +19,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.ui.asset.IconEditLogFilesOnPrimary
-import com.github.ericytsang.app.ui.asset.IconMatchCaseOnPrimary
-import com.github.ericytsang.app.ui.asset.IconSettingsOnPrimary
-import com.github.ericytsang.app.ui.asset.IconWrapTextOnPrimary
+import com.github.ericytsang.app.ui.asset.IconEditLogFiles
+import com.github.ericytsang.app.ui.asset.IconMatchCase
+import com.github.ericytsang.app.ui.asset.IconSettings
+import com.github.ericytsang.app.ui.asset.IconWrapText
 import com.github.ericytsang.app.ui.component.ColorCodedLogLine
 import com.github.ericytsang.app.ui.component.ToggleButton
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
@@ -86,7 +86,7 @@ fun App(
                             appViewModel = viewModel,
                         )
                     },
-                    content = { IconEditLogFilesOnPrimary(animatedThemeColors.onPrimary) },
+                    content = { IconEditLogFiles(animatedThemeColors.onPrimary) },
                 )
 
                 TextField(
@@ -102,19 +102,19 @@ fun App(
                     modifier = Modifier.padding(end = Dimens.mttPadding),
                     onClick = { logViewerViewModel.setCaseSensitive(!logViewerViewModel.isCaseSensitive.value) },
                     isToggled = shouldMatchCase,
-                    content = { contentColor -> IconMatchCaseOnPrimary(contentColor) },
+                    content = { contentColor -> IconMatchCase(contentColor) },
                 )
 
                 ToggleButton(
                     modifier = Modifier.padding(end = Dimens.mttPadding),
                     onClick = { viewModel.toggleWordWrap() },
                     isToggled = shouldWrapText,
-                    content = { contentColor -> IconWrapTextOnPrimary(contentColor) },
+                    content = { contentColor -> IconWrapText(contentColor) },
                 )
 
                 Button(
                     onClick = { openSettingsInNewWindowBlocking(window) },
-                    content = { IconSettingsOnPrimary(animatedThemeColors.onPrimary) },
+                    content = { IconSettings(animatedThemeColors.onPrimary) },
                 )
             }
 

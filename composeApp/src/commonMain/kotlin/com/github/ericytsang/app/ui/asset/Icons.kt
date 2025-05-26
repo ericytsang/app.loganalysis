@@ -12,7 +12,7 @@ import kotlinproject.composeapp.generated.resources.outline_wrap_text_24
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun IconEditLogFilesOnPrimary(color:Color)
+fun IconEditLogFiles(color:Color)
 {
     Image(
         painter = painterResource(Res.drawable.outline_contract_edit_24),
@@ -25,7 +25,7 @@ fun IconEditLogFilesOnPrimary(color:Color)
 }
 
 @Composable
-fun IconWrapTextOnPrimary(color:Color)
+fun IconWrapText(color:Color)
 {
     Image(
         painter = painterResource(Res.drawable.outline_wrap_text_24),
@@ -38,7 +38,7 @@ fun IconWrapTextOnPrimary(color:Color)
 }
 
 @Composable
-fun IconMatchCaseOnPrimary(color:Color)
+fun IconMatchCase(color:Color)
 {
     Image(
         painter = painterResource(Res.drawable.outline_match_case_24),
@@ -51,7 +51,7 @@ fun IconMatchCaseOnPrimary(color:Color)
 }
 
 @Composable
-fun IconSettingsOnPrimary(color:Color)
+fun IconSettings(color:Color)
 {
     Image(
         painter = painterResource(Res.drawable.outline_settings_24),
