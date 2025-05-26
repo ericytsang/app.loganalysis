@@ -15,7 +15,7 @@ interface ThemeUseCase
     {
         fun create(
             kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
-            themeRepository:ThemeRepository = RepositoryDependencyProvider.Companion.instance.themeRepository,
+            themeRepository:ThemeRepository = RepositoryDependencyProvider.instance.themeRepository,
         ):ThemeUseCase = MutableThemeUseCaseImpl(
             kotlinDependencyProvider = kotlinDependencyProvider,
             themeRepository = themeRepository,
@@ -31,7 +31,7 @@ interface MutableThemeUseCase:ThemeUseCase
     {
         fun create(
             kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
-            themeRepository:ThemeRepository = RepositoryDependencyProvider.Companion.instance.themeRepository,
+            themeRepository:ThemeRepository = RepositoryDependencyProvider.instance.themeRepository,
         ):MutableThemeUseCase = MutableThemeUseCaseImpl(
             kotlinDependencyProvider = kotlinDependencyProvider,
             themeRepository = themeRepository,

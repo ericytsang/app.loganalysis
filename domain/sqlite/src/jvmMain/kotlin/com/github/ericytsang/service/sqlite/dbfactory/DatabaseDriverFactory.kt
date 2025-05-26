@@ -26,7 +26,7 @@ internal actual class DatabaseDriverFactory
         val sqliteDriver = JdbcSqliteDriver(
             url = "$SQLITE_JDBC_CONNECTIONS_SCHEME$appDatabaseFileUri",
             properties = Properties(),
-            schema = SqlDelightDatabase.Companion.Schema,
+            schema = SqlDelightDatabase.Schema,
         )
 
         return sqliteDriver

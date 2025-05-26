@@ -43,7 +43,7 @@ fun WorkingFileSetEditor(
             modifier = Modifier.Companion
                 .fillMaxSize()
                 .padding(Dimens.mttPadding),
-            horizontalAlignment = Alignment.Companion.Start,
+            horizontalAlignment = Alignment.Start,
         )
         {
             Button(
@@ -52,7 +52,7 @@ fun WorkingFileSetEditor(
             )
 
             LazyColumn(
-                modifier = Modifier.Companion.fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
             )
             {
                 items(count = workingFileSet.files.size)

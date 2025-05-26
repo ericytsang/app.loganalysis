@@ -41,8 +41,8 @@ import java.io.File
 @Preview
 fun App(
     window:Window,
-    viewModelFactory:(CoroutineScope)->AppViewModel = { uiScope -> AppViewModel.Companion.create(uiScope) },
-    logViewerViewModelFactory:()->LogViewerViewModel = { LogViewerViewModel.Companion.createDefault() },
+    viewModelFactory:(CoroutineScope)->AppViewModel = { uiScope -> AppViewModel.create(uiScope) },
+    logViewerViewModelFactory:()->LogViewerViewModel = { LogViewerViewModel.createDefault() },
     workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel = { WorkingFileSetEditorViewModel.createDefault() },
 )
 {

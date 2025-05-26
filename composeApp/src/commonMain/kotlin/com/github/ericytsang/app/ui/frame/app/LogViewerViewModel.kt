@@ -112,7 +112,7 @@ class LogViewerViewModel(
     companion object
     {
         fun createDefault(
-            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
             logcatFilterParser:LogcatFilterParser = LogcatFilterParser(),
             logcatFilterEvaluator:LogcatFilterEvaluator = LogcatFilterEvaluatorImpl(),
         ):LogViewerViewModel = LogViewerViewModel(

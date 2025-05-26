@@ -22,9 +22,9 @@ interface AppViewModel:ThemeUseCase,DelimiterRepository
     {
         fun create(
             uiScope:CoroutineScope,
-            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
-            settingsRepository:SettingsRepository = RepositoryDependencyProvider.Companion.instance.settingsRepository,
-            delimiterRepository:DelimiterRepository = RepositoryDependencyProvider.Companion.instance.delimiterRepository,
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+            settingsRepository:SettingsRepository = RepositoryDependencyProvider.instance.settingsRepository,
+            delimiterRepository:DelimiterRepository = RepositoryDependencyProvider.instance.delimiterRepository,
         ):AppViewModel = AppViewModelImpl(
             uiScope = uiScope,
             kotlinDependencyProvider = kotlinDependencyProvider,
@@ -41,7 +41,7 @@ private class AppViewModelImpl(
     private val delimiterRepository:DelimiterRepository,
 ):
     AppViewModel,
-    ThemeUseCase by ThemeUseCase.Companion.create(),
+    ThemeUseCase by ThemeUseCase.create(),
     KotlinDependencyProvider by kotlinDependencyProvider,
     DelimiterRepository by delimiterRepository
 {

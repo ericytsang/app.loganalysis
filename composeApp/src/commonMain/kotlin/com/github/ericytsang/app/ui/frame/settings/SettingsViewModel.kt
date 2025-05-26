@@ -29,8 +29,8 @@ interface SettingsViewModel:MutableThemeUseCase
     {
         fun create(
             uiScope:CoroutineScope,
-            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
-            delimiterRepository:DelimiterRepository = RepositoryDependencyProvider.Companion.instance.delimiterRepository,
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+            delimiterRepository:DelimiterRepository = RepositoryDependencyProvider.instance.delimiterRepository,
         ):SettingsViewModel = SettingsViewModelImpl(
             uiScope = uiScope,
             kotlinDependencyProvider = kotlinDependencyProvider,
@@ -44,7 +44,7 @@ private class SettingsViewModelImpl(
     private val kotlinDependencyProvider:KotlinDependencyProvider,
     private val delimiterRepository:DelimiterRepository,
 ):SettingsViewModel,
-    MutableThemeUseCase by MutableThemeUseCase.Companion.create(),
+    MutableThemeUseCase by MutableThemeUseCase.create(),
     KotlinDependencyProvider by kotlinDependencyProvider
 {
     private val delimiterCharactersFlow =

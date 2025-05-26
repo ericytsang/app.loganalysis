@@ -17,7 +17,7 @@ fun IconEditLogFiles(color:Color)
     Image(
         painter = painterResource(Res.drawable.outline_contract_edit_24),
         contentDescription = "Edit log files",
-        colorFilter = ColorFilter.Companion.lighting(
+        colorFilter = ColorFilter.lighting(
             multiply = color,
             add = color,
         )
@@ -30,7 +30,7 @@ fun IconWrapText(color:Color)
     Image(
         painter = painterResource(Res.drawable.outline_wrap_text_24),
         contentDescription = "Wrap text",
-        colorFilter = ColorFilter.Companion.lighting(
+        colorFilter = ColorFilter.lighting(
             multiply = color,
             add = color,
         )
@@ -43,7 +43,7 @@ fun IconMatchCase(color:Color)
     Image(
         painter = painterResource(Res.drawable.outline_match_case_24),
         contentDescription = "Match case",
-        colorFilter = ColorFilter.Companion.lighting(
+        colorFilter = ColorFilter.lighting(
             multiply = color,
             add = color,
         )
@@ -56,7 +56,7 @@ fun IconSettings(color:Color)
     Image(
         painter = painterResource(Res.drawable.outline_settings_24),
         contentDescription = "Settings",
-        colorFilter = ColorFilter.Companion.lighting(
+        colorFilter = ColorFilter.lighting(
             multiply = color,
             add = color,
         )

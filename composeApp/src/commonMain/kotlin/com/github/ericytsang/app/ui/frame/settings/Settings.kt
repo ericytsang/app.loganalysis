@@ -38,12 +38,12 @@ fun Settings(
     {
 
         Column(
-            modifier = Modifier.Companion.fillMaxWidth().padding(Dimens.mttPadding),
-            horizontalAlignment = Alignment.Companion.Start,
+            modifier = Modifier.fillMaxWidth().padding(Dimens.mttPadding),
+            horizontalAlignment = Alignment.Start,
         )
         {
             Button(
-                modifier = Modifier.Companion.padding(bottom = Dimens.mttPadding),
+                modifier = Modifier.padding(bottom = Dimens.mttPadding),
                 onClick = { viewModel.switchTheme() },
                 content = { Text("Toggle theme") },
             )

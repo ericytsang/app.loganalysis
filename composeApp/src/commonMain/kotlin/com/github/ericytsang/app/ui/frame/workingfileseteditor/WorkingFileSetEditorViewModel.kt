@@ -28,8 +28,8 @@ interface WorkingFileSetEditorViewModel
     companion object
     {
         fun createDefault(
-            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
-            workingFileSetRepository:WorkingFileSetRepository = RepositoryDependencyProvider.Companion.instance.workingFileSetRepository,
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+            workingFileSetRepository:WorkingFileSetRepository = RepositoryDependencyProvider.instance.workingFileSetRepository,
         ):WorkingFileSetEditorViewModel = WorkingFileSetEditorViewModelImpl(
             kotlinDependencyProvider = kotlinDependencyProvider,
             workingFileSetRepository = workingFileSetRepository,
