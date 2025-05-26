@@ -1,6 +1,6 @@
 -- create tables
 
-CREATE TABLE Configuration (
+CREATE TABLE ConfigurationEntity (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   -- user-defined name for the configuration.
   -- it could be blank, in which case the app will display a generate name
@@ -11,19 +11,19 @@ CREATE TABLE Configuration (
   logcat_filter TEXT NOT NULL
 );
 
-CREATE TABLE LogFile (
+CREATE TABLE LogFileEntity (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   config_id INTEGER NOT NULL,
   file_path TEXT NOT NULL,
   -- the order in which the log files are displayed and concatenated in the UI
   order_index INTEGER NOT NULL,
-  FOREIGN KEY (config_id) REFERENCES Configuration(id) ON DELETE CASCADE,
+  FOREIGN KEY (config_id) REFERENCES ConfigurationEntity(id) ON DELETE CASCADE,
   UNIQUE (config_id, file_path),
   CHECK (order_index >= 0)
 );
 
 -- "exclude" filters are used to exclude log lines that match the filter string
-CREATE TABLE ExcludeFilter (
+CREATE TABLE ExcludeFilterEntity (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   filter_string TEXT NOT NULL,
   is_case_sensitive INTEGER NOT NULL,
@@ -31,12 +31,12 @@ CREATE TABLE ExcludeFilter (
   is_active INTEGER NOT NULL,
   order_index INTEGER NOT NULL,
   config_id INTEGER,
-  FOREIGN KEY (config_id) REFERENCES Configuration(id) ON DELETE CASCADE,
+  FOREIGN KEY (config_id) REFERENCES ConfigurationEntity(id) ON DELETE CASCADE,
   UNIQUE (filter_string, config_id)
 );
 
 -- "include" filter used to include log lines that match the filter string
-CREATE TABLE IncludeFilter (
+CREATE TABLE IncludeFilterEntity (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   filter_string TEXT NOT NULL,
   is_case_sensitive INTEGER NOT NULL,
@@ -44,22 +44,22 @@ CREATE TABLE IncludeFilter (
   is_active INTEGER NOT NULL,
   order_index INTEGER NOT NULL,
   config_id INTEGER,
-  FOREIGN KEY (config_id) REFERENCES Configuration(id) ON DELETE CASCADE,
+  FOREIGN KEY (config_id) REFERENCES ConfigurationEntity(id) ON DELETE CASCADE,
   UNIQUE (filter_string, config_id)
 );
 
 -- logcat filter used to include log lines that match the filter string
-CREATE TABLE LogCatFilter (
+CREATE TABLE LogCatFilterEntity (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   filter_string TEXT NOT NULL,
   config_id INTEGER,
   order_index INTEGER NOT NULL,
   is_active INTEGER NOT NULL,
-  FOREIGN KEY (config_id) REFERENCES Configuration(id) ON DELETE CASCADE,
+  FOREIGN KEY (config_id) REFERENCES ConfigurationEntity(id) ON DELETE CASCADE,
   UNIQUE (filter_string, config_id)
 );
 
-CREATE TABLE Settings (
+CREATE TABLE SettingsEntity (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   -- the theme of the app: 'light' or 'dark'
   theme TEXT NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE Settings (
 
 -- insert default values into the database
 
-INSERT INTO Settings
+INSERT INTO SettingsEntity
 VALUES (1, 'light', ':,.;!@#$%^&* ()_+=-`~|?<>\\/[]{}\"', 0);
 
 -- everything below are SQLDelight queries
@@ -86,21 +86,21 @@ SELECT last_insert_rowid();
 -- region settings
 
 selectSettings:
-SELECT * FROM Settings
+SELECT * FROM SettingsEntity
 WHERE id = 1;
 
 updateTheme:
-UPDATE Settings
+UPDATE SettingsEntity
 SET theme = ?
 WHERE id = 1;
 
 updateColorCodingDelimiters:
-UPDATE Settings
+UPDATE SettingsEntity
 SET color_coding_delimiters = ?
 WHERE id = 1;
 
 updateShouldWrapText:
-UPDATE Settings
+UPDATE SettingsEntity
 SET should_wrap_text = ?
 WHERE id = 1;
 
@@ -109,39 +109,39 @@ WHERE id = 1;
 -- region configurations
 
 insertConfiguration:
-INSERT INTO Configuration (name, update_sequence, logcat_filter)
+INSERT INTO ConfigurationEntity (name, update_sequence, logcat_filter)
 VALUES (?, ?, ?);
 
 updateConfiguration:
-UPDATE Configuration
+UPDATE ConfigurationEntity
 SET name = ?,
     update_sequence = ?,
     logcat_filter = ?
 WHERE id = ?;
 
 selectAllConfigurations:
-SELECT * FROM Configuration
+SELECT * FROM ConfigurationEntity
 ORDER BY update_sequence DESC;
 
 selectNConfigurationsUpdatedAfter:
-SELECT * FROM Configuration
+SELECT * FROM ConfigurationEntity
 WHERE update_sequence >= ?
 ORDER BY update_sequence ASC
 LIMIT ?;
 
 selectNConfigurationsUpdatedBefore:
-SELECT * FROM Configuration
+SELECT * FROM ConfigurationEntity
 WHERE update_sequence <= ?
 ORDER BY update_sequence DESC
 LIMIT ?;
 
 selectLastUpdatedConfiguration:
-SELECT * FROM Configuration
+SELECT * FROM ConfigurationEntity
 ORDER BY update_sequence DESC
 LIMIT 1;
 
 deleteConfiguration:
-DELETE FROM Configuration
+DELETE FROM ConfigurationEntity
 WHERE id = ?;
 
 -- endregion
@@ -149,11 +149,11 @@ WHERE id = ?;
 -- region log files
 
 insertLogFile:
-INSERT INTO LogFile (config_id, file_path, order_index)
+INSERT INTO LogFileEntity (config_id, file_path, order_index)
 VALUES (?, ?, ?);
 
 selectLogFilesForConfig:
-SELECT * FROM LogFile
+SELECT * FROM LogFileEntity
 WHERE config_id = ?
 ORDER BY order_index;
 
