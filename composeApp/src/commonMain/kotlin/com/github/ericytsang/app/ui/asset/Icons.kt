@@ -6,7 +6,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.outline_contract_edit_24
+import kotlinproject.composeapp.generated.resources.outline_delete_24
+import kotlinproject.composeapp.generated.resources.outline_edit_24
 import kotlinproject.composeapp.generated.resources.outline_match_case_24
+import kotlinproject.composeapp.generated.resources.outline_open_in_new_24
 import kotlinproject.composeapp.generated.resources.outline_settings_24
 import kotlinproject.composeapp.generated.resources.outline_wrap_text_24
 import org.jetbrains.compose.resources.painterResource
@@ -56,6 +59,45 @@ fun IconSettings(color:Color)
     Image(
         painter = painterResource(Res.drawable.outline_settings_24),
         contentDescription = "Settings",
+        colorFilter = ColorFilter.lighting(
+            multiply = color,
+            add = color,
+        )
+    )
+}
+
+@Composable
+fun IconDelete(color:Color)
+{
+    Image(
+        painter = painterResource(Res.drawable.outline_delete_24),
+        contentDescription = "Delete",
+        colorFilter = ColorFilter.lighting(
+            multiply = color,
+            add = color,
+        )
+    )
+}
+
+@Composable
+fun IconEdit(color:Color)
+{
+    Image(
+        painter = painterResource(Res.drawable.outline_edit_24),
+        contentDescription = "Edit",
+        colorFilter = ColorFilter.lighting(
+            multiply = color,
+            add = color,
+        )
+    )
+}
+
+@Composable
+fun IconOpen(color:Color)
+{
+    Image(
+        painter = painterResource(Res.drawable.outline_open_in_new_24),
+        contentDescription = "Open",
         colorFilter = ColorFilter.lighting(
             multiply = color,
             add = color,
