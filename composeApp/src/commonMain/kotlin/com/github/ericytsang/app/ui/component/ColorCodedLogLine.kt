@@ -9,7 +9,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.withStyle
 import com.github.ericytsang.domain.objects.Theme
 import kotlin.random.Random
-import kotlin.text.iterator
 
 @Composable
 fun ColorCodedLogLine(
