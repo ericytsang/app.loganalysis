@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.frame.app
+package com.github.ericytsang.app.ui.frame.logviewer
 
 import com.github.ericytsang.app.usecase.ThemeUseCase
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-interface AppViewModel:ThemeUseCase,DelimiterRepository
+interface LogViewerWindowViewModel:ThemeUseCase,DelimiterRepository
 {
     fun getWordWrapFlow():Flow<Boolean>
 
@@ -22,10 +22,10 @@ interface AppViewModel:ThemeUseCase,DelimiterRepository
     {
         fun create(
             uiScope:CoroutineScope,
-            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
-            settingsRepository:SettingsRepository = RepositoryDependencyProvider.instance.settingsRepository,
-            delimiterRepository:DelimiterRepository = RepositoryDependencyProvider.instance.delimiterRepository,
-        ):AppViewModel = AppViewModelImpl(
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
+            settingsRepository:SettingsRepository = RepositoryDependencyProvider.Companion.instance.settingsRepository,
+            delimiterRepository:DelimiterRepository = RepositoryDependencyProvider.Companion.instance.delimiterRepository,
+        ):LogViewerWindowViewModel = LogViewerComposableViewModelImpl(
             uiScope = uiScope,
             kotlinDependencyProvider = kotlinDependencyProvider,
             settingsRepository = settingsRepository,
@@ -34,14 +34,14 @@ interface AppViewModel:ThemeUseCase,DelimiterRepository
     }
 }
 
-private class AppViewModelImpl(
+private class LogViewerComposableViewModelImpl(
     uiScope:CoroutineScope,
     private val kotlinDependencyProvider:KotlinDependencyProvider,
     private val settingsRepository:SettingsRepository,
     private val delimiterRepository:DelimiterRepository,
 ):
-    AppViewModel,
-    ThemeUseCase by ThemeUseCase.create(),
+    LogViewerWindowViewModel,
+    ThemeUseCase by ThemeUseCase.Companion.create(),
     KotlinDependencyProvider by kotlinDependencyProvider,
     DelimiterRepository by delimiterRepository
 {
