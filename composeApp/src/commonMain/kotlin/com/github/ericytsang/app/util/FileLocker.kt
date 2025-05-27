@@ -7,11 +7,12 @@ import javax.swing.JOptionPane
 import kotlin.system.exitProcess
 
 class EnsureSingletonProcessInstance(
-    private val fileLocker:FileLocker = FileLocker(),
     private val appInfoService:AppInfoService = AppInfoService.instance,
 )
 {
-    fun tryLock()
+    private val fileLocker:FileLocker = FileLocker(),
+
+    fun acquireLock()
     {
         val appHome = appInfoService.getAndCreateAppHome()
         val systemWideAppLockFile = File(appHome, "singleton-process.lock")
@@ -34,7 +35,7 @@ class EnsureSingletonProcessInstance(
     }
 }
 
-class FileLocker()
+private class FileLocker()
 {
     /**
      * Attempts to create the file and lock it for the duration of the process.

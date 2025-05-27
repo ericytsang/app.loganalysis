@@ -7,7 +7,7 @@ import com.github.ericytsang.app.util.EnsureSingletonProcessInstance
 
 fun main()
 {
-    EnsureSingletonProcessInstance().tryLock()
+    EnsureSingletonProcessInstance().acquireLock()
     application {
         Window(
             onCloseRequest = ::exitApplication,
