@@ -89,6 +89,13 @@ class ProjectListItemViewModelImpl(
             awaitCancellation()
         }
 
+        // if there is only one file, then show the file path
+        if (filePaths.size == 1)
+        {
+            emit(filePaths.first())
+            awaitCancellation()
+        }
+
         // some files were found. to shorten the display, we will show the common prefix of all file paths
         val commonPrefixAmongFilePaths = filePaths.fold(filePaths.first()) { acc,next -> acc.commonPrefixWith(next) }
 
