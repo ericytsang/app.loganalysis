@@ -35,25 +35,36 @@ class FileLocker()
      */
     fun tryLock(file:File):Boolean
     {
-        // ensure the file exists and is ready for locking
+        // see if the file is already locked by another live process
+        if (isFileLockedByAnotherLiveProcess(file)) return false
+
+        // try to lock the file
+        createIfNotExists(file)
+        val myPid = ProcessHandle.current().pid()
+        file.writeText(myPid.toString())
+
+        // double-check that the file is now locked by this process in case of race conditions
+        Thread.sleep(500)
+        return !isFileLockedByAnotherLiveProcess(file)
+    }
+
+    private fun createIfNotExists(file:File)
+    {
         if (!file.exists())
         {
             file.parentFile?.mkdirs()
             file.createNewFile()
         }
+    }
+
+    private fun isFileLockedByAnotherLiveProcess(file:File):Boolean
+    {
+        // if file does not exist, then it cannot be locked
+        if (!file.exists()) return false
 
         // see if the file is already locked by another process
         val lockingPid = file.reader().useLines { lines -> lines.firstOrNull()?.toLong() }
-        if (lockingPid != null && isProcessAlive(lockingPid))
-        {
-            // file is already locked by another process
-            return false
-        }
-
-        // try to lock the file
-        val myPid = ProcessHandle.current().pid()
-        file.writeText(myPid.toString())
-        return true
+        return lockingPid != null && isProcessAlive(lockingPid)
     }
 
     private fun isProcessAlive(processId:Long):Boolean
