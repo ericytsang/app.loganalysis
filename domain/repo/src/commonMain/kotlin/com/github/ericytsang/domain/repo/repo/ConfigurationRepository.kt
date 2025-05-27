@@ -4,6 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import com.github.ericytsang.domain.objects.Configuration
 import com.github.ericytsang.domain.objects.ConfigurationId
 import com.github.ericytsang.domain.objects.ConfigurationName
+import com.github.ericytsang.domain.objects.ConfigurationUpdateSequence
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import com.github.ericytsang.service.sqlite.ConfigurationEntity
 import com.github.ericytsang.service.sqlite.dbfactory.DatabaseService
@@ -23,13 +24,13 @@ interface ConfigurationRepository
      * Load the next N [Configurations]s that are before the given sequence number.
      * The [com.github.ericytsang.service.sqlite.Configuration]s are ordered by sequence number in descending order.
      */
-    suspend fun loadNextNConfigurationIdsBefore(n:Int,sequenceNumber:Long):List<Configuration>
+    suspend fun loadNextNConfigurationIdsBefore(n:Int,sequenceNumber:ConfigurationUpdateSequence):List<Configuration>
 
     /**
      * Load the next N configuration IDs that are after the given sequence number.
      * The Configuration IDs are ordered by sequence number in ascending order.
      */
-    suspend fun loadNextNConfigurationIdsAfter(n:Int,sequenceNumber:Long):List<Configuration>
+    suspend fun loadNextNConfigurationIdsAfter(n:Int,sequenceNumber:ConfigurationUpdateSequence):List<Configuration>
 
     /**
      * Delete the configuration with the given [configurationId].
@@ -49,22 +50,22 @@ internal class ConfigurationRepositoryImpl(
 
     override suspend fun loadNextNConfigurationIdsBefore(
         n:Int,
-        sequenceNumber:Long,
+        sequenceNumber:ConfigurationUpdateSequence,
     ):List<Configuration> = withContext(dispatchers.io)
     {
         queries.selectNConfigurationsUpdatedBefore(
-            update_sequence = sequenceNumber,
+            update_sequence = sequenceNumber.updateSequence,
             value_ = n.toLong(),
         ).executeAsList().map { it.toDomainObject() }
     }
 
     override suspend fun loadNextNConfigurationIdsAfter(
         n:Int,
-        sequenceNumber:Long,
+        sequenceNumber:ConfigurationUpdateSequence,
     ):List<Configuration> = withContext(dispatchers.io)
     {
         queries.selectNConfigurationsUpdatedAfter(
-            update_sequence = sequenceNumber,
+            update_sequence = sequenceNumber.updateSequence,
             value_ = n.toLong(),
         ).executeAsList().map { it.toDomainObject() }.asReversed()
     }
@@ -86,7 +87,7 @@ internal class ConfigurationRepositoryImpl(
             return Configuration(
                 id = ConfigurationId(id),
                 name = ConfigurationName(name),
-                updateSequence = update_sequence,
+                updateSequence = ConfigurationUpdateSequence(update_sequence),
                 logcatFilter = logcat_filter,
             )
         }

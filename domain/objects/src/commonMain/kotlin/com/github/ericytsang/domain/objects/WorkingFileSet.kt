@@ -38,10 +38,14 @@ data class OrderIndex(
 data class Configuration(
     val id: ConfigurationId,
     val name: ConfigurationName,
-    val updateSequence: Long,
+    val updateSequence: ConfigurationUpdateSequence,
     val logcatFilter: String,
 )
 
 data class ConfigurationName(
     val name: String,
+)
+
+data class ConfigurationUpdateSequence(
+    val updateSequence: Long,
 )
