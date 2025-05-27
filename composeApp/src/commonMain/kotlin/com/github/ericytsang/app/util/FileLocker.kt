@@ -33,47 +33,27 @@ class FileLocker()
      * Attempts to create the file and lock it for the duration of the process.
      * Returns true if the lock was acquired, false otherwise.
      */
-    fun tryLock(lockFile:File):Boolean
+    fun tryLock(file:File):Boolean
     {
-        val myPid = ProcessHandle.current().pid()
-
-        // create a new file with our PID in the file name, and in the first line of the file
-        val tempLockFile = lockFile.resolveSibling("${lockFile.name}.$myPid.tmp")
-        createIfNotExists(tempLockFile)
-        tempLockFile.writeText(myPid.toString())
+        // ensure the file exists and is ready for locking
+        if (!file.exists())
+        {
+            file.parentFile?.mkdirs()
+            file.createNewFile()
+        }
 
         // see if the file is already locked by another process
-        val lockingPid = if (lockFile.exists())
-        {
-            lockFile.reader().useLines { lines -> lines.firstOrNull()?.toLong() }
-        }
-        else
-        {
-            null
-        }
+        val lockingPid = file.reader().useLines { lines -> lines.firstOrNull()?.toLong() }
         if (lockingPid != null && isProcessAlive(lockingPid))
         {
             // file is already locked by another process
             return false
         }
 
-        // try to lock the file; failure to lock the file, means process has beaten us to it
-        if (!tempLockFile.renameTo(lockFile))
-        {
-            tempLockFile.delete()
-            return false
-        }
-
+        // try to lock the file
+        val myPid = ProcessHandle.current().pid()
+        file.writeText(myPid.toString())
         return true
-    }
-
-    private fun createIfNotExists(file:File)
-    {
-        if (!file.exists())
-        {
-            file.parentFile?.mkdirs()
-            file.createNewFile()
-        }
     }
 
     private fun isProcessAlive(processId:Long):Boolean
