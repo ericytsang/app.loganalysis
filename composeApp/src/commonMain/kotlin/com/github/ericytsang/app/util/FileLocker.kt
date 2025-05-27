@@ -17,7 +17,11 @@ class EnsureSingletonProcessInstance(
         val systemWideAppLockFile = File(appHome, "singleton-process.lock")
         if (!fileLocker.tryLock(systemWideAppLockFile))
         {
-            showFatalErrorDialog("App is already running. If it is not, please delete the lock file and try again. Lock file location:\n\n${systemWideAppLockFile.absolutePath}")
+            showFatalErrorDialog(
+                """App is already running.
+If it is not running, please delete the lock file and try again:
+${systemWideAppLockFile.absolutePath}"""
+            )
         }
     }
 
