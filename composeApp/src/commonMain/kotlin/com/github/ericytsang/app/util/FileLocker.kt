@@ -18,9 +18,11 @@ class EnsureSingletonProcessInstance(
         if (!fileLocker.tryLock(systemWideAppLockFile))
         {
             showFatalErrorDialog(
-                """App is already running.
-If it is not running, please delete the lock file and try again:
-${systemWideAppLockFile.absolutePath}"""
+                """
+                App is already running.
+                If it is not running, please delete the lock file, and try again:
+                ${systemWideAppLockFile.absolutePath}
+                """.trimIndent()
             )
         }
     }
