@@ -10,7 +10,7 @@ class EnsureSingletonProcessInstance(
     private val appInfoService:AppInfoService = AppInfoService.instance,
 )
 {
-    private val fileLocker:FileLocker = FileLocker(),
+    private val fileLocker:FileLocker = FileLocker()
 
     fun acquireLock()
     {
