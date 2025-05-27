@@ -2,8 +2,6 @@ package com.github.ericytsang.app.util
 
 import com.github.ericytsang.domain.appinfo.AppInfoService
 import java.io.File
-import java.io.RandomAccessFile
-import java.nio.channels.OverlappingFileLockException
 import javax.swing.JOptionPane
 import kotlin.system.exitProcess
 
@@ -18,7 +16,7 @@ class EnsureSingletonProcessInstance(
         val systemWideAppLockFile = File(appHome, "singleton-process.lock")
         if (!fileLocker.tryLock(systemWideAppLockFile))
         {
-            showFatalErrorDialog("This app is already running.")
+            showFatalErrorDialog("App is already running.")
         }
     }
 
@@ -35,31 +33,39 @@ class FileLocker()
      * Attempts to create the file and lock it for the duration of the process.
      * Returns true if the lock was acquired, false otherwise.
      */
-    fun tryLock(fileObj:File):Boolean
+    fun tryLock(file:File):Boolean
     {
-        fileObj.parentFile?.mkdirs()
-        fileObj.createNewFile()
-        val raf = RandomAccessFile(fileObj,"rw")
-        val channel = raf.channel
-        val lock = try
+        // ensure the file exists and is ready for locking
+        if (!file.exists())
         {
-            channel.lock()
+            file.parentFile?.mkdirs()
+            file.createNewFile()
         }
-        catch (_:OverlappingFileLockException)
+
+        // see if the file is already locked by another process
+        val lockingPid = file.reader().useLines { lines -> lines.firstOrNull()?.toLong() }
+        if (lockingPid != null && isProcessAlive(lockingPid))
         {
-            // it is OK to have an overlapping lock in this case,
-            // because we are only using this to ensure that 1 process
-            // is using the file at a time, and we are not trying to
-            // modify the file while it is locked.
-            null
+            // file is already locked by another process
+            return false
         }
-        return if (lock != null)
+
+        // try to lock the file
+        val myPid = ProcessHandle.current().pid()
+        file.writeText(myPid.toString())
+        return true
+    }
+
+    private fun isProcessAlive(processId:Long):Boolean
+    {
+        return try
         {
-            true
+            // Attempt to open the process with the given ID
+            ProcessHandle.of(processId).map { it.isAlive }.orElse(false)
         }
-        else
+        catch (_:Exception)
         {
-            raf.close()
+            // If an exception occurs, the process is likely not alive
             false
         }
     }
