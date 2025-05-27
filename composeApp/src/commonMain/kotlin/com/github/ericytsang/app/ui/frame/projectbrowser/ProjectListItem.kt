@@ -1,11 +1,11 @@
 package com.github.ericytsang.app.ui.frame.projectbrowser
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -26,7 +26,7 @@ fun ProjectListItem(
     val targetTheme by themeUseCase.theme.collectAsState(Theme.DARK)
     val themeColors by animatedThemeColors(targetTheme)
     val coroutineScope = rememberCoroutineScope()
-    key(item)
+    Column(modifier = Modifier.padding(bottom = Dimens.mttPadding))
     {
         when (item)
         {
