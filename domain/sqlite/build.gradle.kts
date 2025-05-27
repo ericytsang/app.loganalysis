@@ -12,6 +12,7 @@ kotlin {
     sourceSets.commonMain.dependencies {
         api(projects.lib.kotlin)
         api(projects.domain.objects)
+        implementation(projects.domain.appinfo)
         implementation(libs.primitive.adapters)
         api("app.cash.sqldelight:coroutines-extensions:2.1.0")
     }

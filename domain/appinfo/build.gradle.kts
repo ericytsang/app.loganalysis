@@ -7,12 +7,6 @@ kotlin {
 }
 
 dependencies {
-
     commonMainApi(projects.lib.kotlin)
-    commonMainApi(projects.domain.objects)
-    commonMainApi(projects.domain.appinfo)
-
-    commonMainImplementation(projects.domain.sqlite)
-
     commonTestImplementation(libs.kotlin.test)
 }

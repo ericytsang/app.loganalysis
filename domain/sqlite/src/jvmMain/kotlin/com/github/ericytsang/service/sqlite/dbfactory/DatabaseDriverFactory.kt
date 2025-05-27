@@ -2,6 +2,7 @@ package com.github.ericytsang.service.sqlite.dbfactory
 
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import com.github.ericytsang.domain.appinfo.AppInfoService
 import com.github.ericytsang.service.sqlite.SqlDelightDatabase
 import java.io.File
 import java.util.Properties
@@ -13,10 +14,12 @@ import java.util.Properties
  */
 internal actual class DatabaseDriverFactory
 {
+    private val appInfoService = AppInfoService.instance
+
     actual fun createDriver(appPackageName:String):SqlDriver
     {
         // need to create the directory if it doesn't exist, otherwise the database file won't be created
-        val appHomePath = getAndCreateAppHome(appPackageName)
+        val appHomePath = appInfoService.getAndCreateAppHome()
 
         // use the user home directory to store the database file
         val appDatabasePath = File(appHomePath,DB_FILE_NAME)
@@ -30,20 +33,6 @@ internal actual class DatabaseDriverFactory
         )
 
         return sqliteDriver
-    }
-
-    private fun getAndCreateAppHome(appPackageName:String):File
-    {
-        val userHome = getUserHome()
-        val appHome = File(userHome,".$appPackageName")
-        appHome.mkdirs()
-        return appHome
-    }
-
-    private fun getUserHome():File
-    {
-        val userHomePath = System.getProperty("user.home")
-        return File(userHomePath)
     }
 
     companion object

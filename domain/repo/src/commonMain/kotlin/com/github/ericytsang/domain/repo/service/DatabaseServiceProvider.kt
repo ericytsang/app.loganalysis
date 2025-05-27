@@ -1,5 +1,6 @@
 package com.github.ericytsang.domain.repo.service
 
+import com.github.ericytsang.domain.appinfo.AppInfoService
 import com.github.ericytsang.service.sqlite.dbfactory.DatabaseService
 import com.github.ericytsang.service.sqlite.dependencyinjection.SqliteDependencyProvider
 

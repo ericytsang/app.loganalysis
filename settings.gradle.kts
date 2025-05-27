@@ -32,6 +32,7 @@ dependencyResolutionManagement {
 include(":composeApp")
 
 // :domain: app-specific modules
+include(":domain:appinfo")
 include(":domain:objects")
 include(":domain:repo")
 include(":domain:sqlite")

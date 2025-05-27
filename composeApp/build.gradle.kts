@@ -15,6 +15,7 @@ kotlin {
         implementation(projects.lib.logcatFilterParser)
         implementation(projects.domain.objects)
         implementation(projects.domain.repo)
+        implementation(projects.domain.appinfo)
 
         implementation(compose.runtime)
         implementation(compose.foundation)
