@@ -1,18 +1,19 @@
 package com.github.ericytsang.app.ui.frame.projectbrowser
 
-import com.github.ericytsang.app.usecase.ThemeUseCase
 import com.github.ericytsang.domain.objects.Configuration
+import com.github.ericytsang.domain.objects.ConfigurationUpdateSequence
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.ConfigurationRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 
 /**
  * ViewModel for the Project Browser window.
@@ -32,7 +33,7 @@ interface ProjectBrowserViewModel
      * is this for helping with pagination, so the ViewModel can determine how many items to load from the
      * database into the UI.
      */
-    fun setMaxInMemoryItemsCount(count:Int)
+    fun setMaxInMemoryItemsCountHint(count:Int)
 
     /**
      * this is for the UI to communicate to the ViewModel that it needs more items to be loaded.
@@ -56,7 +57,7 @@ interface ProjectBrowserViewModel
 
 sealed interface LoadMoreItemsRequest
 {
-    val requestId: String
+    val updateSequence:ConfigurationUpdateSequence
 }
 
 sealed class ProjectListItemModel
@@ -66,36 +67,125 @@ sealed class ProjectListItemModel
     ):ProjectListItemModel()
 
     data class LazyLoadMoreItemsBelow(
-        override val requestId: String,
+        override val updateSequence:ConfigurationUpdateSequence,
     ):ProjectListItemModel(),LoadMoreItemsRequest
 
     data class LazyLoadMoreItemsAbove(
-        override val requestId: String,
+        override val updateSequence:ConfigurationUpdateSequence,
     ):ProjectListItemModel(),LoadMoreItemsRequest
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class ProjectBrowserViewModelImpl(
     private val kotlinDependencyProvider:KotlinDependencyProvider,
     private val configurationRepository:ConfigurationRepository,
 ):ProjectBrowserViewModel,
     KotlinDependencyProvider by kotlinDependencyProvider
 {
-    private val maxInMemoryItemsCount = MutableStateFlow(200)
+    private val maxInMemoryItemsCountHint = MutableStateFlow(200)
 
-    override val getProjectsFlow:Flow<List<ProjectListItemModel>> = flow()
-    {
-        val items = configurationRepository.loadNextNConfigurationIdsAfter(100, Long.MIN_VALUE)
-        emit(items.map { ProjectListItemModel.Project(it) })
-        awaitCancellation()
-    }.flowOn(dispatchers.io)
+    private val loadParamsFlow = MutableStateFlow<LoadMoreItemsParams>(
+        LoadMoreItemsParams(
+            loadPosition = DEFAULT_UPDATE_SEQUENCE,
+            loadDirection = LoadDirection.BELOW,
+        )
+    )
 
-    override fun setMaxInMemoryItemsCount(count:Int)
+    private data class LoadMoreItemsParams(
+        val loadPosition:ConfigurationUpdateSequence,
+        val loadDirection:LoadDirection,
+    )
+
+    enum class LoadDirection
     {
-        maxInMemoryItemsCount.value = count
+        ABOVE, // load more items above the current items
+        BELOW, // load more items below the current items
+    }
+
+    private val onProjectsChangedFlow = configurationRepository.getOnChangedFlow()
+
+    private fun rangeToProjectsFlow():Flow<List<ProjectListItemModel>> = combine(maxInMemoryItemsCountHint, loadParamsFlow)
+    { maxInMemoryItemsCountHintValue, loadParams ->
+        val loadPosition = loadParams.loadPosition
+        val loadDirection = loadParams.loadDirection
+        coroutineScope {
+            val loadedOnDemand = async {
+                when (loadDirection)
+                {
+                    LoadDirection.BELOW -> configurationRepository.loadNextNConfigurationIdsBefore(AMOUNT_TO_LOAD_ON_DEMAND,loadPosition)
+                    LoadDirection.ABOVE -> configurationRepository.loadNextNConfigurationIdsAfter(AMOUNT_TO_LOAD_ON_DEMAND,loadPosition)
+                }
+            }
+            val reloadingExisting = async {
+                when (loadDirection)
+                {
+                    LoadDirection.BELOW -> configurationRepository.loadNextNConfigurationIdsAfter(maxInMemoryItemsCountHintValue,loadPosition).drop(1)
+                    LoadDirection.ABOVE -> configurationRepository.loadNextNConfigurationIdsBefore(maxInMemoryItemsCountHintValue,loadPosition).dropLast(1)
+                }
+            }
+            val hasMoreItemsAbove = when (loadDirection)
+            {
+                LoadDirection.BELOW -> reloadingExisting.await().size >= maxInMemoryItemsCountHintValue
+                LoadDirection.ABOVE -> loadedOnDemand.await().size >= AMOUNT_TO_LOAD_ON_DEMAND
+            }
+            val hasMoreItemsBelow = when (loadDirection)
+            {
+                LoadDirection.BELOW -> loadedOnDemand.await().size >= AMOUNT_TO_LOAD_ON_DEMAND
+                LoadDirection.ABOVE -> reloadingExisting.await().size >= maxInMemoryItemsCountHintValue
+            }
+            val items = when (loadDirection)
+            {
+                LoadDirection.BELOW -> reloadingExisting.await()+loadedOnDemand.await()
+                LoadDirection.ABOVE -> loadedOnDemand.await()+reloadingExisting.await()
+            }
+            buildList()
+            {
+                if (hasMoreItemsAbove)
+                {
+                    add(ProjectListItemModel.LazyLoadMoreItemsAbove(items.firstOrNull()?.updateSequence ?: DEFAULT_UPDATE_SEQUENCE))
+                }
+                addAll(items.map { ProjectListItemModel.Project(it) })
+                if (hasMoreItemsBelow)
+                {
+                    add(ProjectListItemModel.LazyLoadMoreItemsBelow(items.lastOrNull()?.updateSequence ?: DEFAULT_UPDATE_SEQUENCE))
+                }
+            }
+        }
+    }
+
+    override val getProjectsFlow:Flow<List<ProjectListItemModel>> = onProjectsChangedFlow
+        .flatMapLatest { rangeToProjectsFlow() }
+        .flowOn(dispatchers.io)
+
+    override fun setMaxInMemoryItemsCountHint(count:Int)
+    {
+        maxInMemoryItemsCountHint.value = count
     }
 
     override fun loadMoreItems(request:LoadMoreItemsRequest)
     {
-        TODO("Not yet implemented")
+        when (request)
+        {
+            is ProjectListItemModel.LazyLoadMoreItemsAbove ->
+            {
+                loadParamsFlow.value = LoadMoreItemsParams(
+                    loadPosition = request.updateSequence,
+                    loadDirection = LoadDirection.ABOVE,
+                )
+            }
+            is ProjectListItemModel.LazyLoadMoreItemsBelow ->
+            {
+                loadParamsFlow.value = LoadMoreItemsParams(
+                    loadPosition = request.updateSequence,
+                    loadDirection = LoadDirection.BELOW,
+                )
+            }
+        }
+    }
+
+    companion object
+    {
+        private const val AMOUNT_TO_LOAD_ON_DEMAND = 100
+        private val DEFAULT_UPDATE_SEQUENCE = ConfigurationUpdateSequence(Long.MAX_VALUE)
     }
 }
