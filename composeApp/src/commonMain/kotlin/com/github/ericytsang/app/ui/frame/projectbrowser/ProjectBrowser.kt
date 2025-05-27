@@ -30,14 +30,14 @@ fun ProjectBrowser(
             count = items.size,
             key = { index -> items[index] },
             itemContent =
-                { index ->
-                    val itemScope = rememberCoroutineScope()
-                    ProjectListItem(
-                        item = items[index],
-                        projectBrowserViewModel = viewModel,
-                        viewModelFactory = { scope,projectItem -> ProjectListItemViewModelImpl(itemScope, projectItem) },
-                    )
-                },
+            { index ->
+                val itemScope = rememberCoroutineScope()
+                ProjectListItem(
+                    item = items[index],
+                    projectBrowserViewModel = viewModel,
+                    viewModelFactory = { scope,projectItem -> ProjectListItemViewModelImpl(itemScope, projectItem) },
+                )
+            },
         )
     }
 }
