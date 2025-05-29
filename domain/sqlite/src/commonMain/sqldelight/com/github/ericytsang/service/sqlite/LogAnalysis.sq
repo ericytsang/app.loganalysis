@@ -8,7 +8,9 @@ CREATE TABLE ConfigurationEntity (
   -- the time when the configuration was created
   update_sequence INTEGER NOT NULL,
   -- the current logcat filter that is inputted into the text field
-  logcat_filter TEXT NOT NULL
+  logcat_filter TEXT NOT NULL,
+  -- whether this configuration when the app was closed
+  is_active TEXT NOT NULL
 );
 
 CREATE TABLE LogFileEntity (
