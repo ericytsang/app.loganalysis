@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.ComposeWindow
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.asset.IconEditLogFiles
 import com.github.ericytsang.app.ui.asset.IconMatchCase
@@ -38,7 +39,7 @@ import java.io.File
 @Composable
 @Preview
 fun LogViewerWindow(
-    window:Window,
+    window:ComposeWindow,
     viewModelFactory:(CoroutineScope)->LogViewerWindowViewModel = { uiScope -> LogViewerWindowViewModel.create(uiScope) },
     logViewerViewModelFactory:()->LogViewerViewModel = { LogViewerViewModel.createDefault() },
     workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel = { WorkingFileSetEditorViewModel.createDefault() },
@@ -50,7 +51,6 @@ fun LogViewerWindow(
     val workingFileSetEditorViewModel = remember { workingFileSetEditorViewModelFactory() }
 
     val theme by viewModel.theme.collectAsState(Theme.DARK)
-    val animatedThemeColors by animatedThemeColors(theme)
 
     val logcatFilterString by logViewerViewModel.logcatFilterString.collectAsState("")
     val delimiters by viewModel.getDelimiterFlow().collectAsState("")
@@ -61,8 +61,8 @@ fun LogViewerWindow(
 
     val shouldWrapText by viewModel.getWordWrapFlow().collectAsState(false)
 
-    fillMaxBackground(colors = animatedThemeColors)
-    {
+    fillMaxBackground()
+    { themeColors ->
 
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -84,7 +84,7 @@ fun LogViewerWindow(
                                 themeUseCase = viewModel,
                             )
                         },
-                    content = { IconEditLogFiles(animatedThemeColors.onPrimary) },
+                    content = { IconEditLogFiles(themeColors.onPrimary) },
                 )
 
                 TextField(
@@ -92,7 +92,7 @@ fun LogViewerWindow(
                     onValueChange = { newValue -> logViewerViewModel.setLogcatFilterString(newValue) },
                     modifier = Modifier.weight(1f).padding(end = Dimens.mttPadding),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = animatedThemeColors.onBackground,
+                        textColor = themeColors.onBackground,
                     ),
                 )
 
@@ -112,7 +112,7 @@ fun LogViewerWindow(
 
                 Button(
                     onClick = { openSettingsInNewWindowBlocking(window) },
-                    content = { IconSettings(animatedThemeColors.onPrimary) },
+                    content = { IconSettings(themeColors.onPrimary) },
                 )
             }
 
@@ -133,7 +133,7 @@ fun LogViewerWindow(
                             modifier = Modifier.fillMaxWidth(),
                             delimiters = delimiters,
                             themeForColorCoding = theme,
-                            defaultColor = animatedThemeColors.onBackground,
+                            defaultColor = themeColors.onBackground,
                             softWrap = shouldWrapText,
                         )
                     }

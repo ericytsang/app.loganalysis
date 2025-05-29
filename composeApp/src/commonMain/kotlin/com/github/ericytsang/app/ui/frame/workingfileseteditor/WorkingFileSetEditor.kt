@@ -11,25 +11,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.ComposeWindow
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
-import com.github.ericytsang.app.usecase.ThemeUseCase
-import com.github.ericytsang.app.util.animatedThemeColors
 import com.github.ericytsang.app.util.fillMaxBackground
-import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import java.awt.Dialog
 
 @Composable
 fun WorkingFileSetEditor(
-    owner:Dialog,
-    viewModel:WorkingFileSetEditorViewModel,
-    themeUseCase:ThemeUseCase,
+    owner:ComposeWindow,
+    viewModel:WorkingFileSetEditorViewModel = WorkingFileSetEditorViewModel.createDefault(),
 )
 {
-    val theme by themeUseCase.theme.collectAsState(Theme.DARK)
-    val animatedThemeColors by animatedThemeColors(theme)
-
     val workingFileSet by viewModel.workingFileSet.collectAsState(WorkingFileSetEmpty)
 
     fun openFilePickerToAddFiles()
@@ -37,8 +31,8 @@ fun WorkingFileSetEditor(
         openMultiFilePicker(owner) { selectedFiles -> viewModel.addFiles(selectedFiles) }
     }
 
-    fillMaxBackground(colors = animatedThemeColors)
-    {
+    fillMaxBackground()
+    { animatedThemeColors ->
         Column(
             modifier = Modifier.Companion
                 .fillMaxSize()

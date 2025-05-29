@@ -13,13 +13,14 @@ interface ThemeUseCase
 
     companion object
     {
-        fun create(
-            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
-            themeRepository:ThemeRepository = RepositoryDependencyProvider.instance.themeRepository,
-        ):ThemeUseCase = MutableThemeUseCaseImpl(
-            kotlinDependencyProvider = kotlinDependencyProvider,
-            themeRepository = themeRepository,
-        )
+        val instance:ThemeUseCase get() = mutableInstance
+
+        val mutableInstance:MutableThemeUseCase by lazy {
+            MutableThemeUseCaseImpl(
+                kotlinDependencyProvider = KotlinDependencyProvider.instance,
+                themeRepository = RepositoryDependencyProvider.instance.themeRepository,
+            )
+        }
     }
 }
 

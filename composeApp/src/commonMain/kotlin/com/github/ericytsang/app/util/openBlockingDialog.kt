@@ -21,3 +21,18 @@ fun openBlockingDialog(
     dialog.defaultCloseOperation = JDialog.DISPOSE_ON_CLOSE
     dialog.isVisible = true
 }
+
+fun openNonBlockingDialog(
+    owner:Window,
+    title:String,
+    content:@Composable DialogWindowScope.() -> Unit,
+)
+{
+    val dialog = ComposeDialog(owner = owner)
+    dialog.setSize(800, 600)
+    dialog.setLocationRelativeTo(owner)
+    dialog.title = title
+    dialog.setContent { content() }
+    dialog.defaultCloseOperation = JDialog.DISPOSE_ON_CLOSE
+    dialog.isVisible = true
+}

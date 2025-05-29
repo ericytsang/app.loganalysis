@@ -19,7 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 fun ProjectListItem(
     item:ProjectListItemModel,
     projectBrowserViewModel:ProjectBrowserViewModel,
-    themeUseCase:ThemeUseCase = ThemeUseCase.create(),
+    themeUseCase:ThemeUseCase = ThemeUseCase.instance,
     viewModelFactory: (CoroutineScope,ProjectListItemModel.Project) -> ProjectListItemViewModel,
 )
 {

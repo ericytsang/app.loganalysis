@@ -49,3 +49,10 @@ data class ConfigurationName(
 data class ConfigurationUpdateSequence(
     val updateSequence: Long,
 )
+{
+    companion object
+    {
+        val max = ConfigurationUpdateSequence(Long.MAX_VALUE)
+        val min = ConfigurationUpdateSequence(Long.MIN_VALUE)
+    }
+}

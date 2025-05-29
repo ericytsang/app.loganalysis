@@ -41,7 +41,7 @@ private class LogViewerComposableViewModelImpl(
     private val delimiterRepository:DelimiterRepository,
 ):
     LogViewerWindowViewModel,
-    ThemeUseCase by ThemeUseCase.Companion.create(),
+    ThemeUseCase by ThemeUseCase.instance,
     KotlinDependencyProvider by kotlinDependencyProvider,
     DelimiterRepository by delimiterRepository
 {

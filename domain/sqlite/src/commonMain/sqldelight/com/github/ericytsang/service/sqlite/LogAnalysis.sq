@@ -108,13 +108,13 @@ WHERE id = 1;
 
 -- endregion
 
--- region configurations
+-- region projects
 
-insertConfiguration:
+insertProject:
 INSERT INTO ProjectEntity (name, update_sequence, logcat_filter, is_active)
 VALUES (?, ?, ?, ?);
 
-updateConfiguration:
+updateProject:
 UPDATE ProjectEntity
 SET name = ?,
     update_sequence = ?,
@@ -122,28 +122,34 @@ SET name = ?,
     is_active = ?
 WHERE id = ?;
 
-selectAllConfigurations:
+selectAllProjects:
 SELECT * FROM ProjectEntity
 ORDER BY update_sequence DESC;
 
-selectNConfigurationsUpdatedAfter:
+selectNextNActiveProjects:
+SELECT * FROM ProjectEntity
+WHERE is_active = 1 AND update_sequence < ?
+ORDER BY update_sequence DESC
+LIMIT ?;
+
+selectNProjectsUpdatedAfter:
 SELECT * FROM ProjectEntity
 WHERE update_sequence >= ?
 ORDER BY update_sequence ASC
 LIMIT ?;
 
-selectNConfigurationsUpdatedBefore:
+selectNProjectsUpdatedBefore:
 SELECT * FROM ProjectEntity
 WHERE update_sequence <= ?
 ORDER BY update_sequence DESC
 LIMIT ?;
 
-selectLastUpdatedConfiguration:
+selectLastUpdatedProject:
 SELECT * FROM ProjectEntity
 ORDER BY update_sequence DESC
 LIMIT 1;
 
-deleteConfiguration:
+deleteProject:
 DELETE FROM ProjectEntity
 WHERE id = ?;
 

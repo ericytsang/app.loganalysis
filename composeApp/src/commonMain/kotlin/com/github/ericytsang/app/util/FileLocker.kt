@@ -70,7 +70,7 @@ private class FileLocker()
         return getProcessInfoFromLockFile(file).fold(
 
             // check if the process info in the lock file matches any currently living process
-            onSuccess = { it != null && isProcessAlive(it) },
+            onSuccess = { it != null && isProcessAlive(it) && it != getMyProcessInfo() },
 
             // assume that there is an ongoing process if the lock file is malformed
             onFailure = { true },

@@ -15,9 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.util.animatedThemeColors
 import com.github.ericytsang.app.util.fillMaxBackground
-import com.github.ericytsang.domain.objects.Theme
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -28,14 +26,11 @@ fun Settings(
     val coroutineScope = rememberCoroutineScope()
     val viewModel = remember { viewModelFactory(coroutineScope) }
 
-    val theme by viewModel.theme.collectAsState(Theme.DARK)
-    val animatedThemeColors by animatedThemeColors(theme)
-
     val delimiterCharactersText by viewModel.delimiterCharactersText.collectAsState("")
     val delimiterCharactersEnabled by viewModel.delimiterCharactersEnabled.collectAsState(false)
 
-    fillMaxBackground(colors = animatedThemeColors)
-    {
+    fillMaxBackground()
+    { themeColors ->
 
         Column(
             modifier = Modifier.fillMaxWidth().padding(Dimens.mttPadding),
@@ -54,7 +49,7 @@ fun Settings(
                 onValueChange = { newValue -> viewModel.setDelimiterCharacters(newValue) },
                 label = { Text("delimiters") },
                 colors = TextFieldDefaults.textFieldColors(
-                    textColor = animatedThemeColors.onBackground,
+                    textColor = themeColors.onBackground,
                 ),
             )
         }
