@@ -1,6 +1,6 @@
 -- create tables
 
-CREATE TABLE ConfigurationEntity (
+CREATE TABLE ProjectEntity (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   -- user-defined name for the configuration.
   -- it could be blank, in which case the app will display a generate name
@@ -10,7 +10,7 @@ CREATE TABLE ConfigurationEntity (
   -- the current logcat filter that is inputted into the text field
   logcat_filter TEXT NOT NULL,
   -- whether this configuration when the app was closed
-  is_active TEXT NOT NULL
+  is_active INTEGER NOT NULL
 );
 
 CREATE TABLE LogFileEntity (
@@ -19,7 +19,7 @@ CREATE TABLE LogFileEntity (
   file_path TEXT NOT NULL,
   -- the order in which the log files are displayed and concatenated in the UI
   order_index INTEGER NOT NULL,
-  FOREIGN KEY (config_id) REFERENCES ConfigurationEntity(id) ON DELETE CASCADE,
+  FOREIGN KEY (config_id) REFERENCES ProjectEntity(id) ON DELETE CASCADE,
   UNIQUE (config_id, file_path),
   CHECK (order_index >= 0)
 );
@@ -33,7 +33,7 @@ CREATE TABLE ExcludeFilterEntity (
   is_active INTEGER NOT NULL,
   order_index INTEGER NOT NULL,
   config_id INTEGER,
-  FOREIGN KEY (config_id) REFERENCES ConfigurationEntity(id) ON DELETE CASCADE,
+  FOREIGN KEY (config_id) REFERENCES ProjectEntity(id) ON DELETE CASCADE,
   UNIQUE (filter_string, config_id)
 );
 
@@ -46,7 +46,7 @@ CREATE TABLE IncludeFilterEntity (
   is_active INTEGER NOT NULL,
   order_index INTEGER NOT NULL,
   config_id INTEGER,
-  FOREIGN KEY (config_id) REFERENCES ConfigurationEntity(id) ON DELETE CASCADE,
+  FOREIGN KEY (config_id) REFERENCES ProjectEntity(id) ON DELETE CASCADE,
   UNIQUE (filter_string, config_id)
 );
 
@@ -57,7 +57,7 @@ CREATE TABLE LogCatFilterEntity (
   config_id INTEGER,
   order_index INTEGER NOT NULL,
   is_active INTEGER NOT NULL,
-  FOREIGN KEY (config_id) REFERENCES ConfigurationEntity(id) ON DELETE CASCADE,
+  FOREIGN KEY (config_id) REFERENCES ProjectEntity(id) ON DELETE CASCADE,
   UNIQUE (filter_string, config_id)
 );
 
@@ -111,39 +111,40 @@ WHERE id = 1;
 -- region configurations
 
 insertConfiguration:
-INSERT INTO ConfigurationEntity (name, update_sequence, logcat_filter)
-VALUES (?, ?, ?);
+INSERT INTO ProjectEntity (name, update_sequence, logcat_filter, is_active)
+VALUES (?, ?, ?, ?);
 
 updateConfiguration:
-UPDATE ConfigurationEntity
+UPDATE ProjectEntity
 SET name = ?,
     update_sequence = ?,
-    logcat_filter = ?
+    logcat_filter = ?,
+    is_active = ?
 WHERE id = ?;
 
 selectAllConfigurations:
-SELECT * FROM ConfigurationEntity
+SELECT * FROM ProjectEntity
 ORDER BY update_sequence DESC;
 
 selectNConfigurationsUpdatedAfter:
-SELECT * FROM ConfigurationEntity
+SELECT * FROM ProjectEntity
 WHERE update_sequence >= ?
 ORDER BY update_sequence ASC
 LIMIT ?;
 
 selectNConfigurationsUpdatedBefore:
-SELECT * FROM ConfigurationEntity
+SELECT * FROM ProjectEntity
 WHERE update_sequence <= ?
 ORDER BY update_sequence DESC
 LIMIT ?;
 
 selectLastUpdatedConfiguration:
-SELECT * FROM ConfigurationEntity
+SELECT * FROM ProjectEntity
 ORDER BY update_sequence DESC
 LIMIT 1;
 
 deleteConfiguration:
-DELETE FROM ConfigurationEntity
+DELETE FROM ProjectEntity
 WHERE id = ?;
 
 -- endregion

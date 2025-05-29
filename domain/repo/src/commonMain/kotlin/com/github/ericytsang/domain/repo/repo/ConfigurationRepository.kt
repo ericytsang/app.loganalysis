@@ -6,7 +6,7 @@ import com.github.ericytsang.domain.objects.ConfigurationId
 import com.github.ericytsang.domain.objects.ConfigurationName
 import com.github.ericytsang.domain.objects.ConfigurationUpdateSequence
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
-import com.github.ericytsang.service.sqlite.ConfigurationEntity
+import com.github.ericytsang.service.sqlite.ProjectEntity
 import com.github.ericytsang.service.sqlite.dbfactory.DatabaseService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -82,7 +82,7 @@ internal class ConfigurationRepositoryImpl(
 
     companion object
     {
-        fun ConfigurationEntity.toDomainObject():Configuration
+        fun ProjectEntity.toDomainObject():Configuration
         {
             return Configuration(
                 id = ConfigurationId(id),
