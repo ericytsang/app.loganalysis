@@ -43,7 +43,7 @@ internal class WorkingFileSetRepositoryImpl(
         database.transaction {
             val lastUpdated = queries.selectLastUpdatedConfiguration().executeAsOneOrNull()
             val updateSequence = lastUpdated?.update_sequence?.plus(1) ?: 1L
-            queries.insertConfiguration("",updateSequence,"")
+            queries.insertConfiguration("",updateSequence,"",0)
             val newConfigurationId = queries.lastInsertId().executeAsOne()
             newFiles.forEachIndexed { index,file ->
                 queries.insertLogFile(
