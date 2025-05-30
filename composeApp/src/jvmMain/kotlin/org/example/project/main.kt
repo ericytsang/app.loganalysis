@@ -1,130 +1,153 @@
 package org.example.project
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import com.github.ericytsang.app.ui.frame.app.App
+import com.github.ericytsang.app.ui.frame.app.AppCommand
 import com.github.ericytsang.app.ui.frame.app.LoadingText
 import com.github.ericytsang.app.ui.frame.app.LogViewerApp
 import com.github.ericytsang.app.ui.frame.app.LogViewerAppInit
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditor
+import com.github.ericytsang.app.ui.frame.app.WindowContentParams
+import com.github.ericytsang.app.ui.frame.app.WindowInfo
+import com.github.ericytsang.app.ui.frame.app.WindowInterface
+import com.github.ericytsang.app.ui.frame.app.openNewProjectWizard
+import com.github.ericytsang.app.ui.frame.app.openOpenProject
+import com.github.ericytsang.app.ui.frame.app.openOpenProjectBrowser
 import com.github.ericytsang.app.util.EnsureSingletonProcessInstance
 import com.github.ericytsang.app.util.fillMaxBackground
-import com.github.ericytsang.domain.objects.ConfigurationId
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 class Main(
     kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
 ):KotlinDependencyProvider by kotlinDependencyProvider
 {
 
-    private val openNewProjectWizardRequestChannel = Channel<Unit>(capacity = Channel.UNLIMITED)
-    private val openNewProjectWizardRequestFlow get() = openNewProjectWizardRequestChannel.receiveAsFlow()
+    private val appCommandChannel = Channel<AppCommand>(capacity = Channel.UNLIMITED)
+    private val appCommandChannelFlow get() = appCommandChannel.receiveAsFlow()
 
-    private val openProjectRequestChannel = Channel<ConfigurationId>(capacity = Channel.UNLIMITED)
-    private val openProjectRequestFlow get() = openProjectRequestChannel.receiveAsFlow()
+    private val doneLoadingSignalChannel = Channel<Unit>(capacity = Channel.UNLIMITED)
+    private val doneLoadingSignalFlow get() = doneLoadingSignalChannel.receiveAsFlow()
 
-    private val openProjectBrowserRequestChannel = Channel<Unit>(capacity = Channel.UNLIMITED)
-    private val openProjectBrowserRequestFlow get() = openProjectBrowserRequestChannel.receiveAsFlow()
-
-    fun main() = application {
-
-        // show a loading dialog right away
-        var showDialogState by mutableStateOf(false)
-        DialogWindow(
-            onCloseRequest = { exitApplication() },
-            title = "Log Viewer",
-            resizable = true,
-            visible = showDialogState,
-        )
-        {
-            fillMaxBackground()
-            { themeColors ->
-                LoadingText()
-            }
-        }
-
+    fun main()
+    {
         // asynchronously initialize the application
         applicationScope.launch(dispatchers.io)
         {
+            delay(20.seconds)
             // make sure only one instance of the application is running
-            EnsureSingletonProcessInstance().acquireLock()
+            if (!EnsureSingletonProcessInstance().tryLock()) return@launch
 
             // figure out what the first action of the application should be
             val logViewerAppInit = LogViewerAppInit.create()
             val firstAction = logViewerAppInit.decideFirstAppAction()
 
             // perform the resolved action
-            val logViewerApp = LogViewerApp.create(
-                openNewProjectWizardChannel = openNewProjectWizardRequestChannel,
-                openProjectChannel = openProjectRequestChannel,
-                openProjectBrowserChannel = openProjectBrowserRequestChannel,
-            )
+            val logViewerApp = LogViewerApp.create(appCommandChannel)
             logViewerAppInit.perform(logViewerApp,firstAction)
 
             // hide the loading dialog because other app UIs are opened and should be visible now
-            showDialogState = false
-            logViewerApp
+            doneLoadingSignalChannel.send(Unit)
         }
+
+        runApplication()
+    }
+
+    private fun runApplication() = application {
+
+        // show a loading dialog right away
+        var showDialogState by mutableStateOf(true)
+        DialogWindow(
+            onCloseRequest = { exitApplication() },
+            title = "Log Viewer",
+            alwaysOnTop = true,
+            resizable = false,
+            visible = showDialogState,
+            content = { fillMaxBackground { themeColors -> LoadingText() } },
+        )
+
+        // close the loading dialog when the application is done loading
+        val doneLoadingSignal by doneLoadingSignalFlow.collectAsState(null)
+        if (doneLoadingSignal != null)
+        {
+            showDialogState = false
+        }
+
+        // keep track of all open windows
+        var openWindows by mutableStateOf<Map<Long, WindowInfo>>(emptyMap())
 
         // consume and handle view model requests
-        val openNewProjectWizardRequest by openNewProjectWizardRequestFlow.collectAsState(null)
-        val openProjectRequest by openProjectRequestFlow.collectAsState(null)
-        val openProjectBrowserRequest by openProjectBrowserRequestFlow.collectAsState(null)
+        val appCommand by appCommandChannelFlow.collectAsState(null)
+        appCommand?.toWindowInfo(openWindows.keys)?.also { windowInfo ->
+            openWindows += windowInfo.windowId to windowInfo
+        }
 
-        // handle the request to open the new project wizard
-        if (openNewProjectWizardRequest != null)
-        {
-            Window(
-                onCloseRequest = ::exitApplication,
-                title = "New project",
-            )
+        // render open windows
+        openWindows.forEach()
+        { openWindow ->
+            val windowInfoId = openWindow.key
+            val windowInfo = openWindow.value
+            key(windowInfoId)
             {
-                fillMaxBackground()
-                { themeColors ->
-                    WorkingFileSetEditor(owner = window)
+                val windowInterface = object:WindowInterface
+                {
+                    override fun destroyWindow()
+                    {
+                        openWindows -= windowInfoId
+                    }
+
+                    override var windowTitle: String
+                        get() = windowInfo.title
+                        set(value) { openWindows += windowInfoId to windowInfo.copy(title = value) }
+                }
+
+                Window(
+                    onCloseRequest = { windowInterface.destroyWindow() },
+                    title = windowInfo.title,
+                )
+                {
+                    fillMaxBackground()
+                    { themeColors ->
+                        val params = WindowContentParams(
+                            window = window,
+                            windowInterface = windowInterface,
+                            themeColors = themeColors,
+                        )
+                        windowInfo.content.content(params)
+                    }
                 }
             }
         }
+    }
 
-        // handle the request to open a specific project
-        if (openProjectRequest != null)
+    private fun AppCommand.toWindowInfo(openWindows:Set<Long>):WindowInfo
+    {
+        val composeWindowContent = when (this)
         {
-            Window(
-                onCloseRequest = ::exitApplication,
-                title = "Specific Project - $openProjectRequest",
-            )
-            {
-                fillMaxBackground()
-                { themeColors ->
-                    App(window = window)
-                }
-            }
+            AppCommand.OpenNewProjectWizard -> openNewProjectWizard()
+            is AppCommand.OpenProject -> openOpenProject()
+            AppCommand.OpenProjectBrowser -> openOpenProjectBrowser()
         }
-
-        // handle the request to open the project browser
-        if (openProjectBrowserRequest != null)
-        {
-            Window(
-                onCloseRequest = ::exitApplication,
-                title = "Project Browser",
-            )
-            {
-                fillMaxBackground()
-                { themeColors ->
-                    App(window = window)
-                }
-            }
-        }
+        return WindowInfo(
+            windowId = openWindows.maxOrNull()?.plus(1) ?: 0L,
+            title = composeWindowContent.initialTitle,
+            content = composeWindowContent,
+        )
     }
 }
 

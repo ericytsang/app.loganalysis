@@ -12,11 +12,12 @@ class EnsureSingletonProcessInstance(
 {
     private val fileLocker:FileLocker = FileLocker()
 
-    fun acquireLock()
+    fun tryLock():Boolean
     {
         val appHome = appInfoService.getAndCreateAppHome()
         val systemWideAppLockFile = File(appHome, "singleton-process.lock")
-        if (!fileLocker.tryLock(systemWideAppLockFile))
+        val lockResult = fileLocker.tryLock(systemWideAppLockFile)
+        if (!lockResult)
         {
             showFatalErrorDialog(
                 """
@@ -26,6 +27,7 @@ class EnsureSingletonProcessInstance(
                 """.trimIndent()
             )
         }
+        return lockResult
     }
 
     private fun showFatalErrorDialog(message:String)

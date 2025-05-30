@@ -1,13 +1,12 @@
 package com.github.ericytsang.app.util
 
+import com.github.ericytsang.kotlin.ImmutableCoroutineScope
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
 
 class LatestJobExecutor(
-    scope:CoroutineScope,
+    scope:ImmutableCoroutineScope,
     coroutineDispatcher:CoroutineDispatcher,
 )
 {

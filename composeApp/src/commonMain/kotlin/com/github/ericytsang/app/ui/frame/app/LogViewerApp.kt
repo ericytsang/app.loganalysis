@@ -13,35 +13,36 @@ interface LogViewerApp
     companion object
     {
         fun create(
-            openNewProjectWizardChannel:SendChannel<Unit>,
-            openProjectChannel:SendChannel<ConfigurationId>,
-            openProjectBrowserChannel:SendChannel<Unit>,
+            commandChannel:SendChannel<AppCommand>,
         ):LogViewerApp = LogViewerAppImpl(
-            openNewProjectWizardChannel = openNewProjectWizardChannel,
-            openProjectChannel = openProjectChannel,
-            openProjectBrowserChannel = openProjectBrowserChannel,
+            commandChannel = commandChannel,
         )
     }
 }
 
 private class LogViewerAppImpl(
-    private val openNewProjectWizardChannel:SendChannel<Unit>,
-    private val openProjectChannel:SendChannel<ConfigurationId>,
-    private val openProjectBrowserChannel:SendChannel<Unit>,
+    private val commandChannel:SendChannel<AppCommand>,
 ):LogViewerApp
 {
     override fun openNewProjectWizard()
     {
-        openNewProjectWizardChannel.trySendBlocking(Unit)
+        commandChannel.trySendBlocking(AppCommand.OpenNewProjectWizard)
     }
 
     override fun openProject(configurationId:ConfigurationId)
     {
-        openProjectChannel.trySendBlocking(configurationId)
+        commandChannel.trySendBlocking(AppCommand.OpenProject(configurationId))
     }
 
     override fun openProjectBrowser()
     {
-        openProjectBrowserChannel.trySendBlocking(Unit)
+        commandChannel.trySendBlocking(AppCommand.OpenProjectBrowser)
     }
+}
+
+sealed class AppCommand
+{
+    data object OpenNewProjectWizard:AppCommand()
+    data class OpenProject(val configurationId:ConfigurationId):AppCommand()
+    data object OpenProjectBrowser:AppCommand()
 }

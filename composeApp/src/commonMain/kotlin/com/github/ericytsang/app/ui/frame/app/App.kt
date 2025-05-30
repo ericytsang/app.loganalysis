@@ -6,16 +6,24 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
+import androidx.compose.material.Colors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.platform.WindowInfo
+import androidx.compose.ui.window.Window
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.asset.IconEditLogFiles
 import com.github.ericytsang.app.ui.asset.IconSettings
 import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowser
 import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowserViewModel
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.NewProjectWizard
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditor
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
 import com.github.ericytsang.app.ui.modal.openSettingsInNewWindowBlocking
 import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlocking
@@ -73,3 +81,49 @@ fun App(
     }
 }
 
+fun openNewProjectWizard() = WindowContent(
+    initialTitle = "New Project",
+) { params ->
+    NewProjectWizard(
+        window = params.window,
+    )
+}
+
+fun openOpenProject() = WindowContent(
+    initialTitle = "New Project",
+) { params ->
+    NewProjectWizard(
+        window = params.window,
+    )
+}
+
+fun openOpenProjectBrowser() = WindowContent(
+    initialTitle = "New Project",
+) { params ->
+    NewProjectWizard(
+        window = params.window,
+    )
+}
+
+data class WindowContent(
+    val initialTitle:String,
+    val content: @Composable (WindowContentParams) -> Unit,
+)
+
+data class WindowContentParams(
+    val window:ComposeWindow,
+    val windowInterface: WindowInterface,
+    val themeColors: Colors,
+)
+
+interface WindowInterface
+{
+    fun destroyWindow()
+    var windowTitle:String
+}
+
+data class WindowInfo(
+    val windowId:Long,
+    val title:String,
+    val content: WindowContent,
+)
