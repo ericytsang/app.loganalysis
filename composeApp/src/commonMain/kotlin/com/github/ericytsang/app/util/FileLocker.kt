@@ -44,7 +44,7 @@ private class FileLocker()
     fun tryLock(file:File):Boolean
     {
         // see if the file is already locked by another live process
-        if (isThereAnOngoingProcess(file)) return false
+        if (isThereAnotherOngoingProcess(file)) return false
 
         // try to lock the file
         createIfNotExists(file)
@@ -65,7 +65,7 @@ private class FileLocker()
         }
     }
 
-    private fun isThereAnOngoingProcess(file:File):Boolean
+    private fun isThereAnotherOngoingProcess(file:File):Boolean
     {
         return getProcessInfoFromLockFile(file).fold(
 
