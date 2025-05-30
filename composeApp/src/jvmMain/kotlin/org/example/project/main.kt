@@ -29,9 +29,7 @@ import com.github.ericytsang.app.util.EnsureSingletonProcessInstance
 import com.github.ericytsang.app.util.fillMaxBackground
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlin.time.Duration.Companion.seconds
 
 class Main(
     kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
@@ -49,7 +47,6 @@ class Main(
         // asynchronously initialize the application
         applicationScope.launch(dispatchers.io)
         {
-            delay(20.seconds)
             // make sure only one instance of the application is running
             if (!EnsureSingletonProcessInstance().tryLock()) return@launch
 
