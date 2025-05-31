@@ -1,16 +1,13 @@
 package org.example.project
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
@@ -27,9 +24,37 @@ import com.github.ericytsang.app.ui.frame.app.openOpenProject
 import com.github.ericytsang.app.ui.frame.app.openOpenProjectBrowser
 import com.github.ericytsang.app.util.EnsureSingletonProcessInstance
 import com.github.ericytsang.app.util.fillMaxBackground
+import com.github.ericytsang.kotlin.ImmutableCoroutineScope
+import com.github.ericytsang.kotlin.ImmutableCoroutineScope.Companion.asImmutableCoroutineScope
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
+
+class MainLoadingDialogViewModel(
+    uiScope:ImmutableCoroutineScope,
+    loadingFinishedSignalChannel:ReceiveChannel<Unit>,
+    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+):KotlinDependencyProvider by kotlinDependencyProvider
+{
+    private val _shouldShowLoadingDialog = MutableStateFlow(true)
+    val shouldShowLoadingDialog:Flow<Boolean> get() = _shouldShowLoadingDialog
+
+    init
+    {
+        // hide the loading dialog after a loading finished signal is received
+        uiScope.launch(dispatchers.io)
+        {
+            loadingFinishedSignalChannel.receiveAsFlow().first()
+            _shouldShowLoadingDialog.value = false
+        }
+    }
+}
 
 class Main(
     kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
@@ -37,10 +62,10 @@ class Main(
 {
 
     private val appCommandChannel = Channel<AppCommand>(capacity = Channel.UNLIMITED)
-    private val appCommandChannelFlow get() = appCommandChannel.receiveAsFlow()
+    private val appCommandChannelFlow = appCommandChannel.consumeAsFlow()
 
     private val doneLoadingSignalChannel = Channel<Unit>(capacity = Channel.UNLIMITED)
-    private val doneLoadingSignalFlow get() = doneLoadingSignalChannel.receiveAsFlow()
+    private val doneLoadingSignalFlow = doneLoadingSignalChannel.consumeAsFlow()
 
     fun main()
     {
@@ -67,30 +92,40 @@ class Main(
 
     private fun runApplication() = application {
 
-        // show a loading dialog right away
-        var showDialogState by mutableStateOf(true)
-        DialogWindow(
-            onCloseRequest = { exitApplication() },
-            title = "Log Viewer",
-            alwaysOnTop = true,
-            resizable = false,
-            visible = showDialogState,
-            content = { fillMaxBackground { themeColors -> LoadingText() } },
-        )
-
-        // close the loading dialog when the application is done loading
-        val doneLoadingSignal by doneLoadingSignalFlow.collectAsState(null)
-        if (doneLoadingSignal != null)
-        {
-            showDialogState = false
+        // create a view model for the main loading dialog
+        val uiScope = rememberCoroutineScope().asImmutableCoroutineScope()
+        val mainLoadingDialogViewModel = remember {
+            MainLoadingDialogViewModel(
+                uiScope = uiScope,
+                loadingFinishedSignalChannel = doneLoadingSignalChannel,
+            )
         }
 
+        // show a loading dialog right away until loading is finished
+        println("// show a loading dialog right away")
+        val shouldShowLoadingDialog by mainLoadingDialogViewModel.shouldShowLoadingDialog.collectAsState(true)
+        if (shouldShowLoadingDialog)
+        {
+            DialogWindow(
+                onCloseRequest = { exitApplication() },
+                title = "Log Viewer",
+                alwaysOnTop = true,
+                resizable = false,
+                content = { fillMaxBackground { themeColors -> LoadingText() } },
+            )
+        }
+/*
+
         // keep track of all open windows
-        var openWindows by mutableStateOf<Map<Long, WindowInfo>>(emptyMap())
+        println("// keep track of all open windows")
+        var openWindows by remember { mutableStateOf<Map<Long,WindowInfo>>(emptyMap()) }
 
         // consume and handle view model requests
+        println("// consume and handle view model requests")
         val appCommand by appCommandChannelFlow.collectAsState(null)
         appCommand?.toWindowInfo(openWindows.keys)?.also { windowInfo ->
+            // processing command
+            println("// processing command: $windowInfo")
             openWindows += windowInfo.windowId to windowInfo
         }
 
@@ -130,6 +165,7 @@ class Main(
                 }
             }
         }
+*/
     }
 
     private fun AppCommand.toWindowInfo(openWindows:Set<Long>):WindowInfo
