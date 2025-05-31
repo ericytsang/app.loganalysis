@@ -2,6 +2,7 @@ package com.github.ericytsang.app.ui.frame.workingfileseteditor
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -102,8 +103,7 @@ fun NewProjectWizard(
                 content = { Text("Add file(s)") },
             )
 
-            Row(modifier = Modifier.weight(1f, fill = true))
-            {}
+            Spacer(modifier = Modifier.weight(1f, fill = true))
 
             Button(
                 onClick = { openFilePickerToAddFiles() },
