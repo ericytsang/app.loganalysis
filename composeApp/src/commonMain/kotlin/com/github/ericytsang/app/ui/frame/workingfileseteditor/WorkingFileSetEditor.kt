@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.Colors
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -70,15 +71,19 @@ fun WorkingFileSetEditor(
 fun NewProjectWizard(
     window:ComposeWindow,
     themeColors:Colors,
-    viewModelFactory:() -> WorkingFileSetEditorViewModel = { WorkingFileSetEditorViewModel.createDefault() },
+    viewModelFactory:() -> NewProjectWizardViewModel = { NewProjectWizardViewModel.createDefault() },
 )
 {
     val viewModel = remember { viewModelFactory() }
-    val workingFileSet by viewModel.workingFileSet.collectAsState(WorkingFileSetEmpty)
+    val selectedFiles by viewModel.selectedFiles.collectAsState(emptyList())
 
     fun openFilePickerToAddFiles()
     {
-        openMultiFilePicker(window) { selectedFiles -> viewModel.addFiles(selectedFiles) }
+        openMultiFilePicker(window)
+        { selectedFiles ->
+            val selectedFiles = selectedFiles.map { SelectedFile(it.absolutePath) }
+            viewModel.addFiles(selectedFiles)
+        }
     }
 
     Column(
@@ -106,11 +111,10 @@ fun NewProjectWizard(
             )
         }
 
-        val files = workingFileSet.files
-        val commonPrefix = when (val firstFile = files.firstOrNull())
+        val commonPrefix = when (val firstFile = selectedFiles.firstOrNull())
         {
             null -> ""
-            else -> files.fold(firstFile.filePath) { acc,path -> acc.commonPrefixWith(path.filePath) }
+            else -> selectedFiles.fold(firstFile.filePath) { acc,path -> acc.commonPrefixWith(path.filePath) }
         }
 
         val secondaryTextColor = themeColors.onBackground.copy(alpha = ContentAlpha.medium)
@@ -120,18 +124,22 @@ fun NewProjectWizard(
         )
         {
             items(
-                count = files.size,
-                key = { index -> files[index].filePath },
+                count = selectedFiles.size,
+                key = { index -> selectedFiles[index].filePath },
             )
             { index ->
-                val filePath = files[index].filePath
-                Text(
-                    // if the texts have a common prefix, then make the common prefix portion the secondary text color
-                    text = buildAnnotatedString {
-                        withStyle(SpanStyle(color = secondaryTextColor)) { append(commonPrefix) }
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(filePath.removePrefix(commonPrefix)) }
-                    }
-                )
+                val filePath = selectedFiles[index].filePath
+                Surface(
+                    modifier = Modifier.fillMaxWidth().padding(Dimens.mttPadding),
+                ) {
+                    Text(
+                        // if the texts have a common prefix, then make the common prefix portion the secondary text color
+                        text = buildAnnotatedString {
+                            withStyle(SpanStyle(color = secondaryTextColor)) { append(commonPrefix) }
+                            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(filePath.removePrefix(commonPrefix)) }
+                        }
+                    )
+                }
             }
         }
     }
