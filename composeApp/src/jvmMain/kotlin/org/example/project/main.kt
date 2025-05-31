@@ -1,6 +1,7 @@
 package org.example.project
 
 import androidx.compose.material.Text
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -27,6 +28,8 @@ import com.github.ericytsang.app.util.fillMaxBackground
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope.Companion.asImmutableCoroutineScope
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.channels.Channel
+import kotlin.collections.minus
+import kotlin.collections.plus
 
 class Main(
     kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
@@ -85,7 +88,8 @@ class Main(
 
         // keep track of all open windows
         println("// keep track of all open windows")
-        var openWindows by remember { mutableStateOf<Map<Long,WindowInfo>>(emptyMap()) }
+        val openWindowsState = remember { mutableStateOf<Map<Long,WindowInfo>>(emptyMap()) }
+        var openWindows by openWindowsState
         remember {
             MainOpenWindowsViewModel(
                 uiScope = uiScope,
@@ -106,24 +110,11 @@ class Main(
             val windowInfo = openWindow.value
             key(windowInfoId)
             {
-                val windowInterface = object:WindowInterface
-                {
-                    override fun destroyWindow()
-                    {
-                        // remove the window from the open windows
-                        openWindows -= windowInfoId
-
-                        // if there are no more open windows, exit the application
-                        if (openWindows.isEmpty())
-                        {
-                            exitApplication()
-                        }
-                    }
-
-                    override var windowTitle: String
-                        get() = windowInfo.title
-                        set(value) { openWindows += windowInfoId to windowInfo.copy(title = value) }
-                }
+                val windowInterface = createWindowInterface(
+                    openWindowsState = openWindowsState,
+                    windowInfo = windowInfo,
+                    exitApplication = { exitApplication() },
+                )
 
                 Window(
                     onCloseRequest = { windowInterface.destroyWindow() },
@@ -157,6 +148,35 @@ class Main(
             title = composeWindowContent.initialTitle,
             content = composeWindowContent,
         )
+    }
+
+    private fun createWindowInterface(
+        openWindowsState:MutableState<Map<Long,WindowInfo>>,
+        windowInfo:WindowInfo,
+        exitApplication:()->Unit,
+    ):WindowInterface = object:WindowInterface
+    {
+        val windowInfoId = windowInfo.windowId
+        var openWindows by openWindowsState
+
+        override fun destroyWindow()
+        {
+            // remove the window from the open windows
+            openWindows -= windowInfoId
+
+            // if there are no more open windows, exit the application
+            if (openWindows.isEmpty())
+            {
+                exitApplication()
+            }
+        }
+
+        override var windowTitle:String
+            get() = windowInfo.title
+            set(value)
+            {
+                openWindows += windowInfoId to windowInfo.copy(title = value)
+            }
     }
 }
 
