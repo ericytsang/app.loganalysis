@@ -1,11 +1,12 @@
 package com.github.ericytsang.app.ui.frame.workingfileseteditor
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
-import androidx.compose.material.Colors
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -17,7 +18,6 @@ import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
 import com.github.ericytsang.app.util.fillMaxBackground
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
-import java.awt.Dialog
 
 @Composable
 fun WorkingFileSetEditor(
@@ -79,13 +79,26 @@ fun NewProjectWizard(
         horizontalAlignment = Alignment.Start,
     )
     {
-        Button(
-            onClick = { openFilePickerToAddFiles() },
-            content = { Text("Add file(s)") },
+        Row(
+            modifier = Modifier.fillMaxWidth(),
         )
+        {
+            Button(
+                onClick = { openFilePickerToAddFiles() },
+                content = { Text("Add file(s)") },
+            )
+
+            Row(modifier = Modifier.weight(1f, fill = true))
+            {}
+
+            Button(
+                onClick = { openFilePickerToAddFiles() },
+                content = { Text("Done") },
+            )
+        }
 
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.weight(1f),
         )
         {
             items(count = workingFileSet.files.size)
