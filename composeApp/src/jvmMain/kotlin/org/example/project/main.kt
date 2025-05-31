@@ -24,48 +24,16 @@ import com.github.ericytsang.app.ui.frame.app.openOpenProject
 import com.github.ericytsang.app.ui.frame.app.openOpenProjectBrowser
 import com.github.ericytsang.app.util.EnsureSingletonProcessInstance
 import com.github.ericytsang.app.util.fillMaxBackground
-import com.github.ericytsang.kotlin.ImmutableCoroutineScope
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope.Companion.asImmutableCoroutineScope
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.receiveAsFlow
-
-class MainLoadingDialogViewModel(
-    uiScope:ImmutableCoroutineScope,
-    loadingFinishedSignalChannel:ReceiveChannel<Unit>,
-    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
-):KotlinDependencyProvider by kotlinDependencyProvider
-{
-    private val _shouldShowLoadingDialog = MutableStateFlow(true)
-    val shouldShowLoadingDialog:Flow<Boolean> get() = _shouldShowLoadingDialog
-
-    init
-    {
-        // hide the loading dialog after a loading finished signal is received
-        uiScope.launch(dispatchers.io)
-        {
-            loadingFinishedSignalChannel.receiveAsFlow().first()
-            _shouldShowLoadingDialog.value = false
-        }
-    }
-}
 
 class Main(
     kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
 ):KotlinDependencyProvider by kotlinDependencyProvider
 {
-
     private val appCommandChannel = Channel<AppCommand>(capacity = Channel.UNLIMITED)
-    private val appCommandChannelFlow = appCommandChannel.consumeAsFlow()
-
     private val doneLoadingSignalChannel = Channel<Unit>(capacity = Channel.UNLIMITED)
-    private val doneLoadingSignalFlow = doneLoadingSignalChannel.consumeAsFlow()
 
     fun main()
     {
@@ -103,7 +71,7 @@ class Main(
 
         // show a loading dialog right away until loading is finished
         println("// show a loading dialog right away")
-        val shouldShowLoadingDialog by mainLoadingDialogViewModel.shouldShowLoadingDialog.collectAsState(true)
+        val shouldShowLoadingDialog by mainLoadingDialogViewModel.shouldShowLoadingDialogFlow.collectAsState(true)
         if (shouldShowLoadingDialog)
         {
             DialogWindow(
@@ -114,19 +82,21 @@ class Main(
                 content = { fillMaxBackground { themeColors -> LoadingText() } },
             )
         }
-/*
 
         // keep track of all open windows
         println("// keep track of all open windows")
         var openWindows by remember { mutableStateOf<Map<Long,WindowInfo>>(emptyMap()) }
-
-        // consume and handle view model requests
-        println("// consume and handle view model requests")
-        val appCommand by appCommandChannelFlow.collectAsState(null)
-        appCommand?.toWindowInfo(openWindows.keys)?.also { windowInfo ->
-            // processing command
-            println("// processing command: $windowInfo")
-            openWindows += windowInfo.windowId to windowInfo
+        remember {
+            MainOpenWindowsViewModel(
+                uiScope = uiScope,
+                appCommandChannel = appCommandChannel,
+                handleCommand = { appCommand ->
+                    // processing command
+                    val windowInfo = appCommand.toWindowInfo(openWindows.keys)
+                    println("// processing command: $windowInfo")
+                    openWindows += windowInfo.windowId to windowInfo
+                },
+            )
         }
 
         // render open windows
@@ -140,7 +110,14 @@ class Main(
                 {
                     override fun destroyWindow()
                     {
+                        // remove the window from the open windows
                         openWindows -= windowInfoId
+
+                        // if there are no more open windows, exit the application
+                        if (openWindows.isEmpty())
+                        {
+                            exitApplication()
+                        }
                     }
 
                     override var windowTitle: String
@@ -165,7 +142,6 @@ class Main(
                 }
             }
         }
-*/
     }
 
     private fun AppCommand.toWindowInfo(openWindows:Set<Long>):WindowInfo
