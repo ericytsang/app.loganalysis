@@ -7,13 +7,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
+import androidx.compose.material.Colors
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
 import com.github.ericytsang.app.util.fillMaxBackground
@@ -62,9 +69,11 @@ fun WorkingFileSetEditor(
 @Composable
 fun NewProjectWizard(
     window:ComposeWindow,
-    viewModel:WorkingFileSetEditorViewModel = WorkingFileSetEditorViewModel.createDefault(),
+    themeColors:Colors,
+    viewModelFactory:() -> WorkingFileSetEditorViewModel = { WorkingFileSetEditorViewModel.createDefault() },
 )
 {
+    val viewModel = remember { viewModelFactory() }
     val workingFileSet by viewModel.workingFileSet.collectAsState(WorkingFileSetEmpty)
 
     fun openFilePickerToAddFiles()
@@ -97,13 +106,32 @@ fun NewProjectWizard(
             )
         }
 
+        val files = workingFileSet.files
+        val commonPrefix = when (val firstFile = files.firstOrNull())
+        {
+            null -> ""
+            else -> files.fold(firstFile.filePath) { acc,path -> acc.commonPrefixWith(path.filePath) }
+        }
+
+        val secondaryTextColor = themeColors.onBackground.copy(alpha = ContentAlpha.medium)
+
         LazyColumn(
             modifier = Modifier.weight(1f),
         )
         {
-            items(count = workingFileSet.files.size)
+            items(
+                count = files.size,
+                key = { index -> files[index].filePath },
+            )
             { index ->
-                Text(text = workingFileSet.files[index].filePath)
+                val filePath = files[index].filePath
+                Text(
+                    // if the texts have a common prefix, then make the common prefix portion the secondary text color
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(color = secondaryTextColor)) { append(commonPrefix) }
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(filePath.removePrefix(commonPrefix)) }
+                    }
+                )
             }
         }
     }

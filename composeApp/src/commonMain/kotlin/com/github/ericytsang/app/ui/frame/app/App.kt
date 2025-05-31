@@ -86,6 +86,7 @@ fun openNewProjectWizard() = WindowContent(
 ) { params ->
     NewProjectWizard(
         window = params.window,
+        themeColors = params.themeColors,
     )
 }
 
@@ -94,6 +95,7 @@ fun openOpenProject() = WindowContent(
 ) { params ->
     NewProjectWizard(
         window = params.window,
+        themeColors = params.themeColors,
     )
 }
 
@@ -102,6 +104,7 @@ fun openOpenProjectBrowser() = WindowContent(
 ) { params ->
     NewProjectWizard(
         window = params.window,
+        themeColors = params.themeColors,
     )
 }
 
