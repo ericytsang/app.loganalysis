@@ -13,15 +13,15 @@ fun openWorkingFileSetEditorInNewWindowBlocking(
     viewModel:WorkingFileSetEditorViewModel,
 )
 {
-    openBlockingDialog(
-        owner = owner,
-        title = "Working File Set Editor",
-    )
-    {
-        WorkingFileSetEditor(
-            owner = owner,
-            viewModel = viewModel,
-        )
-    }
+//    openBlockingDialog(
+//        owner = owner,
+//        title = "Working File Set Editor",
+//    )
+//    {
+//        WorkingFileSetEditor(
+//            owner = owner,
+//            viewModel = viewModel,
+//        )
+//    }
 }
 

@@ -22,7 +22,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
@@ -37,6 +40,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.asset.IconSettings
+import com.github.ericytsang.app.ui.frame.settings.Settings
+import com.github.ericytsang.app.ui.modal.SettingsDialog
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
 import com.github.ericytsang.app.ui.modal.openSettingsInNewWindowBlocking
 import com.github.ericytsang.app.util.fillMaxBackground
@@ -101,6 +106,8 @@ fun NewProjectWizard(
             viewModel.addFiles(selectedFiles)
         }
     }
+
+    var dialogs by remember { mutableStateOf<Set<@Composable ()->Unit>>(emptySet()) }
 
     Column(
         modifier = Modifier.Companion
@@ -187,7 +194,11 @@ fun NewProjectWizard(
             Spacer(modifier = Modifier.weight(1f, fill = true))
 
             OutlinedButton(
-                onClick = { openSettingsInNewWindowBlocking(window) },
+                onClick = {
+                    var function:@Composable ()->Unit = {}
+                    function = { SettingsDialog { dialogs -= function } }
+                    dialogs += function
+                },
                 content = { IconSettings(themeColors.onBackground) },
             )
 
@@ -200,5 +211,9 @@ fun NewProjectWizard(
                 content = { Text("Done") },
             )
         }
+    }
+
+    dialogs.forEachIndexed { index, dialog ->
+        key("dialogs$index") { dialog() }
     }
 }

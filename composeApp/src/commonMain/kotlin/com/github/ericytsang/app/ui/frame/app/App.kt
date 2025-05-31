@@ -65,7 +65,7 @@ fun App(
                     content = { IconEditLogFiles(themeColors.onPrimary) },
                 )
                 Button(
-                    onClick = { openSettingsInNewWindowBlocking(window) },
+                    onClick = { /*openSettingsInNewWindowBlocking(window)*/ },
                     content = { IconSettings(themeColors.onPrimary) },
                 )
             }

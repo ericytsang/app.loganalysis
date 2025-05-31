@@ -111,7 +111,7 @@ fun LogViewerWindow(
                 )
 
                 Button(
-                    onClick = { openSettingsInNewWindowBlocking(window) },
+                    onClick = { /*openSettingsInNewWindowBlocking(window)*/ },
                     content = { IconSettings(themeColors.onPrimary) },
                 )
             }
