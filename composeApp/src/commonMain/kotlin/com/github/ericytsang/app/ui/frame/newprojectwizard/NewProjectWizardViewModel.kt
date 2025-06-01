@@ -23,7 +23,8 @@ interface NewProjectWizardViewModel
      * this is a request from the UI to the view model to create a new configuration
      * with the currently selected files.
      * the view model will then start creating the configuration in the background,
-     * and then notify the UI when the configuration is created via [launchLogViewerRequest].
+     * after it is created, the view model will launch the log viewer window,
+     * and close the "new project wizard" window.
      */
     fun onDoneButtonClicked()
 
@@ -112,8 +113,9 @@ private class NewProjectWizardViewModelImpl(
     {
         synchronized(_isCreatingConfiguration)
         {
+            // ignore this request if already creating a configuration
             if (_isCreatingConfiguration.value)
-                return // already creating a configuration, ignore this request
+                return
 
             _isCreatingConfiguration.value = true
 
