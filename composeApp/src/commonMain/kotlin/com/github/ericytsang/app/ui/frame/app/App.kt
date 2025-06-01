@@ -86,7 +86,7 @@ class App(
                 title = "Log Viewer",
                 alwaysOnTop = true,
                 resizable = false,
-                content = { fillMaxBackground { themeColors -> LoadingText() } },
+                content = { fillMaxBackground { themeColors -> LoadingText(themeColors.onBackground) } },
             )
         }
 

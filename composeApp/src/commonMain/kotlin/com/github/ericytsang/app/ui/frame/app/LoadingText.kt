@@ -5,12 +5,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.Color
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope.Companion.asImmutableCoroutineScope
@@ -18,11 +16,10 @@ import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 @Composable
 fun LoadingText(
+    textColor:Color,
     viewModelFactory: (ImmutableCoroutineScope) -> LoadingTextViewModel = { coroutineScope -> LoadingTextViewModel(coroutineScope) }
 )
 {
@@ -31,6 +28,7 @@ fun LoadingText(
     val loadingText by viewModel.loadingText.collectAsState("")
     Text(
         text = loadingText,
+        color = textColor,
         modifier = Modifier.padding(Dimens.mttPadding),
     )
 }

@@ -1,18 +1,23 @@
 package com.github.ericytsang.app.util
 
 import com.github.ericytsang.domain.appinfo.AppInfoService
+import com.github.ericytsang.kotlin.KotlinDependencyProvider
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.Instant
 import javax.swing.JOptionPane
 import kotlin.system.exitProcess
+import kotlin.time.Duration.Companion.seconds
 
 class EnsureSingletonProcessInstance(
     private val appInfoService:AppInfoService = AppInfoService.instance,
-)
+    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+):KotlinDependencyProvider by kotlinDependencyProvider
 {
     private val fileLocker:FileLocker = FileLocker()
 
-    fun tryLock():Boolean
+    suspend fun tryLock():Boolean = withContext(dispatchers.io)
     {
         val appHome = appInfoService.getAndCreateAppHome()
         val systemWideAppLockFile = File(appHome, "singleton-process.lock")
@@ -27,7 +32,7 @@ class EnsureSingletonProcessInstance(
                 """.trimIndent()
             )
         }
-        return lockResult
+        lockResult
     }
 
     private fun showFatalErrorDialog(message:String)
@@ -43,7 +48,7 @@ private class FileLocker()
      * Attempts to create the file and lock it for the duration of the process.
      * Returns true if the lock was acquired, false otherwise.
      */
-    fun tryLock(file:File):Boolean
+    suspend fun tryLock(file:File):Boolean
     {
         // see if the file is already locked by another live process
         if (isThereAnotherOngoingProcess(file)) return false
@@ -54,7 +59,7 @@ private class FileLocker()
         file.writeText("${myProcessInfo.pid}\n${myProcessInfo.startTime}")
 
         // double-check that the file is now locked by this process in case of race conditions
-        Thread.sleep(500)
+        delay(2.seconds)
         return isTheLockFileStillLockedByUs(file)
     }
 
