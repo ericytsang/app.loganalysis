@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.asset.IconSettings
+import com.github.ericytsang.app.ui.frame.commonwindowheader.CommonWindowHeader
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.childWindowManager
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.showSettingsDialog
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
@@ -63,20 +64,13 @@ fun NewProjectWizard(
         horizontalAlignment = Alignment.Start,
     )
     {
-        Row {
+        // header with settings button
+        CommonWindowHeader(themeColors,childWindowManager)
 
-            // move the icon button the end
-            Spacer(modifier = Modifier.weight(1f,fill = true))
-
-            // settings button
-            IconButton(
-                modifier = Modifier.padding(end = Dimens.mttPadding),
-                onClick = { childWindowManager.showSettingsDialog() },
-                content = { IconSettings(themeColors.onSurface) },
-            )
-        }
-
+        // spacer...
         Spacer(modifier = Modifier.size(Dimens.mttPadding))
+
+        // region selected files list
 
         val commonPrefix = when (val firstFile = selectedFiles.firstOrNull())
         {
@@ -140,8 +134,12 @@ fun NewProjectWizard(
             }
         }
 
+        // endregion
+
+        // spacer...
         Spacer(modifier = Modifier.size(Dimens.mttPadding))
 
+        // footer with buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
         )
