@@ -19,7 +19,7 @@ fun childWindowManager(
 ):ChildWindowManager
 {
     var children by remember { mutableStateOf<Set<ChildWindow>>(emptySet()) }
-    val uniqueKeyGenerator = generateSequence(0) { it + 1 }.iterator()
+    val uniqueKeyGenerator = remember { generateSequence(0) { it+1 }.iterator() }
 
     children.forEach { childWindow ->
         key(childWindow.uniqueKey)
