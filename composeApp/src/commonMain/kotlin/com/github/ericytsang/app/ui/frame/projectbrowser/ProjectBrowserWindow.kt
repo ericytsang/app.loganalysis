@@ -21,6 +21,7 @@ fun ProjectBrowserWindow(
         fillMaxBackground()
         { themeColors ->
             ProjectBrowser(
+                themeColors = themeColors,
                 viewModelFactory = { ProjectBrowserViewModelImpl() },
                 rootChildWindowManager = rootChildWindowManager,
             )

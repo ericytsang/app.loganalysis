@@ -2,6 +2,7 @@ package com.github.ericytsang.app.ui.frame.projectbrowser
 
 import com.github.ericytsang.app.ui.frame.logviewer.LogViewerRootWindow
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.openLogViewer
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.ConfigurationRepository
 import com.github.ericytsang.domain.repo.repo.WorkingFileSetRepository
@@ -61,9 +62,7 @@ class ProjectListItemViewModelImpl(
 
     override fun openProjectInLogViewer()
     {
-        rootChildWindowManager.addChildWindow { controller ->
-            LogViewerRootWindow(rootChildWindowManager,controller)
-        }
+        rootChildWindowManager.openLogViewer()
     }
 
     override fun openWorkingFileSetEditor()

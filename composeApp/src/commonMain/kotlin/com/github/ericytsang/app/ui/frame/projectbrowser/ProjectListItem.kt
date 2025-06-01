@@ -1,6 +1,7 @@
 package com.github.ericytsang.app.ui.frame.projectbrowser
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 fun ProjectListItem(
     item:ProjectListItemModel,
     projectBrowserViewModel:ProjectBrowserViewModel,
+    modifier:Modifier,
     themeUseCase:ThemeUseCase = ThemeUseCase.instance,
     viewModelFactory: (CoroutineScope,ProjectListItemModel.Project) -> ProjectListItemViewModel,
 )
@@ -26,7 +28,7 @@ fun ProjectListItem(
     val targetTheme by themeUseCase.theme.collectAsState(Theme.DARK)
     val themeColors by animatedThemeColors(targetTheme)
     val coroutineScope = rememberCoroutineScope()
-    Column(modifier = Modifier.padding(bottom = Dimens.mttPadding))
+    Column(modifier = modifier)
     {
         when (item)
         {

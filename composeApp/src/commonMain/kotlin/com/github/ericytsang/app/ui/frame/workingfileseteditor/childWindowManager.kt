@@ -6,6 +6,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.github.ericytsang.app.ui.frame.logviewer.LogViewerRootWindow
 import com.github.ericytsang.app.ui.modal.SettingsDialog
 
 data class ChildWindow(
@@ -67,4 +68,9 @@ interface ChildWindowManager
 fun ChildWindowManager.showSettingsDialog()
 {
     addChildWindow { controller -> SettingsDialog { controller.removeSelf() } }
+}
+
+fun ChildWindowManager.openLogViewer()
+{
+    addChildWindow { controller -> LogViewerRootWindow(this, controller) }
 }
