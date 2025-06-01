@@ -25,6 +25,7 @@ fun LogViewerRootWindow(
             LogViewerRoot(
                 window = window,
                 themeColors = themeColors,
+                rootChildWindowManager = rootChildWindowManager,
                 workingFileSetEditorViewModelFactory = { WorkingFileSetEditorViewModel.create(configurationId) },
             )
         }

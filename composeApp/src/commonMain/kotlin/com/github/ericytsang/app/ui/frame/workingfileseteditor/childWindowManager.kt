@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.github.ericytsang.app.ui.frame.logviewer.LogViewerRootWindow
 import com.github.ericytsang.app.ui.frame.newprojectwizard.NewProjectWizardWindow
+import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowserWindow
 import com.github.ericytsang.app.ui.modal.SettingsDialog
 import com.github.ericytsang.domain.objects.ConfigurationId
 
@@ -86,4 +87,9 @@ fun ChildWindowManager.openLogViewer(configurationId:ConfigurationId)
 fun ChildWindowManager.openNewProjectWizard()
 {
     addChildWindow { controller -> NewProjectWizardWindow(this, controller) }
+}
+
+fun ChildWindowManager.openProjectBrowser()
+{
+    addChildWindow { controller -> ProjectBrowserWindow(this, controller) }
 }

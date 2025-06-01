@@ -1,5 +1,6 @@
 package com.github.ericytsang.app.ui.frame.logviewer
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Colors
+import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -25,7 +28,11 @@ import com.github.ericytsang.app.ui.asset.IconSettings
 import com.github.ericytsang.app.ui.asset.IconWrapText
 import com.github.ericytsang.app.ui.component.ColorCodedLogLine
 import com.github.ericytsang.app.ui.component.ToggleButton
+import com.github.ericytsang.app.ui.frame.commonwindowheader.CommonWindowHeader
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.openNewProjectWizard
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.openProjectBrowser
 import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlocking
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
@@ -36,6 +43,7 @@ import java.io.File
 fun LogViewerRoot(
     window:ComposeWindow,
     themeColors: Colors,
+    rootChildWindowManager:ChildWindowManager,
     workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel,
     viewModelFactory:(CoroutineScope)->LogViewerRootViewModel = { uiScope -> LogViewerRootViewModel.create(uiScope) },
     logViewerViewModelFactory:()->LogViewerViewModel = { LogViewerViewModel.createDefault() },
@@ -58,10 +66,28 @@ fun LogViewerRoot(
     val shouldWrapText by viewModel.getWordWrapFlow().collectAsState(false)
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxSize().padding(Dimens.mttPadding),
+        verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
         horizontalAlignment = Alignment.CenterHorizontally,
     )
     {
+        CommonWindowHeader(themeColors,rootChildWindowManager)
+        {
+            // new project button
+            Button(
+                onClick = { rootChildWindowManager.openNewProjectWizard() },
+                content = { Text("New project") },
+                colors = ButtonDefaults.buttonColors(themeColors.surface),
+            )
+
+            // new project button
+            Button(
+                onClick = { rootChildWindowManager.openProjectBrowser() },
+                content = { Text("Recent projects") },
+                colors = ButtonDefaults.buttonColors(themeColors.surface),
+            )
+        }
+
         Row(
             modifier = Modifier.fillMaxWidth().padding(Dimens.mttPadding),
             verticalAlignment = Alignment.CenterVertically,
@@ -101,11 +127,6 @@ fun LogViewerRoot(
                 onClick = { viewModel.toggleWordWrap() },
                 isToggled = shouldWrapText,
                 content = { contentColor -> IconWrapText(contentColor) },
-            )
-
-            Button(
-                onClick = { /*openSettingsInNewWindowBlocking(window)*/ },
-                content = { IconSettings(themeColors.onPrimary) },
             )
         }
 
