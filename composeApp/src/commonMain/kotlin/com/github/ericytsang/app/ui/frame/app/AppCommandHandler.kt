@@ -4,7 +4,7 @@ import com.github.ericytsang.domain.objects.ConfigurationId
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.trySendBlocking
 
-interface LogViewerApp
+interface AppCommandHandler
 {
     fun openNewProjectWizard()
     fun openProject(configurationId:ConfigurationId)
@@ -14,15 +14,15 @@ interface LogViewerApp
     {
         fun create(
             commandChannel:SendChannel<AppCommand>,
-        ):LogViewerApp = LogViewerAppImpl(
+        ):AppCommandHandler = AppCommandHandlerImpl(
             commandChannel = commandChannel,
         )
     }
 }
 
-private class LogViewerAppImpl(
+private class AppCommandHandlerImpl(
     private val commandChannel:SendChannel<AppCommand>,
-):LogViewerApp
+):AppCommandHandler
 {
     override fun openNewProjectWizard()
     {

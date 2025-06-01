@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.frame.app
+package com.github.ericytsang.app.ui.component
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text

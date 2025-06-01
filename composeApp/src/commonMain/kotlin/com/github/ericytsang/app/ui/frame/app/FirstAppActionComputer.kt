@@ -6,14 +6,14 @@ import com.github.ericytsang.domain.repo.repo.ConfigurationRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.withContext
 
-interface LogViewerAppInit
+interface FirstAppActionComputer
 {
     suspend fun decideFirstAppAction():FirstAppAction
-    suspend fun perform(logViewerApp:LogViewerApp,firstAppAction:FirstAppAction)
+    suspend fun perform(appCommandHandler:AppCommandHandler,firstAppAction:FirstAppAction)
 
     companion object
     {
-        fun create():LogViewerAppInit = LogViewerAppInitImpl()
+        fun create():FirstAppActionComputer = FirstAppActionComputerImpl()
     }
 }
 
@@ -42,10 +42,10 @@ sealed class FirstAppAction
     data object OpenProjectBrowser:FirstAppAction()
 }
 
-private class LogViewerAppInitImpl(
+private class FirstAppActionComputerImpl(
     kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
     private val configurationRepository:ConfigurationRepository = RepositoryDependencyProvider.Companion.instance.configurationRepository,
-):LogViewerAppInit,
+):FirstAppActionComputer,
     KotlinDependencyProvider by kotlinDependencyProvider
 {
     override suspend fun decideFirstAppAction():FirstAppAction = withContext(dispatchers.io)
@@ -69,20 +69,20 @@ private class LogViewerAppInitImpl(
         return@withContext FirstAppAction.OpenProjectBrowser
     }
 
-    override suspend fun perform(logViewerApp:LogViewerApp, firstAppAction:FirstAppAction)
+    override suspend fun perform(appCommandHandler:AppCommandHandler, firstAppAction:FirstAppAction)
     {
         when (firstAppAction)
         {
-            is FirstAppAction.OpenNewProjectWizard -> logViewerApp.openNewProjectWizard()
+            is FirstAppAction.OpenNewProjectWizard -> appCommandHandler.openNewProjectWizard()
             is FirstAppAction.OpenPreviouslyOpenedProjects ->
             {
                 val activeProjects = configurationRepository.getActiveProjects()
                 while (activeProjects.hasNext())
                 {
-                    logViewerApp.openProject(activeProjects.next().id)
+                    appCommandHandler.openProject(activeProjects.next().id)
                 }
             }
-            is FirstAppAction.OpenProjectBrowser -> logViewerApp.openProjectBrowser()
+            is FirstAppAction.OpenProjectBrowser -> appCommandHandler.openProjectBrowser()
         }
     }
 }

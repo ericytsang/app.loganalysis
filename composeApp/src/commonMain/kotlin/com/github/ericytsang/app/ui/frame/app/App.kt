@@ -20,6 +20,7 @@ import androidx.compose.ui.window.application
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.asset.IconEditLogFiles
 import com.github.ericytsang.app.ui.asset.IconSettings
+import com.github.ericytsang.app.ui.component.LoadingText
 import com.github.ericytsang.app.ui.frame.newprojectwizard.NewProjectWizardWindow
 import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowser
 import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowserViewModel
@@ -51,12 +52,12 @@ class App(
             if (!EnsureSingletonProcessInstance().tryLock()) return@launch
 
             // figure out what the first action of the application should be
-            val logViewerAppInit = LogViewerAppInit.create()
-            val firstAction = logViewerAppInit.decideFirstAppAction()
+            val firstAppActionComputer = FirstAppActionComputer.create()
+            val firstAction = firstAppActionComputer.decideFirstAppAction()
 
             // perform the resolved action
-            val logViewerApp = LogViewerApp.create(appCommandChannel)
-            logViewerAppInit.perform(logViewerApp,firstAction)
+            val appCommandHandler = AppCommandHandler.create(appCommandChannel)
+            firstAppActionComputer.perform(appCommandHandler,firstAction)
 
             // hide the loading dialog because other app UIs are opened and should be visible now
             doneLoadingSignalChannel.send(Unit)
