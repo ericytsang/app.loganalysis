@@ -1,23 +1,16 @@
 package org.example.project
 
-import androidx.compose.material.Text
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.DialogWindow
-import androidx.compose.ui.window.MenuBar
-import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.github.ericytsang.app.ui.frame.app.AppCommand
 import com.github.ericytsang.app.ui.frame.app.LoadingText
 import com.github.ericytsang.app.ui.frame.app.LogViewerApp
 import com.github.ericytsang.app.ui.frame.app.LogViewerAppInit
 import com.github.ericytsang.app.ui.frame.app.NewProjectWizardWindow
-import com.github.ericytsang.app.ui.frame.app.WindowInfo
-import com.github.ericytsang.app.ui.frame.app.WindowInterface
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.childWindowManager
 import com.github.ericytsang.app.util.EnsureSingletonProcessInstance
@@ -25,8 +18,6 @@ import com.github.ericytsang.app.util.fillMaxBackground
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope.Companion.asImmutableCoroutineScope
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.channels.Channel
-import kotlin.collections.minus
-import kotlin.collections.plus
 
 class Main(
     kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
@@ -119,82 +110,9 @@ class Main(
             }
         }
     }
-
-    private fun createWindowInterface(
-        openWindowsState:MutableState<Map<Long,WindowInfo>>,
-        windowInfo:WindowInfo,
-        exitApplication:()->Unit,
-    ):WindowInterface = object:WindowInterface
-    {
-        val windowInfoId = windowInfo.windowId
-        var openWindows by openWindowsState
-
-        override fun destroyWindow()
-        {
-            // remove the window from the open windows
-            openWindows -= windowInfoId
-
-            // if there are no more open windows, exit the application
-            if (openWindows.isEmpty())
-            {
-                exitApplication()
-            }
-        }
-
-        override var windowTitle:String
-            get() = windowInfo.title
-            set(value)
-            {
-                openWindows += windowInfoId to windowInfo.copy(title = value)
-            }
-    }
 }
 
 fun main()
 {
     Main().main()
-}
-
-private fun exampleMain() = application()
-{
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "Log Viewer",
-
-        )
-    {
-        MenuBar()
-        {
-            Menu(
-                text = "File",
-                mnemonic = 'F',
-            ) {
-                Item(
-                    text = "Open...",
-                    mnemonic = 'O',
-                    onClick = { /* TODO: Open log file */ }
-                )
-                Item(
-                    text = "Recently opened...",
-                    mnemonic = 'R',
-                    onClick = { /* TODO: Open log file */ }
-                )
-                Item(
-                    text = "Exit",
-                    mnemonic = 'X',
-                    onClick = { exitApplication() }
-                )
-            }
-        }
-        Text("test")
-    }
-
-    DialogWindow(
-        onCloseRequest = { exitApplication() },
-        title = "Log Viewer",
-        resizable = true,
-    )
-    {
-        Text("test2")
-    }
 }
