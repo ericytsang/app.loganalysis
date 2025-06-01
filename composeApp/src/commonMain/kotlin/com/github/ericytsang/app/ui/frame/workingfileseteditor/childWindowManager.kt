@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import com.github.ericytsang.app.ui.frame.logviewer.LogViewerRootWindow
 import com.github.ericytsang.app.ui.frame.newprojectwizard.NewProjectWizardWindow
 import com.github.ericytsang.app.ui.modal.SettingsDialog
+import com.github.ericytsang.domain.objects.ConfigurationId
 
 data class ChildWindow(
     val uniqueKey:Any,
@@ -71,9 +72,15 @@ fun ChildWindowManager.openSettingsDialog()
     addChildWindow { controller -> SettingsDialog { controller.removeSelf() } }
 }
 
-fun ChildWindowManager.openLogViewer()
+fun ChildWindowManager.openLogViewer(configurationId:ConfigurationId)
 {
-    addChildWindow { controller -> LogViewerRootWindow(this, controller) }
+    addChildWindow { controller ->
+        LogViewerRootWindow(
+            configurationId = configurationId,
+            rootChildWindowManager = this,
+            controller = controller,
+        )
+    }
 }
 
 fun ChildWindowManager.openNewProjectWizard()

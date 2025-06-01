@@ -23,6 +23,7 @@ fun NewProjectWizardWindow(
                 window = window,
                 themeColors = themeColors,
                 rootChildWindowManager = rootChildWindowManager,
+                controller = controller,
             )
         }
     }

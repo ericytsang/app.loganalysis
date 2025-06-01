@@ -30,20 +30,32 @@ import androidx.compose.ui.text.withStyle
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.frame.commonwindowheader.CommonWindowHeader
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManagerController
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.childWindowManager
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.openLogViewer
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
+import kotlinx.coroutines.flow.receiveAsFlow
 
 @Composable
 fun NewProjectWizard(
     window:ComposeWindow,
     themeColors:Colors,
     rootChildWindowManager:ChildWindowManager,
+    controller:ChildWindowManagerController,
     viewModelFactory:()->NewProjectWizardViewModel = { NewProjectWizardViewModel.createDefault() },
 )
 {
     val viewModel = remember { viewModelFactory() }
     val selectedFiles by viewModel.selectedFiles.collectAsState(emptyList())
+    val isCreatingConfiguration by viewModel.isCreatingConfiguration.collectAsState(false)
+
+    val launchLogViewerRequest by viewModel.launchLogViewerRequest.receiveAsFlow().collectAsState(null)
+    val launchLogViewerRequestValue = launchLogViewerRequest
+    if (launchLogViewerRequestValue != null)
+    {
+        rootChildWindowManager.openLogViewer(launchLogViewerRequestValue)
+        controller.removeSelf()
+    }
 
     fun openFilePickerToAddFiles()
     {
@@ -142,18 +154,20 @@ fun NewProjectWizard(
             Spacer(modifier = Modifier.weight(1f,fill = true))
 
             val addFileButtonColors = ButtonDefaults.buttonColors(themeColors.surface)
+            val addFileEnabled = !isCreatingConfiguration
             val addFileContentColor by addFileButtonColors.contentColor(true)
             Button(
                 onClick = { openFilePickerToAddFiles() },
                 content = { Text("Add file(s)", color = addFileContentColor) },
                 colors = addFileButtonColors,
+                enabled = addFileEnabled,
             )
 
             val doneButtonColors = ButtonDefaults.buttonColors(themeColors.primary)
-            val doneButtonEnabled = selectedFiles.isNotEmpty()
+            val doneButtonEnabled = !isCreatingConfiguration && selectedFiles.isNotEmpty()
             val doneButtonContentColor by doneButtonColors.contentColor(doneButtonEnabled)
             Button(
-                onClick = { rootChildWindowManager.openLogViewer() },
+                onClick = { viewModel.onDoneButtonClicked() },
                 colors = doneButtonColors,
                 enabled = doneButtonEnabled,
                 content = { Text("Done", color = doneButtonContentColor) },

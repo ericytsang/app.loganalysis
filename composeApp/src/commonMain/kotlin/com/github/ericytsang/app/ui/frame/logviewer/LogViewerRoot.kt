@@ -36,9 +36,9 @@ import java.io.File
 fun LogViewerRoot(
     window:ComposeWindow,
     themeColors: Colors,
+    workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel,
     viewModelFactory:(CoroutineScope)->LogViewerRootViewModel = { uiScope -> LogViewerRootViewModel.create(uiScope) },
     logViewerViewModelFactory:()->LogViewerViewModel = { LogViewerViewModel.createDefault() },
-    workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel = { WorkingFileSetEditorViewModel.createDefault() },
 )
 {
     val uiScope = rememberCoroutineScope()

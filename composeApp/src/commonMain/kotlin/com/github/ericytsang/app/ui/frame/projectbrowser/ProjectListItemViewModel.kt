@@ -53,9 +53,9 @@ class ProjectListItemViewModelImpl(
     uiScope: CoroutineScope,
     private val rootChildWindowManager:ChildWindowManager,
     private val project:ProjectListItemModel.Project,
-    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
-    private val configurationRepository:ConfigurationRepository = RepositoryDependencyProvider.Companion.instance.configurationRepository,
-    private val workingFileSetRepository:WorkingFileSetRepository = RepositoryDependencyProvider.Companion.instance.workingFileSetRepository,
+    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+    private val configurationRepository:ConfigurationRepository = RepositoryDependencyProvider.instance.configurationRepository,
+    private val workingFileSetRepository:WorkingFileSetRepository = RepositoryDependencyProvider.instance.workingFileSetRepository,
 ):ProjectListItemViewModel,
     KotlinDependencyProvider by kotlinDependencyProvider
 {
@@ -69,7 +69,7 @@ class ProjectListItemViewModelImpl(
 
     override fun openProjectInLogViewer()
     {
-        rootChildWindowManager.openLogViewer()
+        rootChildWindowManager.openLogViewer(project.configuration.id)
     }
 
     override fun openWorkingFileSetEditor()

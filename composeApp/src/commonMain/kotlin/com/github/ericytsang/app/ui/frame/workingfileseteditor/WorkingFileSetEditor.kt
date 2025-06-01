@@ -20,7 +20,7 @@ import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 @Composable
 fun WorkingFileSetEditor(
     owner:ComposeWindow,
-    viewModel:WorkingFileSetEditorViewModel = WorkingFileSetEditorViewModel.createDefault(),
+    viewModel:WorkingFileSetEditorViewModel,
 )
 {
     val workingFileSet by viewModel.workingFileSet.collectAsState(WorkingFileSetEmpty)
