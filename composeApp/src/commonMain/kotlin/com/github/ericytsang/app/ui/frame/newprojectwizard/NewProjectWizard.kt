@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -30,13 +29,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.frame.commonwindowheader.CommonWindowHeader
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.childWindowManager
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.openLogViewer
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
 
 @Composable
 fun NewProjectWizard(
     window:ComposeWindow,
     themeColors:Colors,
+    rootChildWindowManager:ChildWindowManager,
     viewModelFactory:()->NewProjectWizardViewModel = { NewProjectWizardViewModel.createDefault() },
 )
 {
@@ -151,7 +153,7 @@ fun NewProjectWizard(
             val doneButtonEnabled = selectedFiles.isNotEmpty()
             val doneButtonContentColor by doneButtonColors.contentColor(doneButtonEnabled)
             Button(
-                onClick = { openFilePickerToAddFiles() },
+                onClick = { rootChildWindowManager.openLogViewer() },
                 colors = doneButtonColors,
                 enabled = doneButtonEnabled,
                 content = { Text("Done", color = doneButtonContentColor) },
