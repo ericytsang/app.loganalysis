@@ -13,7 +13,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Colors
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -30,10 +29,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.ui.asset.IconSettings
 import com.github.ericytsang.app.ui.frame.commonwindowheader.CommonWindowHeader
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.childWindowManager
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.showSettingsDialog
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
 
 @Composable
@@ -61,14 +58,12 @@ fun NewProjectWizard(
         modifier = Modifier
             .fillMaxSize()
             .padding(Dimens.mttPadding),
+        verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
         horizontalAlignment = Alignment.Start,
     )
     {
         // header with settings button
         CommonWindowHeader(themeColors,childWindowManager)
-
-        // spacer...
-        Spacer(modifier = Modifier.size(Dimens.mttPadding))
 
         // region selected files list
 
@@ -136,28 +131,28 @@ fun NewProjectWizard(
 
         // endregion
 
-        // spacer...
-        Spacer(modifier = Modifier.size(Dimens.mttPadding))
-
         // footer with buttons
         Row(
+            horizontalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
             modifier = Modifier.fillMaxWidth(),
         )
         {
+            Spacer(modifier = Modifier.weight(1f,fill = true))
+
             Button(
                 onClick = { openFilePickerToAddFiles() },
                 content = { Text("Add file(s)") },
+                colors = ButtonDefaults.buttonColors(themeColors.surface),
             )
 
-            Spacer(modifier = Modifier.weight(1f,fill = true))
-
-            Spacer(modifier = Modifier.size(Dimens.mttPadding))
-
+            val doneButtonColors = ButtonDefaults.buttonColors(themeColors.primary)
+            val doneButtonEnabled = selectedFiles.isNotEmpty()
+            val doneButtonContentColor by doneButtonColors.contentColor(doneButtonEnabled)
             Button(
                 onClick = { openFilePickerToAddFiles() },
-                colors = ButtonDefaults.buttonColors(themeColors.secondary),
-                enabled = selectedFiles.isNotEmpty(),
-                content = { Text("Done") },
+                colors = doneButtonColors,
+                enabled = doneButtonEnabled,
+                content = { Text("Done", color = doneButtonContentColor) },
             )
         }
     }

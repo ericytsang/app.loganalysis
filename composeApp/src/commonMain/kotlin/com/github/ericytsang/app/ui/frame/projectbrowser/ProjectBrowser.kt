@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,6 +21,7 @@ import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.frame.commonwindowheader.CommonWindowHeader
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.childWindowManager
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.openNewProjectWizard
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -38,6 +41,14 @@ fun ProjectBrowser(
     ) {
         // header with settings button
         CommonWindowHeader(themeColors,childWindowManager)
+        {
+            // new project button
+            Button(
+                onClick = { rootChildWindowManager.openNewProjectWizard() },
+                content = { Text("New project") },
+                colors = ButtonDefaults.buttonColors(themeColors.surface),
+            )
+        }
 
         // spacer...
         Spacer(modifier = Modifier.size(Dimens.mttPadding))
@@ -74,7 +85,6 @@ fun ProjectBrowser(
                     )
                 }
             }
-
         }
     }
 }

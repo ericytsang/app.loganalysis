@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.github.ericytsang.app.ui.frame.logviewer.LogViewerRootWindow
+import com.github.ericytsang.app.ui.frame.newprojectwizard.NewProjectWizardWindow
 import com.github.ericytsang.app.ui.modal.SettingsDialog
 
 data class ChildWindow(
@@ -65,7 +66,7 @@ interface ChildWindowManager
     fun addChildWindow(createChildWindow:@Composable (ChildWindowManagerController)->Unit)
 }
 
-fun ChildWindowManager.showSettingsDialog()
+fun ChildWindowManager.openSettingsDialog()
 {
     addChildWindow { controller -> SettingsDialog { controller.removeSelf() } }
 }
@@ -73,4 +74,9 @@ fun ChildWindowManager.showSettingsDialog()
 fun ChildWindowManager.openLogViewer()
 {
     addChildWindow { controller -> LogViewerRootWindow(this, controller) }
+}
+
+fun ChildWindowManager.openNewProjectWizard()
+{
+    addChildWindow { controller -> NewProjectWizardWindow(this, controller) }
 }
