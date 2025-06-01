@@ -32,9 +32,7 @@ import com.github.ericytsang.app.ui.frame.commonwindowheader.CommonWindowHeader
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManagerController
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.childWindowManager
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.openLogViewer
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
-import kotlinx.coroutines.flow.receiveAsFlow
 
 @Composable
 fun NewProjectWizard(
@@ -42,20 +40,17 @@ fun NewProjectWizard(
     themeColors:Colors,
     rootChildWindowManager:ChildWindowManager,
     controller:ChildWindowManagerController,
-    viewModelFactory:()->NewProjectWizardViewModel = { NewProjectWizardViewModel.createDefault() },
+    viewModelFactory:()->NewProjectWizardViewModel = {
+        NewProjectWizardViewModel.create(
+            rootChildWindowManager = rootChildWindowManager,
+            controller = controller,
+        )
+    },
 )
 {
     val viewModel = remember { viewModelFactory() }
     val selectedFiles by viewModel.selectedFiles.collectAsState(emptyList())
     val isCreatingConfiguration by viewModel.isCreatingConfiguration.collectAsState(false)
-
-    val launchLogViewerRequest by viewModel.launchLogViewerRequest.receiveAsFlow().collectAsState(null)
-    val launchLogViewerRequestValue = launchLogViewerRequest
-    if (launchLogViewerRequestValue != null)
-    {
-        rootChildWindowManager.openLogViewer(launchLogViewerRequestValue)
-        controller.removeSelf()
-    }
 
     fun openFilePickerToAddFiles()
     {

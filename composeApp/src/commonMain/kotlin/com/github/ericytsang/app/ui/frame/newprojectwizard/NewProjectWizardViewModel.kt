@@ -1,12 +1,12 @@
 package com.github.ericytsang.app.ui.frame.newprojectwizard
 
-import com.github.ericytsang.domain.objects.ConfigurationId
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManagerController
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.openLogViewer
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.WorkingFileSetRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -36,15 +36,14 @@ interface NewProjectWizardViewModel
      */
     val isCreatingConfiguration:Flow<Boolean>
 
-    /**
-     * this is a request from the view model to the UI to launch the log
-     * viewer for the newly created configuration.
-     */
-    val launchLogViewerRequest:ReceiveChannel<ConfigurationId>
-
     companion object
     {
-        fun createDefault():NewProjectWizardViewModel = NewProjectWizardViewModelImpl(
+        fun create(
+            rootChildWindowManager:ChildWindowManager,
+            controller:ChildWindowManagerController,
+        ):NewProjectWizardViewModel = NewProjectWizardViewModelImpl(
+            rootChildWindowManager = rootChildWindowManager,
+            controller = controller,
             kotlinDependencyProvider = KotlinDependencyProvider.instance,
             workingFileSetRepository = RepositoryDependencyProvider.instance.workingFileSetRepository,
         )
@@ -57,6 +56,8 @@ data class SelectedFile(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 private class NewProjectWizardViewModelImpl(
+    private val rootChildWindowManager:ChildWindowManager,
+    private val controller:ChildWindowManagerController,
     private val kotlinDependencyProvider:KotlinDependencyProvider,
     private val workingFileSetRepository:WorkingFileSetRepository,
 ):NewProjectWizardViewModel,
@@ -65,9 +66,6 @@ private class NewProjectWizardViewModelImpl(
 
     private val _isCreatingConfiguration = MutableStateFlow(false)
     override val isCreatingConfiguration:Flow<Boolean> get() = _isCreatingConfiguration
-
-    private val _launchLogViewerRequest = Channel<ConfigurationId>()
-    override val launchLogViewerRequest:ReceiveChannel<ConfigurationId> get() = _launchLogViewerRequest
 
     private val _selectedFiles = MutableStateFlow(emptyList<SelectedFile>())
     override val selectedFiles:Flow<List<SelectedFile>> = _selectedFiles
@@ -128,7 +126,8 @@ private class NewProjectWizardViewModelImpl(
                     val newConfigurationId = workingFileSetRepository.createNewWorkingFileSet(newFiles)
 
                     // notify the UI to launch the log viewer for the newly created configuration
-                    _launchLogViewerRequest.send(newConfigurationId)
+                    rootChildWindowManager.openLogViewer(newConfigurationId)
+                    controller.removeSelf()
                 }
                 finally
                 {
