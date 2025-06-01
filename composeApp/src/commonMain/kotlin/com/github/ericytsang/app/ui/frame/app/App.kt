@@ -1,12 +1,15 @@
 package com.github.ericytsang.app.ui.frame.app
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Colors
+import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,14 +20,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowState
+import androidx.compose.ui.window.rememberWindowState
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.asset.IconEditLogFiles
 import com.github.ericytsang.app.ui.asset.IconSettings
 import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowser
 import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowserViewModel
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManagerController
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.CustomWindowBar
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.NewProjectWizard
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditor
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.showSettingsDialog
 import com.github.ericytsang.app.ui.modal.openSettingsInNewWindowBlocking
 import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlocking
 import com.github.ericytsang.app.usecase.ThemeUseCase
@@ -81,13 +90,45 @@ fun App(
     }
 }
 
-fun openNewProjectWizard() = WindowContent(
-    initialTitle = "New Project",
-) { params ->
-    NewProjectWizard(
-        window = params.window,
-        themeColors = params.themeColors,
+@Composable
+fun NewProjectWizardWindow(
+    childWindowManager:ChildWindowManager,
+    controller:ChildWindowManagerController,
+)
+{
+    val windowState = rememberWindowState()
+    Window(
+        onCloseRequest = { controller.removeSelf() },
+        title = "New Project",
+        undecorated = true,
+        state = windowState,
     )
+    {
+        fillMaxBackground()
+        { themeColors ->
+            Column(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                CustomWindowBar(
+                    window = window,
+                    onCloseRequest = { controller.removeSelf() },
+                    title = "New Project",
+                    windowState = windowState,
+                    themeColors = themeColors,
+                ) {
+                    IconButton(
+                        modifier = Modifier.padding(end = Dimens.mttPadding),
+                        onClick = { childWindowManager.showSettingsDialog() },
+                        content = { IconSettings(themeColors.onSurface) },
+                    )
+                }
+                NewProjectWizard(
+                    window = window,
+                    themeColors = themeColors,
+                )
+            }
+        }
+    }
 }
 
 fun openOpenProject() = WindowContent(
