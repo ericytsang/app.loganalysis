@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.frame.workingfileseteditor
+package com.github.ericytsang.app.ui.frame.newprojectwizard
 
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,7 +16,7 @@ interface NewProjectWizardViewModel
     companion object
     {
         fun createDefault(
-            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
         ):NewProjectWizardViewModel = NewProjectWizardViewModelImpl(
             kotlinDependencyProvider = kotlinDependencyProvider,
         )

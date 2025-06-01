@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.frame.workingfileseteditor
+package com.github.ericytsang.app.ui.frame.newprojectwizard
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,6 +31,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.asset.IconSettings
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.childWindowManager
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.showSettingsDialog
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
 
 @Composable
@@ -55,26 +57,26 @@ fun NewProjectWizard(
     val childWindowManager = childWindowManager(uniqueKeyPrefix = "NewProjectWizard")
 
     Column(
-        modifier = Modifier.Companion
+        modifier = Modifier
             .fillMaxSize()
             .padding(Dimens.mttPadding),
-        horizontalAlignment = Alignment.Companion.Start,
+        horizontalAlignment = Alignment.Start,
     )
     {
         Row {
 
             // move the icon button the end
-            Spacer(modifier = Modifier.Companion.weight(1f,fill = true))
+            Spacer(modifier = Modifier.weight(1f,fill = true))
 
             // settings button
             IconButton(
-                modifier = Modifier.Companion.padding(end = Dimens.mttPadding),
+                modifier = Modifier.padding(end = Dimens.mttPadding),
                 onClick = { childWindowManager.showSettingsDialog() },
                 content = { IconSettings(themeColors.onSurface) },
             )
         }
 
-        Spacer(modifier = Modifier.Companion.size(Dimens.mttPadding))
+        Spacer(modifier = Modifier.size(Dimens.mttPadding))
 
         val commonPrefix = when (val firstFile = selectedFiles.firstOrNull())
         {
@@ -85,7 +87,7 @@ fun NewProjectWizard(
         val secondaryTextColor = themeColors.onBackground.copy(alpha = ContentAlpha.medium)
 
         Surface(
-            modifier = Modifier.Companion.weight(1f),
+            modifier = Modifier.weight(1f),
             shape = MaterialTheme.shapes.small,
             border = ButtonDefaults.outlinedBorder,
         )
@@ -93,13 +95,13 @@ fun NewProjectWizard(
             if (selectedFiles.isEmpty())
             {
                 Column(
-                    modifier = Modifier.Companion.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.Companion.CenterHorizontally,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
                         text = "No files selected",
-                        fontStyle = FontStyle.Companion.Italic,
+                        fontStyle = FontStyle.Italic,
                         color = secondaryTextColor,
                     )
                 }
@@ -107,7 +109,7 @@ fun NewProjectWizard(
             else
             {
                 LazyColumn(
-                    modifier = Modifier.Companion.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                 )
                 {
                     items(
@@ -117,13 +119,13 @@ fun NewProjectWizard(
                     { index ->
                         val filePath = selectedFiles[index].filePath
                         Surface(
-                            modifier = Modifier.Companion.fillMaxWidth().padding(Dimens.mttPadding),
+                            modifier = Modifier.fillMaxWidth().padding(Dimens.mttPadding),
                         ) {
                             Text(
                                 // if the texts have a common prefix, then make the common prefix portion the secondary text color
                                 text = buildAnnotatedString {
                                     withStyle(SpanStyle(color = secondaryTextColor)) { append(commonPrefix) }
-                                    withStyle(SpanStyle(fontWeight = FontWeight.Companion.Bold)) {
+                                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
                                         append(
                                             filePath.removePrefix(
                                                 commonPrefix
@@ -138,10 +140,10 @@ fun NewProjectWizard(
             }
         }
 
-        Spacer(modifier = Modifier.Companion.size(Dimens.mttPadding))
+        Spacer(modifier = Modifier.size(Dimens.mttPadding))
 
         Row(
-            modifier = Modifier.Companion.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
         )
         {
             Button(
@@ -149,9 +151,9 @@ fun NewProjectWizard(
                 content = { Text("Add file(s)") },
             )
 
-            Spacer(modifier = Modifier.Companion.weight(1f,fill = true))
+            Spacer(modifier = Modifier.weight(1f,fill = true))
 
-            Spacer(modifier = Modifier.Companion.size(Dimens.mttPadding))
+            Spacer(modifier = Modifier.size(Dimens.mttPadding))
 
             Button(
                 onClick = { openFilePickerToAddFiles() },

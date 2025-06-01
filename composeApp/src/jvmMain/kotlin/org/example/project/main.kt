@@ -10,7 +10,7 @@ import com.github.ericytsang.app.ui.frame.app.AppCommand
 import com.github.ericytsang.app.ui.frame.app.LoadingText
 import com.github.ericytsang.app.ui.frame.app.LogViewerApp
 import com.github.ericytsang.app.ui.frame.app.LogViewerAppInit
-import com.github.ericytsang.app.ui.frame.app.NewProjectWizardWindow
+import com.github.ericytsang.app.ui.frame.newprojectwizard.NewProjectWizardWindow
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.childWindowManager
 import com.github.ericytsang.app.util.EnsureSingletonProcessInstance

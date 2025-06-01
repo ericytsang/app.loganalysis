@@ -17,7 +17,7 @@ import com.github.ericytsang.app.ui.asset.IconEditLogFiles
 import com.github.ericytsang.app.ui.asset.IconSettings
 import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowser
 import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowserViewModel
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.NewProjectWizard
+import com.github.ericytsang.app.ui.frame.newprojectwizard.NewProjectWizard
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
 import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlocking
 import com.github.ericytsang.app.usecase.ThemeUseCase
