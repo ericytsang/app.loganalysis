@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
-import androidx.compose.material.Colors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -17,7 +16,6 @@ import com.github.ericytsang.app.ui.asset.IconEditLogFiles
 import com.github.ericytsang.app.ui.asset.IconSettings
 import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowser
 import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowserViewModel
-import com.github.ericytsang.app.ui.frame.newprojectwizard.NewProjectWizard
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
 import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlocking
 import com.github.ericytsang.app.usecase.ThemeUseCase
@@ -73,44 +71,3 @@ fun App(
         }
     }
 }
-
-fun openOpenProject() = WindowContent(
-    initialTitle = "New Project",
-) { params ->
-    NewProjectWizard(
-        window = params.window,
-        themeColors = params.themeColors,
-    )
-}
-
-fun openOpenProjectBrowser() = WindowContent(
-    initialTitle = "New Project",
-) { params ->
-    NewProjectWizard(
-        window = params.window,
-        themeColors = params.themeColors,
-    )
-}
-
-data class WindowContent(
-    val initialTitle:String,
-    val content: @Composable (WindowContentParams) -> Unit,
-)
-
-data class WindowContentParams(
-    val window:ComposeWindow,
-    val windowInterface: WindowInterface,
-    val themeColors: Colors,
-)
-
-interface WindowInterface
-{
-    fun destroyWindow()
-    var windowTitle:String
-}
-
-data class WindowInfo(
-    val windowId:Long,
-    val title:String,
-    val content: WindowContent,
-)
