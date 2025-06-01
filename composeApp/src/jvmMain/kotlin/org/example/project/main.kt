@@ -17,12 +17,14 @@ import com.github.ericytsang.app.ui.frame.app.AppCommand
 import com.github.ericytsang.app.ui.frame.app.LoadingText
 import com.github.ericytsang.app.ui.frame.app.LogViewerApp
 import com.github.ericytsang.app.ui.frame.app.LogViewerAppInit
+import com.github.ericytsang.app.ui.frame.app.NewProjectWizardWindow
 import com.github.ericytsang.app.ui.frame.app.WindowContentParams
 import com.github.ericytsang.app.ui.frame.app.WindowInfo
 import com.github.ericytsang.app.ui.frame.app.WindowInterface
-import com.github.ericytsang.app.ui.frame.app.openNewProjectWizard
 import com.github.ericytsang.app.ui.frame.app.openOpenProject
 import com.github.ericytsang.app.ui.frame.app.openOpenProjectBrowser
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.childWindowManager
 import com.github.ericytsang.app.util.EnsureSingletonProcessInstance
 import com.github.ericytsang.app.util.fillMaxBackground
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope.Companion.asImmutableCoroutineScope
@@ -86,68 +88,41 @@ class Main(
             )
         }
 
-        // keep track of all open windows
-        println("// keep track of all open windows")
-        val openWindowsState = remember { mutableStateOf<Map<Long,WindowInfo>>(emptyMap()) }
-        var openWindows by openWindowsState
+        // manage child windows
+        println("// manage child windows")
+        val childWindowManager = childWindowManager(
+            uniqueKeyPrefix = "main",
+            onFinalWindowClosed = { exitApplication() },
+        )
+
+        // open windows upon receiving app commands
+        println("// open windows upon receiving app commands")
         remember {
             MainOpenWindowsViewModel(
                 uiScope = uiScope,
                 appCommandChannel = appCommandChannel,
-                handleCommand = { appCommand ->
-                    // processing command
-                    val windowInfo = appCommand.toWindowInfo(openWindows.keys)
-                    println("// processing command: $windowInfo")
-                    openWindows += windowInfo.windowId to windowInfo
-                },
+                handleCommand = { appCommand -> handleAppCommand(appCommand,childWindowManager) },
             )
-        }
-
-        // render open windows
-        openWindows.forEach()
-        { openWindow ->
-            val windowInfoId = openWindow.key
-            val windowInfo = openWindow.value
-            key(windowInfoId)
-            {
-                val windowInterface = createWindowInterface(
-                    openWindowsState = openWindowsState,
-                    windowInfo = windowInfo,
-                    exitApplication = { exitApplication() },
-                )
-
-                Window(
-                    onCloseRequest = { windowInterface.destroyWindow() },
-                    title = windowInfo.title,
-                )
-                {
-                    fillMaxBackground()
-                    { themeColors ->
-                        val params = WindowContentParams(
-                            window = window,
-                            windowInterface = windowInterface,
-                            themeColors = themeColors,
-                        )
-                        windowInfo.content.content(params)
-                    }
-                }
-            }
         }
     }
 
-    private fun AppCommand.toWindowInfo(openWindows:Set<Long>):WindowInfo
+    private fun handleAppCommand(
+        appCommand:AppCommand,
+        childWindowManager:ChildWindowManager,
+    )
     {
-        val composeWindowContent = when (this)
+        when (appCommand)
         {
-            AppCommand.OpenNewProjectWizard -> openNewProjectWizard()
-            is AppCommand.OpenProject -> openOpenProject()
-            AppCommand.OpenProjectBrowser -> openOpenProjectBrowser()
+            AppCommand.OpenNewProjectWizard -> childWindowManager.addChildWindow { controller ->
+                NewProjectWizardWindow(childWindowManager,controller)
+            }
+            is AppCommand.OpenProject -> childWindowManager.addChildWindow { controller ->
+                NewProjectWizardWindow(childWindowManager,controller)
+            }
+            AppCommand.OpenProjectBrowser -> childWindowManager.addChildWindow { controller ->
+                NewProjectWizardWindow(childWindowManager,controller)
+            }
         }
-        return WindowInfo(
-            windowId = openWindows.maxOrNull()?.plus(1) ?: 0L,
-            title = composeWindowContent.initialTitle,
-            content = composeWindowContent,
-        )
     }
 
     private fun createWindowInterface(

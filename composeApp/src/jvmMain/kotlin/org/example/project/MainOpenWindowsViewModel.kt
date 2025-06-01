@@ -21,6 +21,8 @@ class MainOpenWindowsViewModel(
         uiScope.launch(dispatchers.io)
         {
             appCommandChannelFlow.collect { command ->
+                // invoke the provided command handler
+                println("Handling command: $command")
                 handleCommand(command)
             }
         }
