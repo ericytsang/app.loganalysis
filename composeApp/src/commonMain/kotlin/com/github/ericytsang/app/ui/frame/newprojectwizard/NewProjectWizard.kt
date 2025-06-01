@@ -139,10 +139,12 @@ fun NewProjectWizard(
         {
             Spacer(modifier = Modifier.weight(1f,fill = true))
 
+            val addFileButtonColors = ButtonDefaults.buttonColors(themeColors.surface)
+            val addFileContentColor by addFileButtonColors.contentColor(true)
             Button(
                 onClick = { openFilePickerToAddFiles() },
-                content = { Text("Add file(s)") },
-                colors = ButtonDefaults.buttonColors(themeColors.surface),
+                content = { Text("Add file(s)", color = addFileContentColor) },
+                colors = addFileButtonColors,
             )
 
             val doneButtonColors = ButtonDefaults.buttonColors(themeColors.primary)
