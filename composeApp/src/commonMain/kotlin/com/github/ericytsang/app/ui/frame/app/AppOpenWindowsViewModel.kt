@@ -1,16 +1,15 @@
-package org.example.project
+package com.github.ericytsang.app.ui.frame.app
 
-import com.github.ericytsang.app.ui.frame.app.AppCommand
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.consumeAsFlow
 
-class MainOpenWindowsViewModel(
+class AppOpenWindowsViewModel(
     uiScope:ImmutableCoroutineScope,
     appCommandChannel:ReceiveChannel<AppCommand>,
     handleCommand: (AppCommand) -> Unit,
-    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
+    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
 ):KotlinDependencyProvider by kotlinDependencyProvider
 {
     private val appCommandChannelFlow = appCommandChannel.consumeAsFlow()

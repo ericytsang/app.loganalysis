@@ -1,4 +1,4 @@
-package org.example.project
+package com.github.ericytsang.app.ui.frame.app
 
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 
-class MainLoadingDialogViewModel(
+class AppLoadingDialogViewModel(
     uiScope:ImmutableCoroutineScope,
     loadingFinishedSignalChannel:ReceiveChannel<Unit>,
-    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
+    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
 ):KotlinDependencyProvider by kotlinDependencyProvider
 {
     private val _shouldShowLoadingDialogFlow = MutableStateFlow(true)
