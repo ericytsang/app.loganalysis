@@ -13,6 +13,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Colors
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Surface
@@ -103,6 +104,21 @@ fun NewProjectWizard(
         horizontalAlignment = Alignment.Start,
     )
     {
+        Row {
+
+            // move the icon button the end
+            Spacer(modifier = Modifier.weight(1f, fill = true))
+
+            // settings button
+            IconButton(
+                modifier = Modifier.padding(end = Dimens.mttPadding),
+                onClick = { childWindowManager.showSettingsDialog() },
+                content = { IconSettings(themeColors.onSurface) },
+            )
+        }
+
+        Spacer(modifier = Modifier.size(Dimens.mttPadding))
+
         val commonPrefix = when (val firstFile = selectedFiles.firstOrNull())
         {
             null -> ""
@@ -176,14 +192,7 @@ fun NewProjectWizard(
                 content = { Text("Add file(s)") },
             )
 
-            Spacer(modifier = Modifier.size(Dimens.mttPadding))
-
             Spacer(modifier = Modifier.weight(1f,fill = true))
-
-            OutlinedButton(
-                onClick = { childWindowManager.showSettingsDialog() },
-                content = { IconSettings(themeColors.onBackground) },
-            )
 
             Spacer(modifier = Modifier.size(Dimens.mttPadding))
 
