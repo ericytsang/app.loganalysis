@@ -1,27 +1,28 @@
-package com.github.ericytsang.app.ui.frame.newprojectwizard
+package com.github.ericytsang.app.ui.frame.projectbrowser
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.rememberWindowState
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManagerController
 import com.github.ericytsang.app.util.fillMaxBackground
 
 @Composable
-fun NewProjectWizardWindow(
+fun ProjectBrowserWindow(
     rootChildWindowManager:ChildWindowManager,
     controller:ChildWindowManagerController,
 )
 {
     Window(
         onCloseRequest = { controller.removeSelf() },
-        title = "New Project",
+        title = "Project Browser",
     )
     {
         fillMaxBackground()
         { themeColors ->
-            NewProjectWizard(
-                window = window,
-                themeColors = themeColors,
+            ProjectBrowser(
+                viewModelFactory = { ProjectBrowserViewModelImpl() },
+                rootChildWindowManager = rootChildWindowManager,
             )
         }
     }

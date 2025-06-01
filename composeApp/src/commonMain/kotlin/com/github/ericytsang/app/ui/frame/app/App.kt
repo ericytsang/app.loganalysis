@@ -24,6 +24,7 @@ import com.github.ericytsang.app.ui.component.LoadingText
 import com.github.ericytsang.app.ui.frame.newprojectwizard.NewProjectWizardWindow
 import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowser
 import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowserViewModel
+import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowserWindow
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.childWindowManager
@@ -94,7 +95,6 @@ class App(
         // manage child windows
         println("// manage child windows")
         val childWindowManager = childWindowManager(
-            uniqueKeyPrefix = "main",
             onFinalWindowClosed = { exitApplication() },
         )
 
@@ -117,13 +117,13 @@ class App(
         when (appCommand)
         {
             AppCommand.OpenNewProjectWizard -> childWindowManager.addChildWindow { controller ->
-                NewProjectWizardWindow(controller)
+                NewProjectWizardWindow(childWindowManager,controller)
             }
             is AppCommand.OpenProject -> childWindowManager.addChildWindow { controller ->
-                NewProjectWizardWindow(controller)
+                NewProjectWizardWindow(childWindowManager,controller)
             }
             AppCommand.OpenProjectBrowser -> childWindowManager.addChildWindow { controller ->
-                NewProjectWizardWindow(controller)
+                ProjectBrowserWindow(childWindowManager,controller)
             }
         }
     }
@@ -170,14 +170,6 @@ fun AppOldUnused(
                     content = { IconSettings(themeColors.onPrimary) },
                 )
             }
-            ProjectBrowser(
-                viewModelFactory = projectBrowserViewModelFactory,
-                paddingValues = PaddingValues(
-                    start = Dimens.mttPadding,
-                    end = Dimens.mttPadding,
-                    bottom = Dimens.mttPadding,
-                )
-            )
         }
     }
 }

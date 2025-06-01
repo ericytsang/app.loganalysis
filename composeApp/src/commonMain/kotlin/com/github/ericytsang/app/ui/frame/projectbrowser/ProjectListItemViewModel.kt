@@ -1,5 +1,7 @@
 package com.github.ericytsang.app.ui.frame.projectbrowser
 
+import com.github.ericytsang.app.ui.frame.logviewer.LogViewerRootWindow
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.ConfigurationRepository
 import com.github.ericytsang.domain.repo.repo.WorkingFileSetRepository
@@ -41,6 +43,7 @@ interface ProjectListItemViewModel
 
 class ProjectListItemViewModelImpl(
     uiScope: CoroutineScope,
+    private val rootChildWindowManager:ChildWindowManager,
     private val project:ProjectListItemModel.Project,
     kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
     private val configurationRepository:ConfigurationRepository = RepositoryDependencyProvider.Companion.instance.configurationRepository,
@@ -58,7 +61,9 @@ class ProjectListItemViewModelImpl(
 
     override fun openProjectInLogViewer()
     {
-
+        rootChildWindowManager.addChildWindow { controller ->
+            LogViewerRootWindow(rootChildWindowManager,controller)
+        }
     }
 
     override fun openWorkingFileSetEditor()

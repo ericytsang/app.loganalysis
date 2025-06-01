@@ -10,10 +10,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.github.ericytsang.app.model.Dimens
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun ProjectBrowser(
+    rootChildWindowManager:ChildWindowManager,
     viewModelFactory: (CoroutineScope) -> ProjectBrowserViewModel,
     paddingValues:PaddingValues = PaddingValues(Dimens.mttPadding),
 )
@@ -29,15 +31,20 @@ fun ProjectBrowser(
         items(
             count = items.size,
             key = { index -> items[index] },
-            itemContent =
-            { index ->
-                val itemScope = rememberCoroutineScope()
-                ProjectListItem(
-                    item = items[index],
-                    projectBrowserViewModel = viewModel,
-                    viewModelFactory = { scope,projectItem -> ProjectListItemViewModelImpl(itemScope, projectItem) },
-                )
-            },
         )
+        { index ->
+            val itemScope = rememberCoroutineScope()
+            ProjectListItem(
+                item = items[index],
+                projectBrowserViewModel = viewModel,
+                viewModelFactory = { scope,projectItem ->
+                    ProjectListItemViewModelImpl(
+                        uiScope = itemScope,
+                        rootChildWindowManager = rootChildWindowManager,
+                        project = projectItem,
+                    )
+                },
+            )
+        }
     }
 }

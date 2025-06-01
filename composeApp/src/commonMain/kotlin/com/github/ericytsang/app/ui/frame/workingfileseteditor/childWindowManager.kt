@@ -1,54 +1,38 @@
 package com.github.ericytsang.app.ui.frame.workingfileseteditor
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.material.Colors
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.awt.ComposeWindow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.pointer.PointerInputScope
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.WindowPlacement
-import androidx.compose.ui.window.WindowState
-import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.modal.SettingsDialog
+
+data class ChildWindow(
+    val uniqueKey:Any,
+    val composable:@Composable () -> Unit,
+)
 
 @Composable
 fun childWindowManager(
-    uniqueKeyPrefix:String,
     onFinalWindowClosed:() -> Unit = {},
 ):ChildWindowManager
 {
-    var children by remember { mutableStateOf<Set<@Composable ()->Unit>>(emptySet()) }
+    var children by remember { mutableStateOf<Set<ChildWindow>>(emptySet()) }
+    val uniqueKeyGenerator = generateSequence(0) { it + 1 }.iterator()
 
-    children.forEachIndexed { index,dialog ->
-        key("$uniqueKeyPrefix$index") { dialog() }
+    children.forEach { childWindow ->
+        key(childWindow.uniqueKey)
+        {
+            childWindow.composable()
+        }
     }
 
     return object:ChildWindowManager
     {
         override fun addChildWindow(createChildWindow:@Composable (ChildWindowManagerController)->Unit)
         {
-            var function:@Composable ()->Unit = {}
+            var function = ChildWindow(0) {}
             val childWindowManagerRemote = object:ChildWindowManagerController
             {
                 override fun removeSelf()
@@ -60,7 +44,7 @@ fun childWindowManager(
                     }
                 }
             }
-            function = { createChildWindow(childWindowManagerRemote) }
+            function = ChildWindow(uniqueKeyGenerator.next()) { createChildWindow(childWindowManagerRemote) }
             children += function
         }
     }

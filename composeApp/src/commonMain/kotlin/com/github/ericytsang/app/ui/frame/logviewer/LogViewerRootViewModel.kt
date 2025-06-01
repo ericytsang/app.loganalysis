@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-interface LogViewerWindowViewModel:ThemeUseCase,DelimiterRepository
+interface LogViewerRootViewModel:ThemeUseCase,DelimiterRepository
 {
     fun getWordWrapFlow():Flow<Boolean>
 
@@ -25,7 +25,7 @@ interface LogViewerWindowViewModel:ThemeUseCase,DelimiterRepository
             kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
             settingsRepository:SettingsRepository = RepositoryDependencyProvider.Companion.instance.settingsRepository,
             delimiterRepository:DelimiterRepository = RepositoryDependencyProvider.Companion.instance.delimiterRepository,
-        ):LogViewerWindowViewModel = LogViewerComposableViewModelImpl(
+        ):LogViewerRootViewModel = LogViewerComposableViewModelImpl(
             uiScope = uiScope,
             kotlinDependencyProvider = kotlinDependencyProvider,
             settingsRepository = settingsRepository,
@@ -40,7 +40,7 @@ private class LogViewerComposableViewModelImpl(
     private val settingsRepository:SettingsRepository,
     private val delimiterRepository:DelimiterRepository,
 ):
-    LogViewerWindowViewModel,
+    LogViewerRootViewModel,
     ThemeUseCase by ThemeUseCase.instance,
     KotlinDependencyProvider by kotlinDependencyProvider,
     DelimiterRepository by delimiterRepository

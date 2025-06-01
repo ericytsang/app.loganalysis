@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.frame.newprojectwizard
+package com.github.ericytsang.app.ui.frame.logviewer
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.Window
@@ -7,7 +7,7 @@ import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManage
 import com.github.ericytsang.app.util.fillMaxBackground
 
 @Composable
-fun NewProjectWizardWindow(
+fun LogViewerRootWindow(
     rootChildWindowManager:ChildWindowManager,
     controller:ChildWindowManagerController,
 )
@@ -19,10 +19,11 @@ fun NewProjectWizardWindow(
     {
         fillMaxBackground()
         { themeColors ->
-            NewProjectWizard(
+            LogViewerRoot(
                 window = window,
                 themeColors = themeColors,
             )
         }
     }
 }
+

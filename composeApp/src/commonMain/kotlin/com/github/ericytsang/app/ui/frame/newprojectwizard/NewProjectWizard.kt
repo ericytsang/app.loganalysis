@@ -54,7 +54,7 @@ fun NewProjectWizard(
         }
     }
 
-    val childWindowManager = childWindowManager(uniqueKeyPrefix = "NewProjectWizard")
+    val childWindowManager = childWindowManager()
 
     Column(
         modifier = Modifier

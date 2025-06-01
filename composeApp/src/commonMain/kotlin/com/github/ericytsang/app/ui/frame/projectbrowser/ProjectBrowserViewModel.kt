@@ -76,8 +76,8 @@ sealed class ProjectListItemModel
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class ProjectBrowserViewModelImpl(
-    private val kotlinDependencyProvider:KotlinDependencyProvider,
-    private val configurationRepository:ConfigurationRepository,
+    private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+    private val configurationRepository:ConfigurationRepository = RepositoryDependencyProvider.instance.configurationRepository,
 ):ProjectBrowserViewModel,
     KotlinDependencyProvider by kotlinDependencyProvider
 {
