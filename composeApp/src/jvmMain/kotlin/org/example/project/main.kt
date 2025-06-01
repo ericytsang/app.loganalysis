@@ -4,8 +4,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -18,11 +16,8 @@ import com.github.ericytsang.app.ui.frame.app.LoadingText
 import com.github.ericytsang.app.ui.frame.app.LogViewerApp
 import com.github.ericytsang.app.ui.frame.app.LogViewerAppInit
 import com.github.ericytsang.app.ui.frame.app.NewProjectWizardWindow
-import com.github.ericytsang.app.ui.frame.app.WindowContentParams
 import com.github.ericytsang.app.ui.frame.app.WindowInfo
 import com.github.ericytsang.app.ui.frame.app.WindowInterface
-import com.github.ericytsang.app.ui.frame.app.openOpenProject
-import com.github.ericytsang.app.ui.frame.app.openOpenProjectBrowser
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.childWindowManager
 import com.github.ericytsang.app.util.EnsureSingletonProcessInstance
@@ -114,13 +109,13 @@ class Main(
         when (appCommand)
         {
             AppCommand.OpenNewProjectWizard -> childWindowManager.addChildWindow { controller ->
-                NewProjectWizardWindow(childWindowManager,controller)
+                NewProjectWizardWindow(controller)
             }
             is AppCommand.OpenProject -> childWindowManager.addChildWindow { controller ->
-                NewProjectWizardWindow(childWindowManager,controller)
+                NewProjectWizardWindow(controller)
             }
             AppCommand.OpenProjectBrowser -> childWindowManager.addChildWindow { controller ->
-                NewProjectWizardWindow(childWindowManager,controller)
+                NewProjectWizardWindow(controller)
             }
         }
     }
