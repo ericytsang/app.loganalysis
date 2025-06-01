@@ -41,7 +41,7 @@ private class NewProjectWizardViewModelImpl(
     {
         applicationScope.launch(dispatchers.io)
         {
-            _selectedFiles.update { selectedFiles -> selectedFiles + newFiles }
+            _selectedFiles.update { selectedFiles -> selectedFiles + newFiles.filter { it !in selectedFiles } }
         }
     }
 
