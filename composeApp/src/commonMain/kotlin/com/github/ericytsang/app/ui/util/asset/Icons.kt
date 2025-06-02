@@ -6,7 +6,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.outline_delete_24
+import kotlinproject.composeapp.generated.resources.outline_files_24
 import kotlinproject.composeapp.generated.resources.outline_match_case_24
+import kotlinproject.composeapp.generated.resources.outline_playlist_add_24
+import kotlinproject.composeapp.generated.resources.outline_playlist_remove_24
+import kotlinproject.composeapp.generated.resources.outline_regular_expression_24
 import kotlinproject.composeapp.generated.resources.outline_settings_24
 import kotlinproject.composeapp.generated.resources.outline_wrap_text_24
 import org.jetbrains.compose.resources.painterResource
@@ -56,6 +60,58 @@ fun IconDelete(color:Color)
     Image(
         painter = painterResource(Res.drawable.outline_delete_24),
         contentDescription = "Delete",
+        colorFilter = ColorFilter.lighting(
+            multiply = color,
+            add = color,
+        )
+    )
+}
+
+@Composable
+fun IconEditFileList(color:Color)
+{
+    Image(
+        painter = painterResource(Res.drawable.outline_files_24),
+        contentDescription = "Edit File List",
+        colorFilter = ColorFilter.lighting(
+            multiply = color,
+            add = color,
+        )
+    )
+}
+
+@Composable
+fun IconIncludeFilter(color:Color)
+{
+    Image(
+        painter = painterResource(Res.drawable.outline_playlist_add_24),
+        contentDescription = "Include Filter",
+        colorFilter = ColorFilter.lighting(
+            multiply = color,
+            add = color,
+        )
+    )
+}
+
+@Composable
+fun IconExcludeFilter(color:Color)
+{
+    Image(
+        painter = painterResource(Res.drawable.outline_playlist_remove_24),
+        contentDescription = "Exclude Filter",
+        colorFilter = ColorFilter.lighting(
+            multiply = color,
+            add = color,
+        )
+    )
+}
+
+@Composable
+fun IconLogcatFilter(color:Color)
+{
+    Image(
+        painter = painterResource(Res.drawable.outline_regular_expression_24),
+        contentDescription = "Logcat Filter",
         colorFilter = ColorFilter.lighting(
             multiply = color,
             add = color,

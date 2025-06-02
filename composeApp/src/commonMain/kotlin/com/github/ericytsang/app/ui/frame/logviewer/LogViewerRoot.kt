@@ -27,6 +27,10 @@ import androidx.compose.ui.awt.ComposeWindow
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
 import com.github.ericytsang.app.ui.util.ChildWindowManager
+import com.github.ericytsang.app.ui.util.asset.IconEditFileList
+import com.github.ericytsang.app.ui.util.asset.IconExcludeFilter
+import com.github.ericytsang.app.ui.util.asset.IconIncludeFilter
+import com.github.ericytsang.app.ui.util.asset.IconLogcatFilter
 import com.github.ericytsang.app.ui.util.asset.IconMatchCase
 import com.github.ericytsang.app.ui.util.asset.IconWrapText
 import com.github.ericytsang.app.ui.util.component.ColorCodedLogLine
@@ -177,15 +181,45 @@ fun LogViewerRoot(
             }
 
             // filter helpers and working file set editor
-            Column()
+            Surface(
+                modifier = Modifier.fillMaxHeight(),
+                shape = MaterialTheme.shapes.small,
+                border = ButtonDefaults.outlinedBorder,
+            )
             {
-                Surface(
-                    modifier = Modifier.fillMaxHeight(),
-                    shape = MaterialTheme.shapes.small,
-                    border = ButtonDefaults.outlinedBorder,
+                Column(
+                    modifier = Modifier.fillMaxHeight().padding(Dimens.mttPadding),
+                    verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
                 )
                 {
-                    Text("placeholder")
+                    ToggleButton(
+                        onClick = { viewModel.toggleWordWrap() },
+                        isToggled = shouldWrapText,
+                        isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                        isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                        content = { contentColor -> IconEditFileList(contentColor) },
+                    )
+                    ToggleButton(
+                        onClick = { viewModel.toggleWordWrap() },
+                        isToggled = shouldWrapText,
+                        isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                        isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                        content = { contentColor -> IconExcludeFilter(contentColor) },
+                    )
+                    ToggleButton(
+                        onClick = { viewModel.toggleWordWrap() },
+                        isToggled = shouldWrapText,
+                        isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                        isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                        content = { contentColor -> IconIncludeFilter(contentColor) },
+                    )
+                    ToggleButton(
+                        onClick = { viewModel.toggleWordWrap() },
+                        isToggled = shouldWrapText,
+                        isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                        isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                        content = { contentColor -> IconLogcatFilter(contentColor) },
+                    )
                 }
             }
         }

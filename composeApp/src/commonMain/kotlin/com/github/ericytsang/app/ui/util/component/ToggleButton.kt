@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
 
 @Composable
 fun ToggleButton(
-    modifier:Modifier,
+    modifier:Modifier = Modifier,
     onClick:()->Unit,
     isToggled:Boolean,
     isNotToggledColors:ButtonColors = ButtonDefaults.buttonColors(),
