@@ -134,13 +134,13 @@ LIMIT ?;
 
 selectNProjectsUpdatedAfter:
 SELECT * FROM ProjectEntity
-WHERE update_sequence >= ?
+WHERE update_sequence > ?
 ORDER BY update_sequence ASC
 LIMIT ?;
 
 selectNProjectsUpdatedBefore:
 SELECT * FROM ProjectEntity
-WHERE update_sequence <= ?
+WHERE update_sequence < ?
 ORDER BY update_sequence DESC
 LIMIT ?;
 

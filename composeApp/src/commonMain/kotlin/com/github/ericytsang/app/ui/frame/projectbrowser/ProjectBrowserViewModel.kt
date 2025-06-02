@@ -116,10 +116,15 @@ internal class ProjectBrowserViewModelImpl(
                 }
             }
             val reloadingExisting = async {
+                val offsetLoadPosition = when (loadDirection)
+                {
+                    LoadDirection.BELOW -> ConfigurationUpdateSequence(loadPosition.updateSequence - 1)
+                    LoadDirection.ABOVE -> ConfigurationUpdateSequence(loadPosition.updateSequence + 1)
+                }
                 when (loadDirection)
                 {
-                    LoadDirection.BELOW -> configurationRepository.loadNextNConfigurationIdsAfter(maxInMemoryItemsCountHintValue,loadPosition).drop(1)
-                    LoadDirection.ABOVE -> configurationRepository.loadNextNConfigurationIdsBefore(maxInMemoryItemsCountHintValue,loadPosition).dropLast(1)
+                    LoadDirection.BELOW -> configurationRepository.loadNextNConfigurationIdsAfter(maxInMemoryItemsCountHintValue,offsetLoadPosition)
+                    LoadDirection.ABOVE -> configurationRepository.loadNextNConfigurationIdsBefore(maxInMemoryItemsCountHintValue,offsetLoadPosition)
                 }
             }
             val hasMoreItemsAbove = when (loadDirection)
@@ -184,7 +189,7 @@ internal class ProjectBrowserViewModelImpl(
 
     companion object
     {
-        private const val AMOUNT_TO_LOAD_ON_DEMAND = 100
+        private const val AMOUNT_TO_LOAD_ON_DEMAND = 10
         private val DEFAULT_UPDATE_SEQUENCE = ConfigurationUpdateSequence(Long.MAX_VALUE)
     }
 }
