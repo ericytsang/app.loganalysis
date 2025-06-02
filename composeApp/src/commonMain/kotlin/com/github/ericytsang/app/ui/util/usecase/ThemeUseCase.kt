@@ -1,11 +1,10 @@
-package com.github.ericytsang.app.usecase
+package com.github.ericytsang.app.ui.util.usecase
 
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.ThemeRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 
 interface ThemeUseCase
 {

@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.util
+package com.github.ericytsang.app.ui.util.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -11,9 +11,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.window.ApplicationScope
-import androidx.compose.ui.window.Window
-import com.github.ericytsang.app.usecase.ThemeUseCase
+import com.github.ericytsang.app.ui.util.usecase.ThemeUseCase
+import com.github.ericytsang.app.ui.util.animatedThemeColors
 import com.github.ericytsang.domain.objects.Theme
 
 /**

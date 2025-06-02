@@ -15,7 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.util.fillMaxBackground
+import com.github.ericytsang.app.ui.util.component.fillMaxBackground
 import kotlinx.coroutines.CoroutineScope
 
 @Composable

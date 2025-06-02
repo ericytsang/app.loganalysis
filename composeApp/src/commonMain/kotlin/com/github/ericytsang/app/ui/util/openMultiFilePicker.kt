@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.modal
+package com.github.ericytsang.app.ui.util
 
 import androidx.compose.ui.awt.ComposeWindow
 import java.awt.FileDialog

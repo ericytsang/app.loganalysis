@@ -28,10 +28,10 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.ui.frame.commonwindowheader.CommonWindowHeader
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManagerController
-import com.github.ericytsang.app.ui.modal.openMultiFilePicker
+import com.github.ericytsang.app.ui.util.component.CommonWindowHeader
+import com.github.ericytsang.app.ui.util.ChildWindowManager
+import com.github.ericytsang.app.ui.util.ChildWindowManagerController
+import com.github.ericytsang.app.ui.util.openMultiFilePicker
 
 @Composable
 fun NewProjectWizard(

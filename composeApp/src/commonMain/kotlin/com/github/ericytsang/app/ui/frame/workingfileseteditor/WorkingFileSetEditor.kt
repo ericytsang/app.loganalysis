@@ -13,8 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.ui.modal.openMultiFilePicker
-import com.github.ericytsang.app.util.fillMaxBackground
+import com.github.ericytsang.app.ui.util.openMultiFilePicker
+import com.github.ericytsang.app.ui.util.component.fillMaxBackground
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 
 @Composable

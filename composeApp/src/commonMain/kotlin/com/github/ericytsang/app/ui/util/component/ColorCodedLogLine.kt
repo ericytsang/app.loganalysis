@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.component
+package com.github.ericytsang.app.ui.util.component
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -9,6 +9,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.withStyle
 import com.github.ericytsang.domain.objects.Theme
 import kotlin.random.Random
+import kotlin.text.iterator
 
 @Composable
 fun ColorCodedLogLine(

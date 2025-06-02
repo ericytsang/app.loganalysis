@@ -1,7 +1,7 @@
 package com.github.ericytsang.app.ui.frame.settings
 
 import com.github.ericytsang.app.ui.frame.settings.SettingsViewModel.DelimiterCharactersState
-import com.github.ericytsang.app.usecase.MutableThemeUseCase
+import com.github.ericytsang.app.ui.util.usecase.MutableThemeUseCase
 import com.github.ericytsang.app.util.LatestJobExecutor
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.DelimiterRepository

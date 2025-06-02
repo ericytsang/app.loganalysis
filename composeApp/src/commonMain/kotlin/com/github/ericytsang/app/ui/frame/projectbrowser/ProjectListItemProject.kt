@@ -1,20 +1,18 @@
 package com.github.ericytsang.app.ui.frame.projectbrowser
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Colors
 import androidx.compose.material.Text
-import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.ui.asset.IconDelete
-import com.github.ericytsang.app.ui.component.ClickableSurface
+import com.github.ericytsang.app.ui.util.asset.IconDelete
+import com.github.ericytsang.app.ui.util.component.ClickableSurface
 import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectListItemViewModelImpl.ProjectItemTexts
 
 @Composable

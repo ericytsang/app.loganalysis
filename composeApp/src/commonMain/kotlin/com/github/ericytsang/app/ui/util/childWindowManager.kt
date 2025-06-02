@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.frame.workingfileseteditor
+package com.github.ericytsang.app.ui.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue

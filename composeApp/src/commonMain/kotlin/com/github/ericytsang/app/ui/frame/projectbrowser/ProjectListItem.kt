@@ -1,7 +1,6 @@
 package com.github.ericytsang.app.ui.frame.projectbrowser
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -11,8 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.usecase.ThemeUseCase
-import com.github.ericytsang.app.util.animatedThemeColors
+import com.github.ericytsang.app.ui.util.usecase.ThemeUseCase
+import com.github.ericytsang.app.ui.util.animatedThemeColors
 import com.github.ericytsang.domain.objects.Theme
 import kotlinx.coroutines.CoroutineScope
 

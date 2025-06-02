@@ -18,9 +18,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.ui.frame.commonwindowheader.CommonWindowHeader
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.openNewProjectWizard
+import com.github.ericytsang.app.ui.util.component.CommonWindowHeader
+import com.github.ericytsang.app.ui.util.ChildWindowManager
+import com.github.ericytsang.app.ui.util.openNewProjectWizard
 import kotlinx.coroutines.CoroutineScope
 
 @Composable

@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.component
+package com.github.ericytsang.app.ui.util.component
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.material.Button

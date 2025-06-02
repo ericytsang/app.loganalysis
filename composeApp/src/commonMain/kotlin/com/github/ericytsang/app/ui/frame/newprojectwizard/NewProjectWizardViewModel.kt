@@ -1,8 +1,8 @@
 package com.github.ericytsang.app.ui.frame.newprojectwizard
 
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManagerController
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.openLogViewer
+import com.github.ericytsang.app.ui.util.ChildWindowManager
+import com.github.ericytsang.app.ui.util.ChildWindowManagerController
+import com.github.ericytsang.app.ui.util.openLogViewer
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.WorkingFileSetRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider

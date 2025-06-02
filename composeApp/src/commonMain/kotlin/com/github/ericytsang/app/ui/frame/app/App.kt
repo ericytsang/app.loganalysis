@@ -1,40 +1,21 @@
 package com.github.ericytsang.app.ui.frame.app
 
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.application
-import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.ui.asset.IconEditLogFiles
-import com.github.ericytsang.app.ui.asset.IconSettings
-import com.github.ericytsang.app.ui.component.LoadingText
+import com.github.ericytsang.app.ui.util.component.LoadingText
 import com.github.ericytsang.app.ui.frame.newprojectwizard.NewProjectWizardWindow
-import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowser
-import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowserViewModel
 import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowserWindow
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.childWindowManager
-import com.github.ericytsang.app.ui.modal.openWorkingFileSetEditorInNewWindowBlocking
-import com.github.ericytsang.app.usecase.ThemeUseCase
+import com.github.ericytsang.app.ui.util.ChildWindowManager
+import com.github.ericytsang.app.ui.util.childWindowManager
 import com.github.ericytsang.app.util.EnsureSingletonProcessInstance
-import com.github.ericytsang.app.util.fillMaxBackground
+import com.github.ericytsang.app.ui.util.component.fillMaxBackground
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope.Companion.asImmutableCoroutineScope
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 
 class App(

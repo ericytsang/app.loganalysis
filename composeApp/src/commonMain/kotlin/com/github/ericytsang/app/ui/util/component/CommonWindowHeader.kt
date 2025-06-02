@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.frame.commonwindowheader
+package com.github.ericytsang.app.ui.util.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -11,9 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.ui.asset.IconSettings
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.openSettingsDialog
+import com.github.ericytsang.app.ui.util.asset.IconSettings
+import com.github.ericytsang.app.ui.util.ChildWindowManager
+import com.github.ericytsang.app.ui.util.openSettingsDialog
 
 @Composable
 fun CommonWindowHeader(

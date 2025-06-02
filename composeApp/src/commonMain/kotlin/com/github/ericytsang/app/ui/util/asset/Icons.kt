@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.asset
+package com.github.ericytsang.app.ui.util.asset
 
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable

@@ -1,6 +1,6 @@
 package com.github.ericytsang.app.ui.frame.logviewer
 
-import com.github.ericytsang.app.usecase.ThemeUseCase
+import com.github.ericytsang.app.ui.util.usecase.ThemeUseCase
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.DelimiterRepository
 import com.github.ericytsang.domain.repo.repo.SettingsRepository

@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.util
+package com.github.ericytsang.app.ui.util
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.AnimationSpec

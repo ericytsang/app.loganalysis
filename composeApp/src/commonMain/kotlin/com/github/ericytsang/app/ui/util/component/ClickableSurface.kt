@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.component
+package com.github.ericytsang.app.ui.util.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource

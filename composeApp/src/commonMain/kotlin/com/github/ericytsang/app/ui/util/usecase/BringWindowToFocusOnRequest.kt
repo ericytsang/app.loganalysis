@@ -1,8 +1,8 @@
-package com.github.ericytsang.app.ui.frame.projectbrowser
+package com.github.ericytsang.app.ui.util.usecase
 
 import androidx.compose.ui.awt.ComposeWindow
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowCommand
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManagerController
+import com.github.ericytsang.app.ui.util.ChildWindowCommand
+import com.github.ericytsang.app.ui.util.ChildWindowManagerController
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.flow.receiveAsFlow
