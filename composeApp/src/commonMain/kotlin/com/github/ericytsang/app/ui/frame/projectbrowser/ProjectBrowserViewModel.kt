@@ -105,6 +105,14 @@ internal class ProjectBrowserViewModelImpl(
 
     private val onProjectsChangedFlow = configurationRepository.getOnChangedFlow()
 
+    /**
+     * re-loads all list items around the given [LoadMoreItemsParams.loadPosition] in the given [LoadMoreItemsParams.loadDirection].
+     * it will re-load [maxInMemoryItemsCountHint] items in the opposite direction of the [LoadMoreItemsParams.loadDirection],
+     * and [AMOUNT_TO_LOAD_ON_DEMAND] items in the [LoadMoreItemsParams.loadDirection].
+     * this method is intended to be used when...
+     * - the user scrolls to the top or bottom of the list to load more items.
+     * - or if changes are detected in the configuration repository that may affect the list of projects.
+     */
     private fun rangeToProjectsFlow():Flow<List<ProjectListItemModel>> = combine(maxInMemoryItemsCountHint, loadParamsFlow)
     { maxInMemoryItemsCountHintValue, loadParams ->
         val loadPosition = loadParams.loadPosition
