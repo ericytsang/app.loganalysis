@@ -21,6 +21,7 @@ import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.util.component.CommonWindowHeader
 import com.github.ericytsang.app.ui.util.ChildWindowManager
 import com.github.ericytsang.app.ui.util.openNewProjectWizard
+import com.github.ericytsang.domain.objects.ConfigurationUpdateSequence
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -61,7 +62,13 @@ fun ProjectBrowser(
             LazyColumn {
                 items(
                     count = items.size,
-                    key = { index -> items[index] },
+                    key = { index ->
+                        when (val item = items[index]) {
+                            is ProjectListItemModel.Project -> item.configuration.updateSequence
+                            is ProjectListItemModel.LazyLoadMoreItemsAbove -> ConfigurationUpdateSequence(item.updateSequence.updateSequence+1)
+                            is ProjectListItemModel.LazyLoadMoreItemsBelow -> ConfigurationUpdateSequence(item.updateSequence.updateSequence-1)
+                        }
+                    },
                 )
                 { index ->
                     val itemScope = rememberCoroutineScope()

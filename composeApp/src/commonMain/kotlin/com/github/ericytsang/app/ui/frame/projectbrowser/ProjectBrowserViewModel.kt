@@ -8,11 +8,13 @@ import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * ViewModel for the Project Browser window.
@@ -81,7 +83,7 @@ internal class ProjectBrowserViewModelImpl(
 ):ProjectBrowserViewModel,
     KotlinDependencyProvider by kotlinDependencyProvider
 {
-    private val maxInMemoryItemsCountHint = MutableStateFlow(200)
+    private val maxInMemoryItemsCountHint = MutableStateFlow(2)
 
     private val loadParamsFlow = MutableStateFlow<LoadMoreItemsParams>(
         LoadMoreItemsParams(
@@ -108,6 +110,7 @@ internal class ProjectBrowserViewModelImpl(
         val loadPosition = loadParams.loadPosition
         val loadDirection = loadParams.loadDirection
         coroutineScope {
+            delay(2.seconds)
             val loadedOnDemand = async {
                 when (loadDirection)
                 {
@@ -189,7 +192,7 @@ internal class ProjectBrowserViewModelImpl(
 
     companion object
     {
-        private const val AMOUNT_TO_LOAD_ON_DEMAND = 10
+        private const val AMOUNT_TO_LOAD_ON_DEMAND = 1
         private val DEFAULT_UPDATE_SEQUENCE = ConfigurationUpdateSequence(Long.MAX_VALUE)
     }
 }
