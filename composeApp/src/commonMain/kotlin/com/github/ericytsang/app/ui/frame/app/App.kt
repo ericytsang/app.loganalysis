@@ -7,13 +7,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.application
-import com.github.ericytsang.app.ui.util.component.LoadingText
-import com.github.ericytsang.app.ui.frame.newprojectwizard.NewProjectWizardWindow
-import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowserWindow
 import com.github.ericytsang.app.ui.util.ChildWindowManager
 import com.github.ericytsang.app.ui.util.childWindowManager
-import com.github.ericytsang.app.util.EnsureSingletonProcessInstance
+import com.github.ericytsang.app.ui.util.component.LoadingText
 import com.github.ericytsang.app.ui.util.component.fillMaxBackground
+import com.github.ericytsang.app.ui.util.openLogViewer
+import com.github.ericytsang.app.ui.util.openNewProjectWizard
+import com.github.ericytsang.app.ui.util.openProjectBrowser
+import com.github.ericytsang.app.util.EnsureSingletonProcessInstance
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope.Companion.asImmutableCoroutineScope
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.channels.Channel
@@ -97,15 +98,9 @@ class App(
     {
         when (appCommand)
         {
-            AppCommand.OpenNewProjectWizard -> childWindowManager.addChildWindow { controller ->
-                NewProjectWizardWindow(childWindowManager,controller)
-            }
-            is AppCommand.OpenProject -> childWindowManager.addChildWindow { controller ->
-                NewProjectWizardWindow(childWindowManager,controller)
-            }
-            AppCommand.OpenProjectBrowser -> childWindowManager.addChildWindow { controller ->
-                ProjectBrowserWindow(childWindowManager,controller)
-            }
+            AppCommand.OpenNewProjectWizard -> childWindowManager.openNewProjectWizard()
+            is AppCommand.OpenProject -> childWindowManager.openLogViewer(appCommand.configurationId)
+            AppCommand.OpenProjectBrowser -> childWindowManager.openProjectBrowser()
         }
     }
 }
