@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Colors
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -89,7 +91,6 @@ fun LogViewerRoot(
         }
 
         Row(
-            modifier = Modifier.fillMaxWidth().padding(Dimens.mttPadding),
             verticalAlignment = Alignment.CenterVertically,
         )
         {
@@ -127,24 +128,28 @@ fun LogViewerRoot(
 
         val logLines by logViewerViewModel.getLogLinesFlow().collectAsState(emptyList())
 
-        Column(
-            modifier = Modifier.fillMaxSize().padding(Dimens.mttPadding),
-        )
+        Column()
         {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-            )
-            {
-                items(count = logLines.size)
-                { index ->
-                    ColorCodedLogLine(
-                        text = logLines[index],
-                        modifier = Modifier.fillMaxWidth(),
-                        delimiters = delimiters,
-                        themeForColorCoding = theme,
-                        defaultColor = themeColors.onBackground,
-                        softWrap = shouldWrapText,
-                    )
+            Surface(
+                modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.small,
+                border = ButtonDefaults.outlinedBorder,
+            ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                )
+                {
+                    items(count = logLines.size)
+                    { index ->
+                        ColorCodedLogLine(
+                            text = logLines[index],
+                            modifier = Modifier.fillMaxWidth(),
+                            delimiters = delimiters,
+                            themeForColorCoding = theme,
+                            defaultColor = themeColors.onBackground,
+                            softWrap = shouldWrapText,
+                        )
+                    }
                 }
             }
         }
