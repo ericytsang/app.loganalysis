@@ -83,7 +83,7 @@ internal class ProjectBrowserViewModelImpl(
 ):ProjectBrowserViewModel,
     KotlinDependencyProvider by kotlinDependencyProvider
 {
-    private val maxInMemoryItemsCountHint = MutableStateFlow(2)
+    private val maxInMemoryItemsCountHint = MutableStateFlow(200)
 
     private val loadParamsFlow = MutableStateFlow<LoadMoreItemsParams>(
         LoadMoreItemsParams(
@@ -110,7 +110,6 @@ internal class ProjectBrowserViewModelImpl(
         val loadPosition = loadParams.loadPosition
         val loadDirection = loadParams.loadDirection
         coroutineScope {
-            delay(2.seconds)
             val loadedOnDemand = async {
                 when (loadDirection)
                 {
@@ -192,7 +191,7 @@ internal class ProjectBrowserViewModelImpl(
 
     companion object
     {
-        private const val AMOUNT_TO_LOAD_ON_DEMAND = 1
+        private const val AMOUNT_TO_LOAD_ON_DEMAND = 20
         private val DEFAULT_UPDATE_SEQUENCE = ConfigurationUpdateSequence(Long.MAX_VALUE)
     }
 }
