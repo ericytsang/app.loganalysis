@@ -213,13 +213,6 @@ fun LogViewerRoot(
                         isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
                         content = { contentColor -> IconIncludeFilter(contentColor) },
                     )
-                    ToggleButton(
-                        onClick = { viewModel.toggleWordWrap() },
-                        isToggled = shouldWrapText,
-                        isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                        isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                        content = { contentColor -> IconLogcatFilter(contentColor) },
-                    )
                 }
             }
         }

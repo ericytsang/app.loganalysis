@@ -105,16 +105,3 @@ fun IconExcludeFilter(color:Color)
         )
     )
 }
-
-@Composable
-fun IconLogcatFilter(color:Color)
-{
-    Image(
-        painter = painterResource(Res.drawable.outline_regular_expression_24),
-        contentDescription = "Logcat Filter",
-        colorFilter = ColorFilter.lighting(
-            multiply = color,
-            add = color,
-        )
-    )
-}
