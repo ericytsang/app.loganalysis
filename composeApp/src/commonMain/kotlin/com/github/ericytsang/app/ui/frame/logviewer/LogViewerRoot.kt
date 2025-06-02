@@ -3,6 +3,7 @@ package com.github.ericytsang.app.ui.frame.logviewer
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -90,75 +91,104 @@ fun LogViewerRoot(
             )
         }
 
-        Surface(
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.small,
-            border = ButtonDefaults.outlinedBorder,
+            horizontalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
         )
         {
-            Row(
-                modifier = Modifier.padding(Dimens.mttPadding),
-                verticalAlignment = Alignment.CenterVertically,
+            // logcat filter input and log viewer
+            Column(
+                modifier = Modifier.weight(1f, fill = true),
+                verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
             )
             {
 
-                // user input for entering the logcat filter string
-                TextField(
-                    value = logcatFilterString,
-                    onValueChange = { newValue -> logViewerViewModel.setLogcatFilterString(newValue) },
-                    modifier = Modifier.weight(1f).padding(end = Dimens.mttPadding),
-                    colors = TextFieldDefaults.textFieldColors(
-                        textColor = themeColors.onBackground,
-                    ),
-                )
-
-                // toggle button for enabling/disabling case-sensitive matching in the logcat filter
-                ToggleButton(
-                    modifier = Modifier.padding(end = Dimens.mttPadding),
-                    onClick = { logViewerViewModel.setCaseSensitive(!logViewerViewModel.isCaseSensitive.value) },
-                    isToggled = shouldMatchCase,
-                    isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                    isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                    content = { contentColor -> IconMatchCase(contentColor) },
-                )
-
-                // toggle button for enabling/disabling word wrapping in the log viewer
-                ToggleButton(
-                    modifier = Modifier.padding(end = Dimens.mttPadding),
-                    onClick = { viewModel.toggleWordWrap() },
-                    isToggled = shouldWrapText,
-                    isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                    isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                    content = { contentColor -> IconWrapText(contentColor) },
-                )
-            }
-        }
-
-        val logLines by logViewerViewModel.getLogLinesFlow().collectAsState(emptyList())
-
-        Column()
-        {
-            Surface(
-                modifier = Modifier.weight(1f),
-                shape = MaterialTheme.shapes.small,
-                border = ButtonDefaults.outlinedBorder,
-            )
-            {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                // logcat filter input
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.small,
+                    border = ButtonDefaults.outlinedBorder,
                 )
                 {
-                    items(count = logLines.size)
-                    { index ->
-                        ColorCodedLogLine(
-                            text = logLines[index],
-                            modifier = Modifier.fillMaxWidth(),
-                            delimiters = delimiters,
-                            themeForColorCoding = theme,
-                            defaultColor = themeColors.onBackground,
-                            softWrap = shouldWrapText,
+                    Row(
+                        modifier = Modifier.padding(Dimens.mttPadding),
+                        verticalAlignment = Alignment.CenterVertically,
+                    )
+                    {
+
+                        // user input for entering the logcat filter string
+                        TextField(
+                            value = logcatFilterString,
+                            onValueChange = { newValue -> logViewerViewModel.setLogcatFilterString(newValue) },
+                            modifier = Modifier.weight(1f).padding(end = Dimens.mttPadding),
+                            colors = TextFieldDefaults.textFieldColors(
+                                textColor = themeColors.onBackground,
+                            ),
+                        )
+
+                        // toggle button for enabling/disabling case-sensitive matching in the logcat filter
+                        ToggleButton(
+                            modifier = Modifier.padding(end = Dimens.mttPadding),
+                            onClick = { logViewerViewModel.setCaseSensitive(!logViewerViewModel.isCaseSensitive.value) },
+                            isToggled = shouldMatchCase,
+                            isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                            isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                            content = { contentColor -> IconMatchCase(contentColor) },
+                        )
+
+                        // toggle button for enabling/disabling word wrapping in the log viewer
+                        ToggleButton(
+                            modifier = Modifier.padding(end = Dimens.mttPadding),
+                            onClick = { viewModel.toggleWordWrap() },
+                            isToggled = shouldWrapText,
+                            isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                            isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                            content = { contentColor -> IconWrapText(contentColor) },
                         )
                     }
+                }
+
+                // region log viewer
+
+                val logLines by logViewerViewModel.getLogLinesFlow().collectAsState(emptyList())
+
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    shape = MaterialTheme.shapes.small,
+                    border = ButtonDefaults.outlinedBorder,
+                )
+                {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                    {
+                        items(count = logLines.size)
+                        { index ->
+                            ColorCodedLogLine(
+                                text = logLines[index],
+                                modifier = Modifier.fillMaxWidth(),
+                                delimiters = delimiters,
+                                themeForColorCoding = theme,
+                                defaultColor = themeColors.onBackground,
+                                softWrap = shouldWrapText,
+                            )
+                        }
+                    }
+                }
+
+                // endregion
+            }
+
+            // filter helpers and working file set editor
+            Column()
+            {
+                Surface(
+                    modifier = Modifier.fillMaxHeight(),
+                    shape = MaterialTheme.shapes.small,
+                    border = ButtonDefaults.outlinedBorder,
+                )
+                {
+                    Text("placeholder")
                 }
             }
         }
