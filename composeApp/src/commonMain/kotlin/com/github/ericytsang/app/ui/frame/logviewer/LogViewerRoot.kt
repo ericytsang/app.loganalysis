@@ -90,40 +90,48 @@ fun LogViewerRoot(
             )
         }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.small,
+            border = ButtonDefaults.outlinedBorder,
         )
         {
-
-            // user input for entering the logcat filter string
-            TextField(
-                value = logcatFilterString,
-                onValueChange = { newValue -> logViewerViewModel.setLogcatFilterString(newValue) },
-                modifier = Modifier.weight(1f).padding(end = Dimens.mttPadding),
-                colors = TextFieldDefaults.textFieldColors(
-                    textColor = themeColors.onBackground,
-                ),
+            Row(
+                modifier = Modifier.padding(Dimens.mttPadding),
+                verticalAlignment = Alignment.CenterVertically,
             )
+            {
 
-            // toggle button for enabling/disabling case-sensitive matching in the logcat filter
-            ToggleButton(
-                modifier = Modifier.padding(end = Dimens.mttPadding),
-                onClick = { logViewerViewModel.setCaseSensitive(!logViewerViewModel.isCaseSensitive.value) },
-                isToggled = shouldMatchCase,
-                isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                content = { contentColor -> IconMatchCase(contentColor) },
-            )
+                // user input for entering the logcat filter string
+                TextField(
+                    value = logcatFilterString,
+                    onValueChange = { newValue -> logViewerViewModel.setLogcatFilterString(newValue) },
+                    modifier = Modifier.weight(1f).padding(end = Dimens.mttPadding),
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = themeColors.onBackground,
+                    ),
+                )
 
-            // toggle button for enabling/disabling word wrapping in the log viewer
-            ToggleButton(
-                modifier = Modifier.padding(end = Dimens.mttPadding),
-                onClick = { viewModel.toggleWordWrap() },
-                isToggled = shouldWrapText,
-                isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                content = { contentColor -> IconWrapText(contentColor) },
-            )
+                // toggle button for enabling/disabling case-sensitive matching in the logcat filter
+                ToggleButton(
+                    modifier = Modifier.padding(end = Dimens.mttPadding),
+                    onClick = { logViewerViewModel.setCaseSensitive(!logViewerViewModel.isCaseSensitive.value) },
+                    isToggled = shouldMatchCase,
+                    isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                    isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                    content = { contentColor -> IconMatchCase(contentColor) },
+                )
+
+                // toggle button for enabling/disabling word wrapping in the log viewer
+                ToggleButton(
+                    modifier = Modifier.padding(end = Dimens.mttPadding),
+                    onClick = { viewModel.toggleWordWrap() },
+                    isToggled = shouldWrapText,
+                    isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                    isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                    content = { contentColor -> IconWrapText(contentColor) },
+                )
+            }
         }
 
         val logLines by logViewerViewModel.getLogLinesFlow().collectAsState(emptyList())
@@ -134,7 +142,8 @@ fun LogViewerRoot(
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.small,
                 border = ButtonDefaults.outlinedBorder,
-            ) {
+            )
+            {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                 )
