@@ -1,10 +1,9 @@
-package com.github.ericytsang.app.ui.modal
+package com.github.ericytsang.app.ui.frame.settings
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.window.Window
 import com.github.ericytsang.app.ui.frame.projectbrowser.BringWindowToFocusOnRequest
-import com.github.ericytsang.app.ui.frame.settings.Settings
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManagerController
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope.Companion.asImmutableCoroutineScope
 

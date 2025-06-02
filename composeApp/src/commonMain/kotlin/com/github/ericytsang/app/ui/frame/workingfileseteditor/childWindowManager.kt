@@ -9,7 +9,7 @@ import androidx.compose.runtime.setValue
 import com.github.ericytsang.app.ui.frame.logviewer.LogViewerRootWindow
 import com.github.ericytsang.app.ui.frame.newprojectwizard.NewProjectWizardWindow
 import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowserWindow
-import com.github.ericytsang.app.ui.modal.SettingsWindow
+import com.github.ericytsang.app.ui.frame.settings.SettingsWindow
 import com.github.ericytsang.domain.objects.ConfigurationId
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
