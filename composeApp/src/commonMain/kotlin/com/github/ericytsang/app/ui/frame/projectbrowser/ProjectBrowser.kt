@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.frame.commonwindowheader.CommonWindowHeader
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.childWindowManager
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.openNewProjectWizard
 import kotlinx.coroutines.CoroutineScope
 
@@ -34,13 +33,12 @@ fun ProjectBrowser(
     val coroutineScope = rememberCoroutineScope()
     val viewModel = remember { viewModelFactory(coroutineScope) }
     val items:List<ProjectListItemModel> by viewModel.getProjectsFlow.collectAsState(emptyList())
-    val childWindowManager = childWindowManager()
 
     Column(
         modifier = Modifier.padding(Dimens.mttPadding)
     ) {
         // header with settings button
-        CommonWindowHeader(themeColors,childWindowManager)
+        CommonWindowHeader(themeColors,rootChildWindowManager)
         {
             // new project button
             Button(

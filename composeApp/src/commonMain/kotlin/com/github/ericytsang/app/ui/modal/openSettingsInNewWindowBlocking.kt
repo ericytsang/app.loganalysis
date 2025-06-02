@@ -1,36 +1,34 @@
 package com.github.ericytsang.app.ui.modal
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.window.Window
+import com.github.ericytsang.app.ui.frame.projectbrowser.BringWindowToFocusOnRequest
 import com.github.ericytsang.app.ui.frame.settings.Settings
-import com.github.ericytsang.app.util.openBlockingDialog
-import java.awt.Window
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManagerController
+import com.github.ericytsang.kotlin.ImmutableCoroutineScope.Companion.asImmutableCoroutineScope
 
 @Composable
-fun openSettingsInNewWindowBlocking()
-{
-    var showDialog by remember { mutableStateOf(true) }
-    if (showDialog)
-    {
-        openBlockingDialog(
-            onCloseRequest = { showDialog = false },
-            title = "Settings",
-            content = { Settings() },
-        )
-    }
-}
-
-@Composable
-fun SettingsDialog(
-    onCloseRequest:()->Unit,
+fun SettingsWindow(
+    controller: ChildWindowManagerController
 )
 {
-    openBlockingDialog(
-        onCloseRequest = onCloseRequest,
+    val coroutineScope = rememberCoroutineScope().asImmutableCoroutineScope()
+
+    Window(
+        onCloseRequest = { controller.removeSelf() },
         title = "Settings",
-        content = { Settings() },
     )
+    {
+
+        // bring the window to focus when requested by the child window manager
+        BringWindowToFocusOnRequest(
+            uiScope = coroutineScope,
+            window = window,
+            controller = controller,
+        )
+
+        // window content
+        Settings()
+    }
 }

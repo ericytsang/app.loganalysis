@@ -31,7 +31,6 @@ import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.frame.commonwindowheader.CommonWindowHeader
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManager
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.ChildWindowManagerController
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.childWindowManager
 import com.github.ericytsang.app.ui.modal.openMultiFilePicker
 
 @Composable
@@ -61,8 +60,6 @@ fun NewProjectWizard(
         }
     }
 
-    val childWindowManager = childWindowManager()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -72,7 +69,7 @@ fun NewProjectWizard(
     )
     {
         // header with settings button
-        CommonWindowHeader(themeColors,childWindowManager)
+        CommonWindowHeader(themeColors,rootChildWindowManager)
 
         // region selected files list
 
