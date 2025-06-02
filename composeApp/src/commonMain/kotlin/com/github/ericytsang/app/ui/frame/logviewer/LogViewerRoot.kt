@@ -13,6 +13,7 @@ import androidx.compose.material.Colors
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -92,19 +93,8 @@ fun LogViewerRoot(
             verticalAlignment = Alignment.CenterVertically,
         )
         {
-            Button(
-                modifier = Modifier.padding(end = Dimens.mttPadding),
-                onClick =
-                    {
-                        openWorkingFileSetEditorInNewWindowBlocking(
-                            owner = window,
-                            viewModel = workingFileSetEditorViewModel,
-                            themeUseCase = viewModel,
-                        )
-                    },
-                content = { IconEditLogFiles(themeColors.onPrimary) },
-            )
 
+            // user input for entering the logcat filter string
             TextField(
                 value = logcatFilterString,
                 onValueChange = { newValue -> logViewerViewModel.setLogcatFilterString(newValue) },
@@ -114,17 +104,23 @@ fun LogViewerRoot(
                 ),
             )
 
+            // toggle button for enabling/disabling case-sensitive matching in the logcat filter
             ToggleButton(
                 modifier = Modifier.padding(end = Dimens.mttPadding),
                 onClick = { logViewerViewModel.setCaseSensitive(!logViewerViewModel.isCaseSensitive.value) },
                 isToggled = shouldMatchCase,
+                isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
                 content = { contentColor -> IconMatchCase(contentColor) },
             )
 
+            // toggle button for enabling/disabling word wrapping in the log viewer
             ToggleButton(
                 modifier = Modifier.padding(end = Dimens.mttPadding),
                 onClick = { viewModel.toggleWordWrap() },
                 isToggled = shouldWrapText,
+                isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
                 content = { contentColor -> IconWrapText(contentColor) },
             )
         }
