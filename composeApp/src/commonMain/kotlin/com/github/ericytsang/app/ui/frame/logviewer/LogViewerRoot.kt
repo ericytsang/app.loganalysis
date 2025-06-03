@@ -3,7 +3,14 @@ package com.github.ericytsang.app.ui.frame.logviewer
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -25,6 +32,7 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -206,6 +214,30 @@ fun LogViewerRoot(
                 ),
             )
 
+            fun getEnterAnimation():EnterTransition
+            {
+                return if (showEditFileListPanel || showExcludeFilterPanel || showIncludeFilterPanel)
+                {
+                    expandVertically()
+                }
+                else
+                {
+                    expandIn()
+                }
+            }
+
+            fun getExitAnimation():ExitTransition
+            {
+                return if (showEditFileListPanel || showExcludeFilterPanel || showIncludeFilterPanel)
+                {
+                    shrinkVertically()
+                }
+                else
+                {
+                    shrinkOut()
+                }
+            }
+
             Surface(
                 modifier = Modifier.fillMaxHeight(),
                 shape = MaterialTheme.shapes.small,
@@ -229,7 +261,7 @@ fun LogViewerRoot(
                         content = { contentColor -> IconEditFileList(contentColor) },
                     )
 
-                    AnimatedVisibility(visible = showEditFileListPanel, exit = shrinkOut())
+                    AnimatedVisibility(visible = showEditFileListPanel, enter = getEnterAnimation(), exit = getExitAnimation())
                     {
                         FilterBuilderPanel(
                             themeColors = themeColors,
@@ -246,7 +278,7 @@ fun LogViewerRoot(
                         content = { contentColor -> IconExcludeFilter(contentColor) },
                     )
 
-                    AnimatedVisibility(visible = showExcludeFilterPanel, exit = shrinkOut())
+                    AnimatedVisibility(visible = showExcludeFilterPanel, enter = getEnterAnimation(), exit = getExitAnimation())
                     {
                         FilterBuilderPanel(
                             themeColors = themeColors,
@@ -263,7 +295,7 @@ fun LogViewerRoot(
                         content = { contentColor -> IconIncludeFilter(contentColor) },
                     )
 
-                    AnimatedVisibility(visible = showIncludeFilterPanel, exit = shrinkOut())
+                    AnimatedVisibility(visible = showIncludeFilterPanel, enter = getEnterAnimation(), exit = getExitAnimation())
                     {
                         FilterBuilderPanel(
                             themeColors = themeColors,
