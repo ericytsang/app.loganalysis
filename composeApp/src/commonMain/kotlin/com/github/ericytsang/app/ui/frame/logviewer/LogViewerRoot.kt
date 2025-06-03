@@ -214,30 +214,6 @@ fun LogViewerRoot(
                 ),
             )
 
-            fun getEnterAnimation():EnterTransition
-            {
-                return if (showEditFileListPanel || showExcludeFilterPanel || showIncludeFilterPanel)
-                {
-                    expandVertically()
-                }
-                else
-                {
-                    expandIn()
-                }
-            }
-
-            fun getExitAnimation():ExitTransition
-            {
-                return if (showEditFileListPanel || showExcludeFilterPanel || showIncludeFilterPanel)
-                {
-                    shrinkVertically()
-                }
-                else
-                {
-                    shrinkOut()
-                }
-            }
-
             Surface(
                 modifier = Modifier.fillMaxHeight(),
                 shape = MaterialTheme.shapes.small,
@@ -261,7 +237,7 @@ fun LogViewerRoot(
                         content = { contentColor -> IconEditFileList(contentColor) },
                     )
 
-                    AnimatedVisibility(visible = showEditFileListPanel, enter = getEnterAnimation(), exit = getExitAnimation())
+                    if (showEditFileListPanel)
                     {
                         FilterBuilderPanel(
                             themeColors = themeColors,
@@ -278,7 +254,7 @@ fun LogViewerRoot(
                         content = { contentColor -> IconExcludeFilter(contentColor) },
                     )
 
-                    AnimatedVisibility(visible = showExcludeFilterPanel, enter = getEnterAnimation(), exit = getExitAnimation())
+                    if (showExcludeFilterPanel)
                     {
                         FilterBuilderPanel(
                             themeColors = themeColors,
@@ -295,7 +271,7 @@ fun LogViewerRoot(
                         content = { contentColor -> IconIncludeFilter(contentColor) },
                     )
 
-                    AnimatedVisibility(visible = showIncludeFilterPanel, enter = getEnterAnimation(), exit = getExitAnimation())
+                    if (showIncludeFilterPanel)
                     {
                         FilterBuilderPanel(
                             themeColors = themeColors,
