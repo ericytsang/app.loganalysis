@@ -10,7 +10,6 @@ import kotlinproject.composeapp.generated.resources.outline_files_24
 import kotlinproject.composeapp.generated.resources.outline_match_case_24
 import kotlinproject.composeapp.generated.resources.outline_playlist_add_24
 import kotlinproject.composeapp.generated.resources.outline_playlist_remove_24
-import kotlinproject.composeapp.generated.resources.outline_regular_expression_24
 import kotlinproject.composeapp.generated.resources.outline_settings_24
 import kotlinproject.composeapp.generated.resources.outline_wrap_text_24
 import org.jetbrains.compose.resources.painterResource

@@ -1,15 +1,22 @@
 package com.github.ericytsang.app.ui.frame.logviewer
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Checkbox
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -19,8 +26,10 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
@@ -30,7 +39,6 @@ import com.github.ericytsang.app.ui.util.ChildWindowManager
 import com.github.ericytsang.app.ui.util.asset.IconEditFileList
 import com.github.ericytsang.app.ui.util.asset.IconExcludeFilter
 import com.github.ericytsang.app.ui.util.asset.IconIncludeFilter
-import com.github.ericytsang.app.ui.util.asset.IconLogcatFilter
 import com.github.ericytsang.app.ui.util.asset.IconMatchCase
 import com.github.ericytsang.app.ui.util.asset.IconWrapText
 import com.github.ericytsang.app.ui.util.component.ColorCodedLogLine
@@ -41,6 +49,9 @@ import com.github.ericytsang.app.ui.util.openProjectBrowser
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import java.io.File
 
 @Composable
@@ -180,7 +191,21 @@ fun LogViewerRoot(
                 // endregion
             }
 
-            // filter helpers and working file set editor
+            // region filter helpers and working file set editor
+
+            var showEditFileListPanel by mutableStateOf(false)
+            var showExcludeFilterPanel by mutableStateOf(false)
+            var showIncludeFilterPanel by mutableStateOf(false)
+
+            val placeholderFilters = listOf(
+                FilterViewModelImpl(
+                    filterStringFlow = flowOf("filterStringFlow"),
+                    isCaseSensitiveFlow = emptyFlow(),
+                    isEnabledFlow = emptyFlow(),
+                    filterTypeFlow = emptyFlow(),
+                ),
+            )
+
             Surface(
                 modifier = Modifier.fillMaxHeight(),
                 shape = MaterialTheme.shapes.small,
@@ -188,33 +213,149 @@ fun LogViewerRoot(
             )
             {
                 Column(
-                    modifier = Modifier.fillMaxHeight().padding(Dimens.mttPadding),
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(IntrinsicSize.Max)
+                        .padding(Dimens.mttPadding),
                     verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
                 )
                 {
                     ToggleButton(
-                        onClick = { viewModel.toggleWordWrap() },
-                        isToggled = shouldWrapText,
+                        modifier = Modifier.fillMaxWidth().align(Alignment.Start),
+                        onClick = { showEditFileListPanel = !showEditFileListPanel },
+                        isToggled = showEditFileListPanel,
                         isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
                         isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
                         content = { contentColor -> IconEditFileList(contentColor) },
                     )
+
+                    AnimatedVisibility(visible = showEditFileListPanel, exit = shrinkOut())
+                    {
+                        FilterBuilderPanel(
+                            themeColors = themeColors,
+                            filtersFlow = flowOf(placeholderFilters),
+                        )
+                    }
+
                     ToggleButton(
-                        onClick = { viewModel.toggleWordWrap() },
-                        isToggled = shouldWrapText,
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { showExcludeFilterPanel = !showExcludeFilterPanel },
+                        isToggled = showExcludeFilterPanel,
                         isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
                         isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
                         content = { contentColor -> IconExcludeFilter(contentColor) },
                     )
+
+                    AnimatedVisibility(visible = showExcludeFilterPanel, exit = shrinkOut())
+                    {
+                        FilterBuilderPanel(
+                            themeColors = themeColors,
+                            filtersFlow = flowOf(placeholderFilters),
+                        )
+                    }
+
                     ToggleButton(
-                        onClick = { viewModel.toggleWordWrap() },
-                        isToggled = shouldWrapText,
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { showIncludeFilterPanel = !showIncludeFilterPanel },
+                        isToggled = showIncludeFilterPanel,
                         isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
                         isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
                         content = { contentColor -> IconIncludeFilter(contentColor) },
                     )
+
+                    AnimatedVisibility(visible = showIncludeFilterPanel, exit = shrinkOut())
+                    {
+                        FilterBuilderPanel(
+                            themeColors = themeColors,
+                            filtersFlow = flowOf(placeholderFilters),
+                        )
+                    }
                 }
+            }
+
+            // endregion
+        }
+    }
+}
+
+/**
+ * a region on the UI allowing user to add/remove filters to some collection of filters.
+ * filters have different interpretation types: string literal, regex, logcat filter.
+ * filters can be case-sensitive or not.
+ * filters can be enabled or disabled.
+ * each filter is represented on the UI by a text field and a checkbox.
+ * when the user clicks on the checkbox, the filter is enabled or disabled.
+ * when the user types in the text field, the filter is updated.
+ * when the text field has focus, the other settings are revealed below the text field:
+ * - case sensitivity toggle
+ * - filter type toggle.
+ */
+@Composable
+fun FilterBuilderPanel(
+    themeColors: Colors,
+    filtersFlow: Flow<List<FilterViewModel>>
+)
+{
+    val filters by filtersFlow.collectAsState(emptyList())
+    Column()
+    {
+        for (filter in filters)
+        {
+            Row(verticalAlignment = Alignment.CenterVertically)
+            {
+                Checkbox(
+                    checked = filter.isEnabled.collectAsState(false).value,
+                    onCheckedChange = { newValue -> filter.setEnabled(newValue) },
+                )
+                TextField(
+                    value = filter.filterString.collectAsState("").value,
+                    onValueChange = { newValue -> filter.setFilterString(newValue) },
+                    modifier = Modifier.padding(end = Dimens.mttPadding),
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = themeColors.onBackground,
+                    ),
+                )
             }
         }
     }
+}
+
+class FilterViewModelImpl(
+    private val filterStringFlow: Flow<String>,
+    private val isCaseSensitiveFlow: Flow<Boolean>,
+    private val isEnabledFlow: Flow<Boolean>,
+    private val filterTypeFlow: Flow<FilterType>,
+) : FilterViewModel
+{
+    override val filterString = filterStringFlow
+    override val isCaseSensitive = isCaseSensitiveFlow
+    override val isEnabled = isEnabledFlow
+    override val filterType = filterTypeFlow
+
+    override fun setFilterString(newValue: String) { /* implementation */ }
+    override fun setCaseSensitive(newValue: Boolean) { /* implementation */ }
+    override fun setEnabled(newValue: Boolean) { /* implementation */ }
+    override fun setFilterType(newValue: FilterType) { /* implementation */ }
+    override fun requestDelete() { /* implementation */ }
+}
+
+interface FilterViewModel
+{
+    val filterString: Flow<String>
+    val isCaseSensitive: Flow<Boolean>
+    val isEnabled: Flow<Boolean>
+    val filterType: Flow<FilterType>
+
+    fun setFilterString(newValue: String)
+    fun setCaseSensitive(newValue: Boolean)
+    fun setEnabled(newValue: Boolean)
+    fun setFilterType(newValue: FilterType)
+    fun requestDelete()
+}
+
+enum class FilterType
+{
+    STRING_LITERAL,
+    REGEX,
+    LOGCAT_FILTER,
 }
