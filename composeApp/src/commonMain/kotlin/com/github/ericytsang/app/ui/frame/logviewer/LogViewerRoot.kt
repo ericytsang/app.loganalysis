@@ -2,6 +2,11 @@
 
 package com.github.ericytsang.app.ui.frame.logviewer
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableDefaults
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -238,69 +243,80 @@ fun LogViewerRoot(
                 border = ButtonDefaults.outlinedBorder,
             )
             {
-                Column(
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .width(IntrinsicSize.Max)
                         .padding(Dimens.mttPadding),
                     verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
                 )
                 {
-                    ToggleButton(
-                        modifier = Modifier.fillMaxWidth().align(Alignment.Start),
-                        onClick = { showEditFileListPanel = !showEditFileListPanel },
-                        isToggled = showEditFileListPanel,
-                        isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                        isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                        content = { contentColor -> IconEditFileList(contentColor) },
-                    )
+                    item {
+                        ToggleButton(
+                            modifier = Modifier,//.fillMaxWidth(),
+                            onClick = { showEditFileListPanel = !showEditFileListPanel },
+                            isToggled = showEditFileListPanel,
+                            isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                            isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                            content = { contentColor -> IconEditFileList(contentColor) },
+                        )
+                    }
 
                     if (showEditFileListPanel)
                     {
-                        FilterBuilderPanel(
-                            themeColors = themeColors,
-                            filterViewModels = placeholderFilters,
-                            expandedItem = expandedItem,
-                            onTextFieldGotFocus = { filterId -> expandedItem = filterId },
-                        )
+                        item {
+                            FilterBuilderPanel(
+                                themeColors = themeColors,
+                                filterViewModels = placeholderFilters,
+                                expandedItem = expandedItem,
+                                onTextFieldGotFocus = { filterId -> expandedItem = filterId },
+                            )
+                        }
                     }
 
-                    ToggleButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = { showExcludeFilterPanel = !showExcludeFilterPanel },
-                        isToggled = showExcludeFilterPanel,
-                        isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                        isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                        content = { contentColor -> IconExcludeFilter(contentColor) },
-                    )
+                    item {
+                        ToggleButton(
+                            modifier = Modifier,//.fillMaxWidth(),
+                            onClick = { showExcludeFilterPanel = !showExcludeFilterPanel },
+                            isToggled = showExcludeFilterPanel,
+                            isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                            isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                            content = { contentColor -> IconExcludeFilter(contentColor) },
+                        )
+                    }
 
                     if (showExcludeFilterPanel)
                     {
-                        FilterBuilderPanel(
-                            themeColors = themeColors,
-                            filterViewModels = placeholderFilters,
-                            expandedItem = expandedItem,
-                            onTextFieldGotFocus = { filterId -> expandedItem = filterId },
+                        item {
+                            FilterBuilderPanel(
+                                themeColors = themeColors,
+                                filterViewModels = placeholderFilters,
+                                expandedItem = expandedItem,
+                                onTextFieldGotFocus = { filterId -> expandedItem = filterId },
+                            )
+                        }
+                    }
+
+                    item {
+                        ToggleButton(
+                            modifier = Modifier,//.fillMaxWidth(),
+                            onClick = { showIncludeFilterPanel = !showIncludeFilterPanel },
+                            isToggled = showIncludeFilterPanel,
+                            isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                            isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                            content = { contentColor -> IconIncludeFilter(contentColor) },
                         )
                     }
 
-                    ToggleButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = { showIncludeFilterPanel = !showIncludeFilterPanel },
-                        isToggled = showIncludeFilterPanel,
-                        isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                        isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                        content = { contentColor -> IconIncludeFilter(contentColor) },
-                    )
-
                     if (showIncludeFilterPanel)
                     {
-                        FilterBuilderPanel(
-                            themeColors = themeColors,
-                            filterViewModels = placeholderFilters,
-                            expandedItem = expandedItem,
-                            onTextFieldGotFocus = { filterId -> expandedItem = filterId },
-                        )
+                        item {
+                            FilterBuilderPanel(
+                                themeColors = themeColors,
+                                filterViewModels = placeholderFilters,
+                                expandedItem = expandedItem,
+                                onTextFieldGotFocus = { filterId -> expandedItem = filterId },
+                            )
+                        }
                     }
                 }
             }
