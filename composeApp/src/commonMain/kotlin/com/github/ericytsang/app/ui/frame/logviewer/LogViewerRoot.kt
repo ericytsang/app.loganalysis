@@ -1,38 +1,34 @@
+@file:OptIn(ExperimentalMaterialApi::class)
+
 package com.github.ericytsang.app.ui.frame.logviewer
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.expandIn
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkOut
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Colors
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.RadioButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,14 +54,16 @@ import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.update
 import java.io.File
 
 @Composable
 fun LogViewerRoot(
     window:ComposeWindow,
-    themeColors: Colors,
+    themeColors:Colors,
     rootChildWindowManager:ChildWindowManager,
     workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel,
     viewModelFactory:(CoroutineScope)->LogViewerRootViewModel = { uiScope -> LogViewerRootViewModel.create(uiScope) },
@@ -118,7 +116,7 @@ fun LogViewerRoot(
         {
             // logcat filter input and log viewer
             Column(
-                modifier = Modifier.weight(1f, fill = true),
+                modifier = Modifier.weight(1f,fill = true),
                 verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
             )
             {
@@ -207,12 +205,32 @@ fun LogViewerRoot(
 
             val placeholderFilters = listOf(
                 FilterViewModelImpl(
-                    filterStringFlow = flowOf("filterStringFlow"),
-                    isCaseSensitiveFlow = emptyFlow(),
-                    isEnabledFlow = emptyFlow(),
-                    filterTypeFlow = emptyFlow(),
+                    filterId = FilterId("ID1"),
+                    initialFilterString = "filterStringFlow",
+                    initialIsCaseSensitive = true,
+                    initialIsEnabled = true,
+                    initialFilterType = FilterType.STRING_LITERAL,
+                    onRequestDelete = { },
+                ),
+                FilterViewModelImpl(
+                    filterId = FilterId("ID2"),
+                    initialFilterString = "filterStringFlow",
+                    initialIsCaseSensitive = true,
+                    initialIsEnabled = true,
+                    initialFilterType = FilterType.STRING_LITERAL,
+                    onRequestDelete = { },
+                ),
+                FilterViewModelImpl(
+                    filterId = FilterId("ID3"),
+                    initialFilterString = "filterStringFlow",
+                    initialIsCaseSensitive = true,
+                    initialIsEnabled = true,
+                    initialFilterType = FilterType.STRING_LITERAL,
+                    onRequestDelete = { },
                 ),
             )
+
+            var expandedItem by remember { mutableStateOf(FilterId("nothing should be selected right now")) }
 
             Surface(
                 modifier = Modifier.fillMaxHeight(),
@@ -241,7 +259,9 @@ fun LogViewerRoot(
                     {
                         FilterBuilderPanel(
                             themeColors = themeColors,
-                            filtersFlow = flowOf(placeholderFilters),
+                            filterViewModels = placeholderFilters,
+                            expandedItem = expandedItem,
+                            onTextFieldGotFocus = { filterId -> expandedItem = filterId },
                         )
                     }
 
@@ -258,7 +278,9 @@ fun LogViewerRoot(
                     {
                         FilterBuilderPanel(
                             themeColors = themeColors,
-                            filtersFlow = flowOf(placeholderFilters),
+                            filterViewModels = placeholderFilters,
+                            expandedItem = expandedItem,
+                            onTextFieldGotFocus = { filterId -> expandedItem = filterId },
                         )
                     }
 
@@ -275,7 +297,9 @@ fun LogViewerRoot(
                     {
                         FilterBuilderPanel(
                             themeColors = themeColors,
-                            filtersFlow = flowOf(placeholderFilters),
+                            filterViewModels = placeholderFilters,
+                            expandedItem = expandedItem,
+                            onTextFieldGotFocus = { filterId -> expandedItem = filterId },
                         )
                     }
                 }
@@ -300,70 +324,268 @@ fun LogViewerRoot(
  */
 @Composable
 fun FilterBuilderPanel(
-    themeColors: Colors,
-    filtersFlow: Flow<List<FilterViewModel>>
+
+    /**
+     * colors to be used for the UI components.
+     * this is used to ensure that the UI components are consistent with the theme.
+     */
+    themeColors:Colors,
+
+    /**
+     * flow that emits the list of filters to be displayed.
+     * each filter is represented by a FilterViewModel.
+     */
+    filterViewModels:List<FilterViewModel>,
+
+    /**
+     * flow that emits the id of the filter that is currently expanded.
+     * this is used to determine whether to show the additional settings for a filter.
+     */
+    expandedItem:FilterId,
+
+    /**
+     * callback when the text field gets focus.
+     * this is intended to be used by the host to update [expandedItem].
+     */
+    onTextFieldGotFocus:(FilterId)->Unit,
+
+    //mutableHasSelectableItems:MutableHasSelectableItems<FilterId>
 )
 {
-    val filters by filtersFlow.collectAsState(emptyList())
-    Column()
+    Column(
+        modifier = Modifier.padding(Dimens.mttPadding),
+        verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
+        horizontalAlignment = Alignment.Start,
+    )
     {
-        for (filter in filters)
+        for (filterViewModel in filterViewModels)
         {
-            Row(verticalAlignment = Alignment.CenterVertically)
-            {
-                Checkbox(
-                    checked = filter.isEnabled.collectAsState(false).value,
-                    onCheckedChange = { newValue -> filter.setEnabled(newValue) },
-                )
-                TextField(
-                    value = filter.filterString.collectAsState("").value,
-                    onValueChange = { newValue -> filter.setFilterString(newValue) },
-                    modifier = Modifier.padding(end = Dimens.mttPadding),
-                    colors = TextFieldDefaults.textFieldColors(
-                        textColor = themeColors.onBackground,
-                    ),
-                )
+            Column {
+                val textFieldInteractionSource = remember { MutableInteractionSource() }
+
+                // call onTextFieldGotFocus one time when the text field gets focus
+                val isTextFieldFocused by textFieldInteractionSource.collectIsFocusedAsState()
+                var makeSureOnlyCalledOneTime by remember { mutableStateOf(false) }
+                if (isTextFieldFocused && !makeSureOnlyCalledOneTime)
+                {
+                    makeSureOnlyCalledOneTime = true
+                    onTextFieldGotFocus(filterViewModel.filterId)
+                }
+                else if (!isTextFieldFocused)
+                {
+                    makeSureOnlyCalledOneTime = false
+                }
+
+                // show editable filter string and checkbox for enabling/disabling the filter
+                Row(verticalAlignment = Alignment.CenterVertically)
+                {
+                    Checkbox(
+                        checked = filterViewModel.isEnabledFlow.collectAsState(false).value,
+                        onCheckedChange = { newValue -> filterViewModel.setEnabled(newValue) },
+                    )
+                    TextField(
+                        value = filterViewModel.filterStringFlow.collectAsState("").value,
+                        interactionSource = textFieldInteractionSource,
+                        onValueChange = { newValue -> filterViewModel.setFilterString(newValue) },
+                        modifier = Modifier.padding(end = Dimens.mttPadding),
+                        colors = TextFieldDefaults.textFieldColors(
+                            textColor = themeColors.onBackground,
+                        ),
+                    )
+                }
+
+                // show the additional settings for this filter if it is expanded ([expandedItem])
+                if (filterViewModel.filterId == expandedItem)
+                {
+                    // checkbox for case sensitivity
+                    val isCaseSensitive by filterViewModel.isCaseSensitiveFlow.collectAsState(false)
+                    val toggleCaseSensitivity = { filterViewModel.setCaseSensitive(!isCaseSensitive) }
+                    Surface(
+                        modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
+                        shape = MaterialTheme.shapes.small,
+                        onClick = toggleCaseSensitivity,
+                    )
+                    {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        )
+                        {
+                            Checkbox(
+                                checked = isCaseSensitive,
+                                onCheckedChange = { newValue -> toggleCaseSensitivity() },
+                            )
+                            Text("Case sensitive")
+                        }
+                    }
+
+                    // spacing
+                    Spacer(modifier = Modifier.size(Dimens.mttPadding))
+
+                    // radio buttons for filter type
+                    Text("Filter type", modifier = Modifier.padding(start = Dimens.mttSize))
+                    val filterTypeFlow by filterViewModel.filterTypeFlow.collectAsState(null)
+                    for (filterType in FilterType.entries)
+                    {
+                        val onClick = { filterViewModel.setFilterType(filterType) }
+                        Surface(
+                            modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
+                            shape = MaterialTheme.shapes.small,
+                            onClick = onClick,
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                RadioButton(
+                                    selected = filterTypeFlow == filterType,
+                                    onClick = onClick,
+                                )
+                                Text(filterType.displayName)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
-class FilterViewModelImpl(
-    private val filterStringFlow: Flow<String>,
-    private val isCaseSensitiveFlow: Flow<Boolean>,
-    private val isEnabledFlow: Flow<Boolean>,
-    private val filterTypeFlow: Flow<FilterType>,
-) : FilterViewModel
+sealed class SelectedItems<T>
 {
-    override val filterString = filterStringFlow
-    override val isCaseSensitive = isCaseSensitiveFlow
-    override val isEnabled = isEnabledFlow
-    override val filterType = filterTypeFlow
+    fun isSelected(subject:T):Boolean = when (this)
+    {
+        is SelectedSome -> subject in selectedItems
+        is DeselectedSome -> subject !in deselectedItems
+    }
 
-    override fun setFilterString(newValue: String) { /* implementation */ }
-    override fun setCaseSensitive(newValue: Boolean) { /* implementation */ }
-    override fun setEnabled(newValue: Boolean) { /* implementation */ }
-    override fun setFilterType(newValue: FilterType) { /* implementation */ }
-    override fun requestDelete() { /* implementation */ }
+    data class SelectedSome<T>(val selectedItems:Set<T>):SelectedItems<T>()
+    data class DeselectedSome<T>(val deselectedItems:Set<T>):SelectedItems<T>()
 }
+
+interface MutableHasSelectableItems<T>:HasSelectableItems<T>
+{
+    fun addToSelection(item:T)
+    fun removeFromSelection(item:T)
+    fun deselectAll()
+    fun selectAll()
+}
+
+interface HasSelectableItems<T>
+{
+    val selectedItems:Flow<SelectedItems<T>>
+}
+
+class HasSelectableItemsImpl<T>(
+    initialSelection:SelectedItems<T> = SelectedItems.SelectedSome(emptySet()),
+):MutableHasSelectableItems<T>
+{
+    private val _selectedItems = MutableStateFlow<SelectedItems<T>>(initialSelection)
+    override val selectedItems:Flow<SelectedItems<T>> get() = _selectedItems
+    override fun addToSelection(item:T)
+    {
+        _selectedItems.update { old ->
+            when (old)
+            {
+                is SelectedItems.SelectedSome -> SelectedItems.SelectedSome(old.selectedItems+item)
+                is SelectedItems.DeselectedSome -> SelectedItems.DeselectedSome(old.deselectedItems-item)
+            }
+        }
+    }
+
+    override fun removeFromSelection(item:T)
+    {
+        _selectedItems.update { old ->
+            when (old)
+            {
+                is SelectedItems.SelectedSome -> SelectedItems.SelectedSome(old.selectedItems-item)
+                is SelectedItems.DeselectedSome -> SelectedItems.DeselectedSome(old.deselectedItems+item)
+            }
+        }
+    }
+
+    override fun deselectAll()
+    {
+        _selectedItems.value = SelectedItems.SelectedSome(emptySet())
+    }
+
+    override fun selectAll()
+    {
+        _selectedItems.value = SelectedItems.DeselectedSome(emptySet())
+    }
+}
+
+class FilterViewModelImpl(
+    override val filterId:FilterId,
+    initialFilterString:String,
+    initialIsCaseSensitive:Boolean,
+    initialIsEnabled:Boolean,
+    initialFilterType:FilterType,
+    private val onRequestDelete:()->Unit,
+):FilterViewModel
+{
+
+    private val _filterStringFlow = MutableStateFlow<String>(initialFilterString)
+    override val filterStringFlow:Flow<String> get() = _filterStringFlow
+
+    private val _isCaseSensitiveFlow = MutableStateFlow<Boolean>(initialIsCaseSensitive)
+    override val isCaseSensitiveFlow:Flow<Boolean> get() = _isCaseSensitiveFlow
+
+    private val _isEnabledFlow = MutableStateFlow<Boolean>(initialIsEnabled)
+    override val isEnabledFlow:Flow<Boolean> get() = _isEnabledFlow
+
+    private val _filterTypeFlow = MutableStateFlow<FilterType>(initialFilterType)
+    override val filterTypeFlow:Flow<FilterType> get() = _filterTypeFlow
+
+    override fun setFilterString(newValue:String)
+    {
+        _filterStringFlow.value = newValue
+    }
+
+    override fun setCaseSensitive(newValue:Boolean)
+    {
+        _isCaseSensitiveFlow.value = newValue
+    }
+
+    override fun setEnabled(newValue:Boolean)
+    {
+        _isEnabledFlow.value = newValue
+    }
+
+    override fun setFilterType(newValue:FilterType)
+    {
+        _filterTypeFlow.value = newValue
+    }
+
+    override fun requestDelete()
+    {
+        onRequestDelete()
+    }
+}
+
+data class FilterId(val id:String)
 
 interface FilterViewModel
 {
-    val filterString: Flow<String>
-    val isCaseSensitive: Flow<Boolean>
-    val isEnabled: Flow<Boolean>
-    val filterType: Flow<FilterType>
+    val filterId:FilterId
 
-    fun setFilterString(newValue: String)
-    fun setCaseSensitive(newValue: Boolean)
-    fun setEnabled(newValue: Boolean)
-    fun setFilterType(newValue: FilterType)
+    val filterStringFlow:Flow<String>
+    val isCaseSensitiveFlow:Flow<Boolean>
+    val isEnabledFlow:Flow<Boolean>
+    val filterTypeFlow:Flow<FilterType>
+
+    fun setFilterString(newValue:String)
+    fun setCaseSensitive(newValue:Boolean)
+    fun setEnabled(newValue:Boolean)
+    fun setFilterType(newValue:FilterType)
     fun requestDelete()
 }
 
-enum class FilterType
+enum class FilterType(
+    val displayName:String,
+)
 {
-    STRING_LITERAL,
-    REGEX,
-    LOGCAT_FILTER,
+    STRING_LITERAL("Plaintext"),
+    REGEX("Regex"),
+    LOGCAT_FILTER("Logcat filter"),
 }
