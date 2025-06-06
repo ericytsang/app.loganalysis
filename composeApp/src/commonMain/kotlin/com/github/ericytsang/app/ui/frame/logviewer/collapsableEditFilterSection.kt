@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Colors
@@ -67,9 +68,9 @@ fun LazyListScope.collapsableEditFilterSection(
 
     /**
      * list of filters to be displayed in the filter builder panel.
-     * each filter is represented by a [FilterViewModelImpl].
+     * each filter is represented by a [FilterViewModel].
      */
-    placeholderFilters:List<FilterViewModelImpl>,
+    placeholderFilters:List<FilterViewModel>,
 
     /**
      * the id of the filter that is currently expanded.

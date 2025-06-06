@@ -52,12 +52,64 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import java.io.File
+import java.util.UUID
+
+interface FilterSetViewModel
+{
+    val filters:Flow<List<FilterViewModel>>
+    fun addFilter(filter:FilterViewModel)
+}
+
+class FilterSetViewModelImpl:FilterSetViewModel
+{
+    private val _filters = MutableStateFlow<List<FilterViewModel>>(createPlaceholders())
+    override val filters:Flow<List<FilterViewModel>> get() = _filters
+
+    override fun addFilter(filter:FilterViewModel)
+    {
+        _filters.update { it + filter }
+    }
+
+    private fun removeFilter(filterId:FilterId)
+    {
+        _filters.update { it.filter { filter -> filter.filterId != filterId } }
+    }
+
+    private fun createPlaceholders() = listOf(
+        FilterViewModelImpl(
+            filterId = FilterId(UUID.randomUUID().toString()),
+            initialFilterString = "filterStringFlow",
+            initialIsCaseSensitive = true,
+            initialIsEnabled = true,
+            initialFilterType = FilterType.STRING_LITERAL,
+            onRequestDelete = ::removeFilter,
+        ),
+        FilterViewModelImpl(
+            filterId = FilterId(UUID.randomUUID().toString()),
+            initialFilterString = "filterStringFlow",
+            initialIsCaseSensitive = true,
+            initialIsEnabled = true,
+            initialFilterType = FilterType.STRING_LITERAL,
+            onRequestDelete = ::removeFilter,
+        ),
+        FilterViewModelImpl(
+            filterId = FilterId(UUID.randomUUID().toString()),
+            initialFilterString = "filterStringFlow",
+            initialIsCaseSensitive = true,
+            initialIsEnabled = true,
+            initialFilterType = FilterType.STRING_LITERAL,
+            onRequestDelete = ::removeFilter,
+        ),
+    )
+}
 
 @Composable
 fun LogViewerRoot(
     window:ComposeWindow,
     themeColors:Colors,
     rootChildWindowManager:ChildWindowManager,
+    includeFilterSetViewModelFactory:()->FilterSetViewModel = { FilterSetViewModelImpl() },
+    excludeFilterSetViewModelFactory:()->FilterSetViewModel = { FilterSetViewModelImpl() },
     workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel,
     viewModelFactory:(CoroutineScope)->LogViewerRootViewModel = { uiScope -> LogViewerRootViewModel.create(uiScope) },
     logViewerViewModelFactory:()->LogViewerViewModel = { LogViewerViewModel.createDefault() },
@@ -65,6 +117,8 @@ fun LogViewerRoot(
 {
     val uiScope = rememberCoroutineScope()
     val viewModel = remember { viewModelFactory(uiScope) }
+    val includeFilterSetViewModel = remember { includeFilterSetViewModelFactory() }
+    val excludeFilterSetViewModel = remember { excludeFilterSetViewModelFactory() }
     val logViewerViewModel = remember { logViewerViewModelFactory() }
     val workingFileSetEditorViewModel = remember { workingFileSetEditorViewModelFactory() }
 
@@ -196,33 +250,6 @@ fun LogViewerRoot(
             var showExcludeFilterPanel by remember { mutableStateOf(false) }
             var showIncludeFilterPanel by remember { mutableStateOf(false) }
 
-            val placeholderFilters = listOf(
-                FilterViewModelImpl(
-                    filterId = FilterId("ID1"),
-                    initialFilterString = "filterStringFlow",
-                    initialIsCaseSensitive = true,
-                    initialIsEnabled = true,
-                    initialFilterType = FilterType.STRING_LITERAL,
-                    onRequestDelete = { },
-                ),
-                FilterViewModelImpl(
-                    filterId = FilterId("ID2"),
-                    initialFilterString = "filterStringFlow",
-                    initialIsCaseSensitive = true,
-                    initialIsEnabled = true,
-                    initialFilterType = FilterType.STRING_LITERAL,
-                    onRequestDelete = { },
-                ),
-                FilterViewModelImpl(
-                    filterId = FilterId("ID3"),
-                    initialFilterString = "filterStringFlow",
-                    initialIsCaseSensitive = true,
-                    initialIsEnabled = true,
-                    initialFilterType = FilterType.STRING_LITERAL,
-                    onRequestDelete = { },
-                ),
-            )
-
             var filterIdOfSelectedFilterEditorPanel by remember { mutableStateOf(FilterId("nothing should be selected right now")) }
 
             val columnWidth by derivedStateOf {
@@ -231,6 +258,9 @@ fun LogViewerRoot(
                 else
                     Modifier.width(Dimens.mttPadding*2+Dimens.mttSize)
             }
+
+            val excludeFilterSet by excludeFilterSetViewModel.filters.collectAsState(emptyList())
+            val includeFilterSet by includeFilterSetViewModel.filters.collectAsState(emptyList())
 
             Surface(
                 modifier = Modifier.fillMaxHeight(),
@@ -251,7 +281,7 @@ fun LogViewerRoot(
                         sectionIcon = { contentColor -> IconEditFileList(contentColor) },
                         isSectionExpanded = showEditFileListPanel,
                         requestToggleSectionExpanded = { showEditFileListPanel = !showEditFileListPanel },
-                        placeholderFilters = placeholderFilters,
+                        placeholderFilters = excludeFilterSet,
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                     )
@@ -262,7 +292,7 @@ fun LogViewerRoot(
                         sectionIcon = { contentColor -> IconExcludeFilter(contentColor) },
                         isSectionExpanded = showExcludeFilterPanel,
                         requestToggleSectionExpanded = { showExcludeFilterPanel = !showExcludeFilterPanel },
-                        placeholderFilters = placeholderFilters,
+                        placeholderFilters = excludeFilterSet,
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                     )
@@ -273,7 +303,7 @@ fun LogViewerRoot(
                         sectionIcon = { contentColor -> IconIncludeFilter(contentColor) },
                         isSectionExpanded = showIncludeFilterPanel,
                         requestToggleSectionExpanded = { showIncludeFilterPanel = !showIncludeFilterPanel },
-                        placeholderFilters = placeholderFilters,
+                        placeholderFilters = includeFilterSet,
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                     )
@@ -355,7 +385,7 @@ class FilterViewModelImpl(
     initialIsCaseSensitive:Boolean,
     initialIsEnabled:Boolean,
     initialFilterType:FilterType,
-    private val onRequestDelete:()->Unit,
+    private val onRequestDelete:(FilterId)->Unit,
 ):FilterViewModel
 {
 
@@ -393,7 +423,7 @@ class FilterViewModelImpl(
 
     override fun requestDelete()
     {
-        onRequestDelete()
+        onRequestDelete(filterId)
     }
 }
 
