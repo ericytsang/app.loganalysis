@@ -251,7 +251,7 @@ fun LogViewerRoot(
                     verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
                 )
                 {
-                    CollapsableEditFilterSection(
+                    collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showEditFileListPanel",
                         sectionIcon = { contentColor -> IconEditFileList(contentColor) },
@@ -262,7 +262,7 @@ fun LogViewerRoot(
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                     )
 
-                    CollapsableEditFilterSection(
+                    collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showExcludeFilterPanel",
                         sectionIcon = { contentColor -> IconExcludeFilter(contentColor) },
@@ -273,7 +273,7 @@ fun LogViewerRoot(
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                     )
 
-                    CollapsableEditFilterSection(
+                    collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showIncludeFilterPanel",
                         sectionIcon = { contentColor -> IconIncludeFilter(contentColor) },
