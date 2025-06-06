@@ -4,6 +4,7 @@ import com.github.ericytsang.kotlin.ImmutableCoroutineScope.Companion.asImmutabl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
@@ -24,6 +25,22 @@ internal object KotlinDependencyProviderImpl:KotlinDependencyProvider
 {
     override val dispatchers:CoroutineDispatcherProvider = CoroutineDispatcherProviderImpl()
     override val applicationScope:ImmutableCoroutineScope = CoroutineScope(dispatchers.main).asImmutableCoroutineScope()
+}
+
+fun CoroutineScope.newChildScope(
+    coroutineContext:CoroutineContext = EmptyCoroutineContext,
+):CoroutineScope
+{
+    val job = launch(coroutineContext) { awaitCancellation() }
+    return CoroutineScope(coroutineContext + job)
+}
+
+fun ImmutableCoroutineScope.newChildScope(
+    coroutineContext:CoroutineContext = EmptyCoroutineContext,
+):CoroutineScope
+{
+    val job = launch(coroutineContext) { awaitCancellation() }
+    return CoroutineScope(coroutineContext + job)
 }
 
 class ImmutableCoroutineScope(
