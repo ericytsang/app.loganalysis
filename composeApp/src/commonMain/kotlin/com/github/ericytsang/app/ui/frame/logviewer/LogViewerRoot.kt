@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
@@ -303,14 +304,19 @@ fun LogViewerRoot(
  * - case sensitivity toggle
  * - filter type toggle.
  */
-@Composable
-fun FilterBuilderPanel(
+fun LazyListScope.filterBuilderPanel(
 
     /**
      * colors to be used for the UI components.
      * this is used to ensure that the UI components are consistent with the theme.
      */
     themeColors:Colors,
+
+    /**
+     * [LazyColumn] uses keys to keep track of its contained items
+     * so it can infer what animations to perform as items CRUD
+     */
+    lazyColumnItemKeyPrefix:String,
 
     /**
      * flow that emits the list of filters to be displayed.
@@ -333,97 +339,98 @@ fun FilterBuilderPanel(
     //mutableHasSelectableItems:MutableHasSelectableItems<FilterId>
 )
 {
-    Column(
-        modifier = Modifier.padding(Dimens.mttPadding),
-        verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
-        horizontalAlignment = Alignment.Start,
-    )
+    for (filterViewModel in filterViewModels)
     {
-        for (filterViewModel in filterViewModels)
+        // checkbox for enable/disable the filter + text field for filter string
+        item(key = "$lazyColumnItemKeyPrefix-${filterViewModel.filterId.id}-header")
         {
-            Column {
-                val textFieldInteractionSource = remember { MutableInteractionSource() }
+            val textFieldInteractionSource = remember { MutableInteractionSource() }
 
-                // call onTextFieldGotFocus one time when the text field gets focus
-                val isTextFieldFocused by textFieldInteractionSource.collectIsFocusedAsState()
-                var makeSureOnlyCalledOneTime by remember { mutableStateOf(false) }
-                if (isTextFieldFocused && !makeSureOnlyCalledOneTime)
-                {
-                    makeSureOnlyCalledOneTime = true
-                    onTextFieldGotFocus(filterViewModel.filterId)
-                }
-                else if (!isTextFieldFocused)
-                {
-                    makeSureOnlyCalledOneTime = false
-                }
+            // call onTextFieldGotFocus one time when the text field gets focus
+            val isTextFieldFocused by textFieldInteractionSource.collectIsFocusedAsState()
+            var makeSureOnlyCalledOneTime by remember { mutableStateOf(false) }
+            if (isTextFieldFocused && !makeSureOnlyCalledOneTime)
+            {
+                makeSureOnlyCalledOneTime = true
+                onTextFieldGotFocus(filterViewModel.filterId)
+            }
+            else if (!isTextFieldFocused)
+            {
+                makeSureOnlyCalledOneTime = false
+            }
 
-                // show editable filter string and checkbox for enabling/disabling the filter
-                Row(verticalAlignment = Alignment.CenterVertically)
+            // show editable filter string and checkbox for enabling/disabling the filter
+            Row(
+                modifier = Modifier.animateItem(),
+                verticalAlignment = Alignment.CenterVertically,
+            )
+            {
+                Checkbox(
+                    checked = filterViewModel.isEnabledFlow.collectAsState(false).value,
+                    onCheckedChange = { newValue -> filterViewModel.setEnabled(newValue) },
+                )
+                TextField(
+                    value = filterViewModel.filterStringFlow.collectAsState("").value,
+                    interactionSource = textFieldInteractionSource,
+                    onValueChange = { newValue -> filterViewModel.setFilterString(newValue) },
+                    modifier = Modifier.weight(1f, fill = true).padding(end = Dimens.mttPadding),
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = themeColors.onBackground,
+                    ),
+                )
+            }
+        }
+
+        // show the additional settings for this filter if it is expanded ([expandedItem])
+        if (filterViewModel.filterId == expandedItem)
+        {
+            item(key = "$lazyColumnItemKeyPrefix-${filterViewModel.filterId.id}-settings")
+            {
+                // checkbox for case sensitivity
+                val isCaseSensitive by filterViewModel.isCaseSensitiveFlow.collectAsState(false)
+                val toggleCaseSensitivity = { filterViewModel.setCaseSensitive(!isCaseSensitive) }
+                Surface(
+                    modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize).animateItem(),
+                    shape = MaterialTheme.shapes.small,
+                    onClick = toggleCaseSensitivity,
+                )
                 {
-                    Checkbox(
-                        checked = filterViewModel.isEnabledFlow.collectAsState(false).value,
-                        onCheckedChange = { newValue -> filterViewModel.setEnabled(newValue) },
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
                     )
-                    TextField(
-                        value = filterViewModel.filterStringFlow.collectAsState("").value,
-                        interactionSource = textFieldInteractionSource,
-                        onValueChange = { newValue -> filterViewModel.setFilterString(newValue) },
-                        modifier = Modifier.weight(1f, fill = true).padding(end = Dimens.mttPadding),
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = themeColors.onBackground,
-                        ),
-                    )
+                    {
+                        Checkbox(
+                            checked = isCaseSensitive,
+                            onCheckedChange = { newValue -> toggleCaseSensitivity() },
+                        )
+                        Text("Case sensitive")
+                    }
                 }
 
-                // show the additional settings for this filter if it is expanded ([expandedItem])
-                if (filterViewModel.filterId == expandedItem)
+                // spacing
+                Spacer(modifier = Modifier.size(Dimens.mttPadding))
+
+                // radio buttons for filter type
+                Text("Filter type", modifier = Modifier.padding(start = Dimens.mttSize))
+                val filterTypeFlow by filterViewModel.filterTypeFlow.collectAsState(null)
+                for (filterType in FilterType.entries)
                 {
-                    // checkbox for case sensitivity
-                    val isCaseSensitive by filterViewModel.isCaseSensitiveFlow.collectAsState(false)
-                    val toggleCaseSensitivity = { filterViewModel.setCaseSensitive(!isCaseSensitive) }
+                    val onClick = { filterViewModel.setFilterType(filterType) }
                     Surface(
                         modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
                         shape = MaterialTheme.shapes.small,
-                        onClick = toggleCaseSensitivity,
-                    )
-                    {
+                        onClick = onClick,
+                    ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
-                        )
-                        {
-                            Checkbox(
-                                checked = isCaseSensitive,
-                                onCheckedChange = { newValue -> toggleCaseSensitivity() },
-                            )
-                            Text("Case sensitive")
-                        }
-                    }
-
-                    // spacing
-                    Spacer(modifier = Modifier.size(Dimens.mttPadding))
-
-                    // radio buttons for filter type
-                    Text("Filter type", modifier = Modifier.padding(start = Dimens.mttSize))
-                    val filterTypeFlow by filterViewModel.filterTypeFlow.collectAsState(null)
-                    for (filterType in FilterType.entries)
-                    {
-                        val onClick = { filterViewModel.setFilterType(filterType) }
-                        Surface(
-                            modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
-                            shape = MaterialTheme.shapes.small,
-                            onClick = onClick,
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(
-                                    selected = filterTypeFlow == filterType,
-                                    onClick = onClick,
-                                )
-                                Text(filterType.displayName)
-                            }
+                            RadioButton(
+                                selected = filterTypeFlow == filterType,
+                                onClick = onClick,
+                            )
+                            Text(filterType.displayName)
                         }
                     }
                 }

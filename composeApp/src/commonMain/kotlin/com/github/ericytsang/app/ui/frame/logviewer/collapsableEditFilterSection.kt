@@ -76,15 +76,12 @@ fun LazyListScope.collapsableEditFilterSection(
 
     if (isSectionExpanded)
     {
-        item(key = "$lazyColumnItemKeyPrefix-panel") {
-            Row(modifier = Modifier.animateItem()) {
-                FilterBuilderPanel(
-                    themeColors = themeColors,
-                    filterViewModels = placeholderFilters,
-                    expandedItem = expandedFilterId,
-                    onTextFieldGotFocus = requestFilterExpansion,
-                )
-            }
-        }
+        filterBuilderPanel(
+            themeColors = themeColors,
+            lazyColumnItemKeyPrefix = "$lazyColumnItemKeyPrefix-panel",
+            filterViewModels = placeholderFilters,
+            expandedItem = expandedFilterId,
+            onTextFieldGotFocus = requestFilterExpansion,
+        )
     }
 }
