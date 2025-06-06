@@ -2,6 +2,7 @@
 
 package com.github.ericytsang.app.ui.frame.logviewer
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -62,7 +63,7 @@ fun LazyListScope.collapsableEditFilterSection(
 )
 {
     item(key = "$lazyColumnItemKeyPrefix-header") {
-        Row(modifier = Modifier.animateItem()) {
+        Row(modifier = Modifier.animateItem().background(themeColors.background)) {
             ToggleButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = requestToggleSectionExpanded,

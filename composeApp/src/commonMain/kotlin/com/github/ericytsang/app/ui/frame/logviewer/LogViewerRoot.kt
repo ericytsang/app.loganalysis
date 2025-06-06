@@ -2,6 +2,7 @@
 
 package com.github.ericytsang.app.ui.frame.logviewer
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -361,7 +362,7 @@ fun LazyListScope.filterBuilderPanel(
 
             // show editable filter string and checkbox for enabling/disabling the filter
             Row(
-                modifier = Modifier.animateItem(),
+                modifier = Modifier.animateItem().background(themeColors.background),
                 verticalAlignment = Alignment.CenterVertically,
             )
             {
@@ -386,51 +387,54 @@ fun LazyListScope.filterBuilderPanel(
         {
             item(key = "$lazyColumnItemKeyPrefix-${filterViewModel.filterId.id}-settings")
             {
-                // checkbox for case sensitivity
-                val isCaseSensitive by filterViewModel.isCaseSensitiveFlow.collectAsState(false)
-                val toggleCaseSensitivity = { filterViewModel.setCaseSensitive(!isCaseSensitive) }
-                Surface(
-                    modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize).animateItem(),
-                    shape = MaterialTheme.shapes.small,
-                    onClick = toggleCaseSensitivity,
-                )
+                Column(Modifier.fillMaxWidth().animateItem().background(themeColors.background))
                 {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    )
-                    {
-                        Checkbox(
-                            checked = isCaseSensitive,
-                            onCheckedChange = { newValue -> toggleCaseSensitivity() },
-                        )
-                        Text("Case sensitive")
-                    }
-                }
-
-                // spacing
-                Spacer(modifier = Modifier.size(Dimens.mttPadding))
-
-                // radio buttons for filter type
-                Text("Filter type", modifier = Modifier.padding(start = Dimens.mttSize))
-                val filterTypeFlow by filterViewModel.filterTypeFlow.collectAsState(null)
-                for (filterType in FilterType.entries)
-                {
-                    val onClick = { filterViewModel.setFilterType(filterType) }
+                    // checkbox for case sensitivity
+                    val isCaseSensitive by filterViewModel.isCaseSensitiveFlow.collectAsState(false)
+                    val toggleCaseSensitivity = { filterViewModel.setCaseSensitive(!isCaseSensitive) }
                     Surface(
                         modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
                         shape = MaterialTheme.shapes.small,
-                        onClick = onClick,
-                    ) {
+                        onClick = toggleCaseSensitivity,
+                    )
+                    {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            RadioButton(
-                                selected = filterTypeFlow == filterType,
-                                onClick = onClick,
+                        )
+                        {
+                            Checkbox(
+                                checked = isCaseSensitive,
+                                onCheckedChange = { newValue -> toggleCaseSensitivity() },
                             )
-                            Text(filterType.displayName)
+                            Text("Case sensitive")
+                        }
+                    }
+
+                    // spacing
+                    Spacer(modifier = Modifier.size(Dimens.mttPadding))
+
+                    // radio buttons for filter type
+                    Text("Filter type",modifier = Modifier.padding(start = Dimens.mttSize))
+                    val filterTypeFlow by filterViewModel.filterTypeFlow.collectAsState(null)
+                    for (filterType in FilterType.entries)
+                    {
+                        val onClick = { filterViewModel.setFilterType(filterType) }
+                        Surface(
+                            modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
+                            shape = MaterialTheme.shapes.small,
+                            onClick = onClick,
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                RadioButton(
+                                    selected = filterTypeFlow == filterType,
+                                    onClick = onClick,
+                                )
+                                Text(filterType.displayName)
+                            }
                         }
                     }
                 }
