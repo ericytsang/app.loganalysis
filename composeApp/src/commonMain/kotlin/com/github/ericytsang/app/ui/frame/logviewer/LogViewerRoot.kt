@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
@@ -30,7 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
@@ -230,7 +231,7 @@ fun LogViewerRoot(
                 ),
             )
 
-            var expandedItem by remember { mutableStateOf(FilterId("nothing should be selected right now")) }
+            var filterIdOfSelectedFilterEditorPanel by remember { mutableStateOf(FilterId("nothing should be selected right now")) }
 
             val columnWidth by derivedStateOf {
                 if (showEditFileListPanel || showExcludeFilterPanel || showIncludeFilterPanel)
@@ -252,90 +253,118 @@ fun LogViewerRoot(
                     verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
                 )
                 {
-                    item(key = "showEditFileListPanelHeader") {
-                        Row(modifier = Modifier.animateItem()) {
-                            ToggleButton(
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = { showEditFileListPanel = !showEditFileListPanel },
-                                isToggled = showEditFileListPanel,
-                                isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                                isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                                content = { contentColor -> IconEditFileList(contentColor) },
-                            )
-                        }
-                    }
+                    collapsableEditFilterSection(
+                        themeColors = themeColors,
+                        lazyColumnItemKeyPrefix = "showEditFileListPanel",
+                        sectionIcon = { contentColor -> IconEditFileList(contentColor) },
+                        isSectionExpanded = showEditFileListPanel,
+                        requestToggleSectionExpanded = { showEditFileListPanel = !showEditFileListPanel },
+                        placeholderFilters = placeholderFilters,
+                        expandedFilterId = filterIdOfSelectedFilterEditorPanel,
+                        requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
+                    )
 
-                    if (showEditFileListPanel)
-                    {
-                        item(key = "editFileListPanel") {
-                            Row(modifier = Modifier.animateItem()) {
-                                FilterBuilderPanel(
-                                    themeColors = themeColors,
-                                    filterViewModels = placeholderFilters,
-                                    expandedItem = expandedItem,
-                                    onTextFieldGotFocus = { filterId -> expandedItem = filterId },
-                                )
-                            }
-                        }
-                    }
+                    collapsableEditFilterSection(
+                        themeColors = themeColors,
+                        lazyColumnItemKeyPrefix = "showExcludeFilterPanel",
+                        sectionIcon = { contentColor -> IconExcludeFilter(contentColor) },
+                        isSectionExpanded = showExcludeFilterPanel,
+                        requestToggleSectionExpanded = { showExcludeFilterPanel = !showExcludeFilterPanel },
+                        placeholderFilters = placeholderFilters,
+                        expandedFilterId = filterIdOfSelectedFilterEditorPanel,
+                        requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
+                    )
 
-                    item(key = "showExcludeFilterPanelHeader") {
-                        Row(modifier = Modifier.animateItem()) {
-                            ToggleButton(
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = { showExcludeFilterPanel = !showExcludeFilterPanel },
-                                isToggled = showExcludeFilterPanel,
-                                isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                                isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                                content = { contentColor -> IconExcludeFilter(contentColor) },
-                            )
-                        }
-                    }
-
-                    if (showExcludeFilterPanel)
-                    {
-                        item(key = "excludeFilterPanel") {
-                            Row(modifier = Modifier.animateItem()) {
-                                FilterBuilderPanel(
-                                    themeColors = themeColors,
-                                    filterViewModels = placeholderFilters,
-                                    expandedItem = expandedItem,
-                                    onTextFieldGotFocus = { filterId -> expandedItem = filterId },
-                                )
-                            }
-                        }
-                    }
-
-                    item(key = "showIncludeFilterPanelHeader") {
-                        Row(modifier = Modifier.animateItem()) {
-                            ToggleButton(
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = { showIncludeFilterPanel = !showIncludeFilterPanel },
-                                isToggled = showIncludeFilterPanel,
-                                isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                                isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                                content = { contentColor -> IconIncludeFilter(contentColor) },
-                            )
-                        }
-                    }
-
-                    if (showIncludeFilterPanel)
-                    {
-                        item(key = "includeFilterPanel") {
-                            Row(modifier = Modifier.animateItem()) {
-                                FilterBuilderPanel(
-                                    themeColors = themeColors,
-                                    filterViewModels = placeholderFilters,
-                                    expandedItem = expandedItem,
-                                    onTextFieldGotFocus = { filterId -> expandedItem = filterId },
-                                )
-                            }
-                        }
-                    }
+                    collapsableEditFilterSection(
+                        themeColors = themeColors,
+                        lazyColumnItemKeyPrefix = "showIncludeFilterPanel",
+                        sectionIcon = { contentColor -> IconIncludeFilter(contentColor) },
+                        isSectionExpanded = showIncludeFilterPanel,
+                        requestToggleSectionExpanded = { showIncludeFilterPanel = !showIncludeFilterPanel },
+                        placeholderFilters = placeholderFilters,
+                        expandedFilterId = filterIdOfSelectedFilterEditorPanel,
+                        requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
+                    )
                 }
             }
 
             // endregion
+        }
+    }
+}
+
+private fun LazyListScope.collapsableEditFilterSection(
+
+    /** colors to be used for the UI components. */
+    themeColors:Colors,
+
+    /**
+     * [LazyColumn] uses keys to keep track of its contained items
+     * so it can infer what animations to perform as items CRUD
+     */
+    lazyColumnItemKeyPrefix:String,
+
+    /**
+     * composable to be used as the icon for the section header.
+     * this is intended to be used by the host to provide a custom icon for the section header.
+     */
+    sectionIcon:@Composable (contentColor:Color)->Unit,
+
+    /**
+     * whether this section is expanded or not.
+     * if it is expanded, the filter builder panel is shown.
+     */
+    isSectionExpanded:Boolean,
+
+    /**
+     * callback to request toggling the section expanded state.
+     * this is intended to be used by the host to update [isSectionExpanded].
+     */
+    requestToggleSectionExpanded:() -> Unit,
+
+    /**
+     * list of filters to be displayed in the filter builder panel.
+     * each filter is represented by a [FilterViewModelImpl].
+     */
+    placeholderFilters:List<FilterViewModelImpl>,
+
+    /**
+     * the id of the filter that is currently expanded.
+     * this is used to determine whether to show the additional settings for a filter.
+     */
+    expandedFilterId:FilterId,
+
+    /**
+     * callback when the text field gets focus.
+     * this is intended to be used by the host to update [expandedFilterId].
+     */
+    requestFilterExpansion:(FilterId) -> Unit,
+)
+{
+    item(key = "$lazyColumnItemKeyPrefix-header") {
+        Row(modifier = Modifier.animateItem()) {
+            ToggleButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = requestToggleSectionExpanded,
+                isToggled = isSectionExpanded,
+                isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                content = sectionIcon,
+            )
+        }
+    }
+
+    if (isSectionExpanded)
+    {
+        item(key = "$lazyColumnItemKeyPrefix-panel") {
+            Row(modifier = Modifier.animateItem()) {
+                FilterBuilderPanel(
+                    themeColors = themeColors,
+                    filterViewModels = placeholderFilters,
+                    expandedItem = expandedFilterId,
+                    onTextFieldGotFocus = requestFilterExpansion,
+                )
+            }
         }
     }
 }
