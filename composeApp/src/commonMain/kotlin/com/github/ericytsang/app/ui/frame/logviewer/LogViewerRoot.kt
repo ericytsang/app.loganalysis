@@ -2,16 +2,10 @@
 
 package com.github.ericytsang.app.ui.frame.logviewer
 
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.ScrollableDefaults
-import androidx.compose.foundation.gestures.ScrollableState
-import androidx.compose.foundation.gestures.rememberScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -34,7 +28,9 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
 import com.github.ericytsang.app.ui.util.ChildWindowManager
@@ -60,8 +57,6 @@ import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import java.io.File
 
@@ -204,9 +199,9 @@ fun LogViewerRoot(
 
             // region filter helpers and working file set editor
 
-            var showEditFileListPanel by mutableStateOf(false)
-            var showExcludeFilterPanel by mutableStateOf(false)
-            var showIncludeFilterPanel by mutableStateOf(false)
+            var showEditFileListPanel by remember { mutableStateOf(false) }
+            var showExcludeFilterPanel by remember { mutableStateOf(false) }
+            var showIncludeFilterPanel by remember { mutableStateOf(false) }
 
             val placeholderFilters = listOf(
                 FilterViewModelImpl(
@@ -237,6 +232,13 @@ fun LogViewerRoot(
 
             var expandedItem by remember { mutableStateOf(FilterId("nothing should be selected right now")) }
 
+            val columnWidth by derivedStateOf {
+                if (showEditFileListPanel || showExcludeFilterPanel || showIncludeFilterPanel)
+                    Modifier.width(400.dp)
+                else
+                    Modifier.width(Dimens.mttPadding*2+Dimens.mttSize)
+            }
+
             Surface(
                 modifier = Modifier.fillMaxHeight(),
                 shape = MaterialTheme.shapes.small,
@@ -244,78 +246,90 @@ fun LogViewerRoot(
             )
             {
                 LazyColumn(
-                    modifier = Modifier
+                    modifier = columnWidth
                         .fillMaxHeight()
                         .padding(Dimens.mttPadding),
                     verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
                 )
                 {
-                    item {
-                        ToggleButton(
-                            modifier = Modifier,//.fillMaxWidth(),
-                            onClick = { showEditFileListPanel = !showEditFileListPanel },
-                            isToggled = showEditFileListPanel,
-                            isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                            isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                            content = { contentColor -> IconEditFileList(contentColor) },
-                        )
+                    item(key = "showEditFileListPanelHeader") {
+                        Row(modifier = Modifier.animateItem()) {
+                            ToggleButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = { showEditFileListPanel = !showEditFileListPanel },
+                                isToggled = showEditFileListPanel,
+                                isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                                isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                                content = { contentColor -> IconEditFileList(contentColor) },
+                            )
+                        }
                     }
 
                     if (showEditFileListPanel)
                     {
-                        item {
-                            FilterBuilderPanel(
-                                themeColors = themeColors,
-                                filterViewModels = placeholderFilters,
-                                expandedItem = expandedItem,
-                                onTextFieldGotFocus = { filterId -> expandedItem = filterId },
-                            )
+                        item(key = "editFileListPanel") {
+                            Row(modifier = Modifier.animateItem()) {
+                                FilterBuilderPanel(
+                                    themeColors = themeColors,
+                                    filterViewModels = placeholderFilters,
+                                    expandedItem = expandedItem,
+                                    onTextFieldGotFocus = { filterId -> expandedItem = filterId },
+                                )
+                            }
                         }
                     }
 
-                    item {
-                        ToggleButton(
-                            modifier = Modifier,//.fillMaxWidth(),
-                            onClick = { showExcludeFilterPanel = !showExcludeFilterPanel },
-                            isToggled = showExcludeFilterPanel,
-                            isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                            isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                            content = { contentColor -> IconExcludeFilter(contentColor) },
-                        )
+                    item(key = "showExcludeFilterPanelHeader") {
+                        Row(modifier = Modifier.animateItem()) {
+                            ToggleButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = { showExcludeFilterPanel = !showExcludeFilterPanel },
+                                isToggled = showExcludeFilterPanel,
+                                isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                                isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                                content = { contentColor -> IconExcludeFilter(contentColor) },
+                            )
+                        }
                     }
 
                     if (showExcludeFilterPanel)
                     {
-                        item {
-                            FilterBuilderPanel(
-                                themeColors = themeColors,
-                                filterViewModels = placeholderFilters,
-                                expandedItem = expandedItem,
-                                onTextFieldGotFocus = { filterId -> expandedItem = filterId },
+                        item(key = "excludeFilterPanel") {
+                            Row(modifier = Modifier.animateItem()) {
+                                FilterBuilderPanel(
+                                    themeColors = themeColors,
+                                    filterViewModels = placeholderFilters,
+                                    expandedItem = expandedItem,
+                                    onTextFieldGotFocus = { filterId -> expandedItem = filterId },
+                                )
+                            }
+                        }
+                    }
+
+                    item(key = "showIncludeFilterPanelHeader") {
+                        Row(modifier = Modifier.animateItem()) {
+                            ToggleButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = { showIncludeFilterPanel = !showIncludeFilterPanel },
+                                isToggled = showIncludeFilterPanel,
+                                isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                                isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                                content = { contentColor -> IconIncludeFilter(contentColor) },
                             )
                         }
                     }
 
-                    item {
-                        ToggleButton(
-                            modifier = Modifier,//.fillMaxWidth(),
-                            onClick = { showIncludeFilterPanel = !showIncludeFilterPanel },
-                            isToggled = showIncludeFilterPanel,
-                            isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                            isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                            content = { contentColor -> IconIncludeFilter(contentColor) },
-                        )
-                    }
-
                     if (showIncludeFilterPanel)
                     {
-                        item {
-                            FilterBuilderPanel(
-                                themeColors = themeColors,
-                                filterViewModels = placeholderFilters,
-                                expandedItem = expandedItem,
-                                onTextFieldGotFocus = { filterId -> expandedItem = filterId },
-                            )
+                        item(key = "includeFilterPanel") {
+                            Row(modifier = Modifier.animateItem()) {
+                                FilterBuilderPanel(
+                                    themeColors = themeColors,
+                                    filterViewModels = placeholderFilters,
+                                    expandedItem = expandedItem,
+                                    onTextFieldGotFocus = { filterId -> expandedItem = filterId },
+                                )
+                            }
                         }
                     }
                 }
@@ -403,7 +417,7 @@ fun FilterBuilderPanel(
                         value = filterViewModel.filterStringFlow.collectAsState("").value,
                         interactionSource = textFieldInteractionSource,
                         onValueChange = { newValue -> filterViewModel.setFilterString(newValue) },
-                        modifier = Modifier.padding(end = Dimens.mttPadding),
+                        modifier = Modifier.weight(1f, fill = true).padding(end = Dimens.mttPadding),
                         colors = TextFieldDefaults.textFieldColors(
                             textColor = themeColors.onBackground,
                         ),
