@@ -254,6 +254,17 @@ fun LazyListScope.filterBuilderPanel(
                             }
                         }
                     }
+
+                    // spacing
+                    Spacer(modifier = Modifier.size(Dimens.mttPadding))
+
+                    // delete button
+                    Button(
+                        modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
+                        colors = ButtonDefaults.buttonColors(themeColors.error),
+                        onClick = { filterViewModel.requestDelete() },
+                        content = { Text("Delete filter") },
+                    )
                 }
             }
         }
