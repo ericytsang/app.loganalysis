@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.github.ericytsang.app.ui.util.component.ToggleButton
 
-fun LazyListScope.collapsableEditFilterSection(
+fun LazyListScope.CollapsableEditFilterSection(
 
     /** colors to be used for the UI components. */
     themeColors:Colors,
