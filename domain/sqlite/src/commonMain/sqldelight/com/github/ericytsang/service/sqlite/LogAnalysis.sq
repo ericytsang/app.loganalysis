@@ -24,41 +24,31 @@ CREATE TABLE LogFileEntity (
   CHECK (order_index >= 0)
 );
 
--- "exclude" filters are used to exclude log lines that match the filter string
-CREATE TABLE ExcludeFilterEntity (
+-- filter used to show or hide log lines that match the filter string
+CREATE TABLE FilterEntity (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  filter_string TEXT NOT NULL,
-  is_case_sensitive INTEGER NOT NULL,
-  is_regex INTEGER NOT NULL,
-  is_active INTEGER NOT NULL,
-  order_index INTEGER NOT NULL,
-  config_id INTEGER,
-  FOREIGN KEY (config_id) REFERENCES ProjectEntity(id) ON DELETE CASCADE,
-  UNIQUE (filter_string, config_id)
-);
+  config_id INTEGER NOT NULL,
 
--- "include" filter used to include log lines that match the filter string
-CREATE TABLE IncludeFilterEntity (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  filter_string TEXT NOT NULL,
-  is_case_sensitive INTEGER NOT NULL,
-  is_regex INTEGER NOT NULL,
-  is_active INTEGER NOT NULL,
-  order_index INTEGER NOT NULL,
-  config_id INTEGER,
-  FOREIGN KEY (config_id) REFERENCES ProjectEntity(id) ON DELETE CASCADE,
-  UNIQUE (filter_string, config_id)
-);
+  -- whether the filter is used to include or exclude matching log lines
+  is_exclude_filter INTEGER NOT NULL,
 
--- logcat filter used to include log lines that match the filter string
-CREATE TABLE LogCatFilterEntity (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  filter_string TEXT NOT NULL,
-  config_id INTEGER,
+  -- the order in which the filter is displayed in the UI
   order_index INTEGER NOT NULL,
+
+  -- the filter string that is used to match log lines
+  filter_string TEXT NOT NULL,
+
+  -- whether the filter string is case sensitive or not
+  is_case_sensitive INTEGER NOT NULL,
+
+  -- 'string_literal', 'regex', or 'logcat_filter'
+  filter_interpretation_mode TEXT NOT NULL,
+
+  -- whether the filter is active and being used to filter log lines or not
   is_active INTEGER NOT NULL,
+
   FOREIGN KEY (config_id) REFERENCES ProjectEntity(id) ON DELETE CASCADE,
-  UNIQUE (filter_string, config_id)
+  UNIQUE (filter_string, config_id, is_exclude_filter)
 );
 
 CREATE TABLE SettingsEntity (
@@ -169,5 +159,39 @@ ORDER BY order_index;
 -- endregion
 
 -- region filters
+
+insertFilter:
+INSERT INTO FilterEntity (config_id, is_exclude_filter, order_index, filter_string, is_case_sensitive, filter_interpretation_mode, is_active)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+selectFiltersForConfig:
+SELECT * FROM FilterEntity
+WHERE config_id = ? AND is_exclude_filter = ?
+ORDER BY order_index ASC;
+
+updateOrderIndex:
+UPDATE FilterEntity
+SET order_index = ?
+WHERE id = ?;
+
+updateFilterString:
+UPDATE FilterEntity
+SET filter_string = ?
+WHERE id = ?;
+
+updateIsCaseSensitive:
+UPDATE FilterEntity
+SET is_case_sensitive = ?
+WHERE id = ?;
+
+updateFilterInterpretationMode:
+UPDATE FilterEntity
+SET filter_interpretation_mode = ?
+WHERE id = ?;
+
+updateIsActive:
+UPDATE FilterEntity
+SET is_active = ?
+WHERE id = ?;
 
 -- endregion

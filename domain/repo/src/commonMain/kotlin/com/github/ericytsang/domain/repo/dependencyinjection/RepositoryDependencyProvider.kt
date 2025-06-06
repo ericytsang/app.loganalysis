@@ -1,9 +1,18 @@
 package com.github.ericytsang.domain.repo.dependencyinjection
 
+import app.cash.sqldelight.coroutines.asFlow
+import com.github.ericytsang.domain.objects.ConfigurationId
+import com.github.ericytsang.domain.objects.FilterInterpretationMode
+import com.github.ericytsang.domain.objects.FilterModel
+import com.github.ericytsang.domain.objects.FilterModelId
+import com.github.ericytsang.domain.objects.FilterType
+import com.github.ericytsang.domain.objects.OrderIndex
 import com.github.ericytsang.domain.repo.repo.ConfigurationRepository
 import com.github.ericytsang.domain.repo.repo.ConfigurationRepositoryImpl
 import com.github.ericytsang.domain.repo.repo.DelimiterRepository
 import com.github.ericytsang.domain.repo.repo.DelimiterRepositoryImpl
+import com.github.ericytsang.domain.repo.repo.FilterRepository
+import com.github.ericytsang.domain.repo.repo.FilterRepositoryImpl
 import com.github.ericytsang.domain.repo.repo.SettingsRepository
 import com.github.ericytsang.domain.repo.repo.SettingsRepositoryImpl
 import com.github.ericytsang.domain.repo.repo.ThemeRepository
@@ -12,6 +21,11 @@ import com.github.ericytsang.domain.repo.repo.WorkingFileSetRepository
 import com.github.ericytsang.domain.repo.repo.WorkingFileSetRepositoryImpl
 import com.github.ericytsang.domain.repo.service.DatabaseServiceProvider
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
+import com.github.ericytsang.service.sqlite.FilterEntity
+import com.github.ericytsang.service.sqlite.dbfactory.DatabaseService
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
 interface RepositoryDependencyProvider
 {
@@ -20,6 +34,7 @@ interface RepositoryDependencyProvider
     val delimiterRepository:DelimiterRepository
     val workingFileSetRepository:WorkingFileSetRepository
     val configurationRepository:ConfigurationRepository
+    val filterRepository:FilterRepository
 
     companion object
     {
@@ -62,6 +77,13 @@ internal class RepositoryDependencyProviderImpl(
 
     override val configurationRepository:ConfigurationRepository by lazy {
         ConfigurationRepositoryImpl(
+            kotlinDependencyProvider = kotlinDependencyProvider,
+            databaseService = databaseServiceProvider.databaseService,
+        )
+    }
+
+    override val filterRepository:FilterRepository by lazy {
+        FilterRepositoryImpl(
             kotlinDependencyProvider = kotlinDependencyProvider,
             databaseService = databaseServiceProvider.databaseService,
         )
