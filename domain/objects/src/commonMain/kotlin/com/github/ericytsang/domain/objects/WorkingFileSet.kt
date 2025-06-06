@@ -56,3 +56,31 @@ data class ConfigurationUpdateSequence(
         val min = ConfigurationUpdateSequence(Long.MIN_VALUE)
     }
 }
+
+data class FilterModel(
+    val id:FilterModelId,
+    val configurationId:ConfigurationId,
+    val filterString:String,
+    val isCaseSensitive:Boolean,
+    val filterInterpretationMode:FilterInterpretationMode,
+    val filterType:FilterType,
+    val isActive:Boolean,
+    val orderIndex:OrderIndex,
+)
+
+data class FilterModelId(
+    val id:Long,
+)
+
+enum class FilterType
+{
+    INCLUDE,
+    EXCLUDE,
+}
+
+enum class FilterInterpretationMode
+{
+    STRING_LITERAL,
+    REGULAR_EXPRESSION,
+    LOGCAT_FILTER,
+}
