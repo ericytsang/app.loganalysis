@@ -33,6 +33,8 @@ import androidx.compose.ui.graphics.Color
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.util.component.DoubleClickButton
 import com.github.ericytsang.app.ui.util.component.ToggleButton
+import com.github.ericytsang.domain.objects.FilterId
+import com.github.ericytsang.domain.objects.FilterInterpretationMode
 
 @ExperimentalMaterialApi
 fun LazyListScope.collapsableEditFilterSection(
@@ -232,8 +234,8 @@ fun LazyListScope.filterBuilderPanel(
 
                     // radio buttons for filter type
                     Text("Filter type",modifier = Modifier.padding(start = Dimens.mttSize))
-                    val filterTypeFlow by filterViewModel.filterTypeFlow.collectAsState(null)
-                    for (filterType in FilterType.entries)
+                    val filterTypeFlow by filterViewModel.filterInterpretationModeFlow.collectAsState(null)
+                    for (filterType in FilterInterpretationMode.entries)
                     {
                         val onClick = { filterViewModel.setFilterType(filterType) }
                         Surface(
