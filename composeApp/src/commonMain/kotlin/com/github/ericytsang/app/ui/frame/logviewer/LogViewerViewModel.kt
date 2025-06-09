@@ -100,11 +100,11 @@ class LogViewerViewModel(
     private val activeFilters:Flow<List<Node>> = filterRepository
         .selectActiveFiltersForConfig(configurationId)
         .map { list -> list.filter { it.filterString.isNotEmpty() } }
-        .map { list -> list.map { toFilterNode(it) } }
+        .map { list -> list.mapNotNull { toFilterNode(it) } }
         .flowOn(dispatchers.io)
         .conflate()
 
-    private fun toFilterNode(filterModel:FilterModel):Node
+    private fun toFilterNode(filterModel:FilterModel):Node?
     {
         val filterNode = when (filterModel.filterInterpretationMode)
         {
@@ -120,15 +120,27 @@ class LogViewerViewModel(
                 regex = true,
                 caseSensitive = filterModel.isCaseSensitive,
             )
-            FilterInterpretationMode.LOGCAT_FILTER -> logcatFilterParser.parse(
-                input = filterModel.filterString,
-                forceIsCaseSensitive = filterModel.isCaseSensitive,
-            )
+            FilterInterpretationMode.LOGCAT_FILTER -> try
+            {
+                logcatFilterParser.parse(
+                    input = filterModel.filterString,
+                    forceIsCaseSensitive = filterModel.isCaseSensitive,
+                )
+            }
+            catch (e:Exception)
+            {
+                println("Error parsing logcat filter: ${filterModel.filterString}, error: ${e.message}")
+                null
+            }
         }
-        return when (filterModel.filterType)
+        return when
         {
-            FilterType.INCLUDE -> filterNode
-            FilterType.EXCLUDE -> NotNode(filterNode)
+            filterNode == null -> null
+            else -> when (filterModel.filterType)
+            {
+                FilterType.INCLUDE -> filterNode
+                FilterType.EXCLUDE -> NotNode(filterNode)
+            }
         }
     }
 
