@@ -120,9 +120,7 @@ fun LogViewerRoot(
     window:ComposeWindow,
     themeColors:Colors,
     rootChildWindowManager:ChildWindowManager,
-    configurationId:ConfigurationId,
-    includeFilterSetViewModelFactory:()->FilterSetViewModel = { FilterTypeFilterSetViewModel(FilterType.INCLUDE, configurationId) },
-    excludeFilterSetViewModelFactory:()->FilterSetViewModel = { FilterTypeFilterSetViewModel(FilterType.EXCLUDE, configurationId) },
+    filterSetViewModelFactory:(FilterType)->FilterSetViewModel,
     workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel,
     viewModelFactory:(CoroutineScope)->LogViewerRootViewModel = { uiScope -> LogViewerRootViewModel.create(uiScope) },
     logViewerViewModelFactory:()->LogViewerViewModel = { LogViewerViewModel.createDefault() },
@@ -130,8 +128,8 @@ fun LogViewerRoot(
 {
     val uiScope = rememberCoroutineScope()
     val viewModel = remember { viewModelFactory(uiScope) }
-    val includeFilterSetViewModel = remember { includeFilterSetViewModelFactory() }
-    val excludeFilterSetViewModel = remember { excludeFilterSetViewModelFactory() }
+    val includeFilterSetViewModel = remember { filterSetViewModelFactory(FilterType.INCLUDE) }
+    val excludeFilterSetViewModel = remember { filterSetViewModelFactory(FilterType.EXCLUDE) }
     val logViewerViewModel = remember { logViewerViewModelFactory() }
     val workingFileSetEditorViewModel = remember { workingFileSetEditorViewModelFactory() }
 

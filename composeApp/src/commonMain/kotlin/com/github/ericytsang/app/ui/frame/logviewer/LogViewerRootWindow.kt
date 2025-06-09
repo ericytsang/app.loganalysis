@@ -40,6 +40,7 @@ fun LogViewerRootWindow(
                 window = window,
                 themeColors = themeColors,
                 rootChildWindowManager = rootChildWindowManager,
+                filterSetViewModelFactory = { filterType -> FilterTypeFilterSetViewModel(filterType, configurationId) },
                 workingFileSetEditorViewModelFactory = { WorkingFileSetEditorViewModel.create(configurationId) },
             )
         }
