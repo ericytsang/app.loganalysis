@@ -53,13 +53,25 @@ fun LazyListScope.collapsableEditFilterSection(
      * composable to be used as the icon for the section header.
      * this is intended to be used by the host to provide a custom icon for the section header.
      */
-    sectionTitleContent:@Composable (contentColor:Color)->Unit,
+    sectionIcon:@Composable (contentColor:Color)->Unit,
+
+    /**
+     * what to show as the title of the section when the section is expanded.
+     */
+    sectionTitle:String,
 
     /**
      * whether this section is expanded or not.
      * if it is expanded, the filter builder panel is shown.
      */
     isSectionExpanded:Boolean,
+
+    /**
+     * whether to show the section header.
+     * this is intended to be used by the host to hide the section header when it is not needed.
+     * currently the intention is to show the section header while the sidebar is expanded.
+     */
+    shouldShowSectionHeader:Boolean,
 
     /**
      * callback to request toggling the section expanded state.
@@ -109,7 +121,15 @@ fun LazyListScope.collapsableEditFilterSection(
                         verticalAlignment = Alignment.CenterVertically,
                     )
                     {
-                        sectionTitleContent(contentColor)
+                        sectionIcon(contentColor)
+                        if (shouldShowSectionHeader)
+                        {
+                            Text(
+                                text = sectionTitle,
+                                color = contentColor,
+                                modifier = Modifier.padding(start = Dimens.mttPadding),
+                            )
+                        }
                     }
                 },
             )

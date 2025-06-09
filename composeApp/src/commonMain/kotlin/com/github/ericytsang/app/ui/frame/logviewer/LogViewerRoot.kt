@@ -289,18 +289,9 @@ fun LogViewerRoot(
                     collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showEditFileListPanel",
-                        sectionTitleContent =
-                        { contentColor ->
-                            IconEditFileList(contentColor)
-                            if (isSidebarExpanded)
-                            {
-                                Text(
-                                    text = "Edit file list",
-                                    color = contentColor,
-                                    modifier = Modifier.padding(start = Dimens.mttPadding),
-                                )
-                            }
-                        },
+                        sectionIcon = { contentColor -> IconEditFileList(contentColor) },
+                        sectionTitle = "Edit file list",
+                        shouldShowSectionHeader = isSidebarExpanded,
                         isSectionExpanded = showEditFileListPanel,
                         requestToggleSectionExpanded = { showEditFileListPanel = !showEditFileListPanel },
                         filterItemViewModels = emptyList(),
@@ -312,18 +303,9 @@ fun LogViewerRoot(
                     collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showExcludeFilterPanel",
-                        sectionTitleContent =
-                        { contentColor ->
-                            IconExcludeFilter(contentColor)
-                            if (isSidebarExpanded)
-                            {
-                                Text(
-                                    text = "Exclude filters",
-                                    color = contentColor,
-                                    modifier = Modifier.padding(start = Dimens.mttPadding),
-                                )
-                            }
-                        },
+                        sectionIcon = { contentColor -> IconExcludeFilter(contentColor) },
+                        sectionTitle = "Exclude filters",
+                        shouldShowSectionHeader = isSidebarExpanded,
                         isSectionExpanded = showExcludeFilterPanel,
                         requestToggleSectionExpanded = { showExcludeFilterPanel = !showExcludeFilterPanel },
                         filterItemViewModels = excludeFilterSet,
@@ -335,18 +317,9 @@ fun LogViewerRoot(
                     collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showIncludeFilterPanel",
-                        sectionTitleContent =
-                        { contentColor ->
-                            IconIncludeFilter(contentColor)
-                            if (isSidebarExpanded)
-                            {
-                                Text(
-                                    text = "Include filters",
-                                    color = contentColor,
-                                    modifier = Modifier.padding(start = Dimens.mttPadding),
-                                )
-                            }
-                        },
+                        sectionIcon = { contentColor -> IconIncludeFilter(contentColor) },
+                        sectionTitle = "Include filters",
+                        shouldShowSectionHeader = isSidebarExpanded,
                         isSectionExpanded = showIncludeFilterPanel,
                         requestToggleSectionExpanded = { showIncludeFilterPanel = !showIncludeFilterPanel },
                         filterItemViewModels = includeFilterSet,
