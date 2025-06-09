@@ -76,7 +76,7 @@ fun LazyListScope.collapsableEditFilterSection(
      * the id of the filter that is currently expanded.
      * this is used to determine whether to show the additional settings for a filter.
      */
-    expandedFilterId:FilterId,
+    expandedFilterId:FilterId?,
 
     /**
      * callback when the text field gets focus.
