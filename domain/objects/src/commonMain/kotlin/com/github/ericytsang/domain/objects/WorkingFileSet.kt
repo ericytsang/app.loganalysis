@@ -58,7 +58,7 @@ data class ConfigurationUpdateSequence(
 }
 
 data class FilterModel(
-    val id:FilterModelId,
+    val id:FilterId,
     val configurationId:ConfigurationId,
     val filterString:String,
     val isCaseSensitive:Boolean,
@@ -68,7 +68,7 @@ data class FilterModel(
     val orderIndex:OrderIndex,
 )
 
-data class FilterModelId(
+data class FilterId(
     val id:Long,
 )
 
