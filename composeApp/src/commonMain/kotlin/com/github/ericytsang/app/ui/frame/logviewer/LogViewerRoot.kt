@@ -61,8 +61,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
 import java.io.File
-import java.util.UUID
-import kotlin.random.Random
 
 interface FilterSetViewModel
 {
@@ -292,7 +290,7 @@ fun LogViewerRoot(
                         sectionIcon = { contentColor -> IconEditFileList(contentColor) },
                         isSectionExpanded = showEditFileListPanel,
                         requestToggleSectionExpanded = { showEditFileListPanel = !showEditFileListPanel },
-                        placeholderFilters = excludeFilterSet,
+                        filterItemViewModels = emptyList(),
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                     )
@@ -303,7 +301,7 @@ fun LogViewerRoot(
                         sectionIcon = { contentColor -> IconExcludeFilter(contentColor) },
                         isSectionExpanded = showExcludeFilterPanel,
                         requestToggleSectionExpanded = { showExcludeFilterPanel = !showExcludeFilterPanel },
-                        placeholderFilters = excludeFilterSet,
+                        filterItemViewModels = excludeFilterSet,
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                     )
@@ -314,7 +312,7 @@ fun LogViewerRoot(
                         sectionIcon = { contentColor -> IconIncludeFilter(contentColor) },
                         isSectionExpanded = showIncludeFilterPanel,
                         requestToggleSectionExpanded = { showIncludeFilterPanel = !showIncludeFilterPanel },
-                        placeholderFilters = includeFilterSet,
+                        filterItemViewModels = includeFilterSet,
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                     )
