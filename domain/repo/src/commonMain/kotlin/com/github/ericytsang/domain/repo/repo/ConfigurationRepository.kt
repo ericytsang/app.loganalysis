@@ -66,7 +66,7 @@ interface SuspendIterator<T>
         private fun <T> create(
             iterator:Iterator<T>,
             coroutineDispatcher:CoroutineDispatcher,
-        ):SuspendIterator<T> = object :SuspendIterator<T>
+        ):SuspendIterator<T> = object:SuspendIterator<T>
         {
             override suspend fun next():T = withContext(coroutineDispatcher) { iterator.next() }
             override suspend fun hasNext():Boolean = withContext(coroutineDispatcher) { iterator.hasNext() }
@@ -76,15 +76,15 @@ interface SuspendIterator<T>
 
         private fun <T> create(
             iterator:Iterator<T>,
-        ):SuspendIterator<T> = object :SuspendIterator<T>
+        ):SuspendIterator<T> = object:SuspendIterator<T>
         {
             override suspend fun next():T = iterator.next()
             override suspend fun hasNext():Boolean = iterator.hasNext()
         }
 
         fun <T,N> create(
-            getNextQueryStartPoint: (List<T>) -> N,
-            query: suspend (N) -> List<T>,
+            getNextQueryStartPoint:(List<T>)->N,
+            query:suspend (N)->List<T>,
         ):SuspendIterator<T>
         {
             val projectSequence = generateSequence(emptyList<T>())
