@@ -45,19 +45,74 @@ import com.github.ericytsang.app.ui.util.component.CommonWindowHeader
 import com.github.ericytsang.app.ui.util.component.ToggleButton
 import com.github.ericytsang.app.ui.util.openNewProjectWizard
 import com.github.ericytsang.app.ui.util.openProjectBrowser
+import com.github.ericytsang.domain.objects.ConfigurationId
+import com.github.ericytsang.domain.objects.FilterInterpretationMode
+import com.github.ericytsang.domain.objects.FilterId
+import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
+import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
+import com.github.ericytsang.domain.repo.repo.FilterRepository
+import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
 import java.io.File
 import java.util.UUID
+import kotlin.random.Random
 
 interface FilterSetViewModel
 {
     val filters:Flow<List<FilterViewModel>>
-    fun addFilter(filter:FilterViewModel)
+    suspend fun addFilter(
+        configurationId:ConfigurationId,
+        filterType:FilterType,
+    ):FilterId
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class FilterTypeFilterSetViewModel(
+    private val filterType:FilterType,
+    private val configurationId:ConfigurationId,
+    private val filterRepo:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
+    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+):FilterSetViewModel,
+    KotlinDependencyProvider by kotlinDependencyProvider
+{
+    override val filters:Flow<List<FilterViewModel>> = filterRepo.selectFiltersForConfig(
+        configurationId = configurationId,
+        filterType = filterType,
+    ).mapLatest { rows ->
+        rows.map { row ->
+            FilterViewModelImpl(
+                filterId = row.id,
+                initialFilterString = row.filterString,
+                initialIsCaseSensitive = row.isCaseSensitive,
+                initialIsEnabled = row.isActive,
+                initialFilterInterpretationMode = row.filterInterpretationMode,
+                onRequestDelete = { filterId -> applicationScope.launch { filterRepo.delete(row.id) } },
+            )
+        }
+    }
+
+    override suspend fun addFilter(
+        configurationId:ConfigurationId,
+        filterType:FilterType,
+    ):FilterId
+    {
+        val filterId = filterRepo.insertFilterAtTop(
+            configurationId = configurationId,
+            filterString = "",
+            isCaseSensitive = false,
+            filterInterpretationMode = FilterInterpretationMode.STRING_LITERAL,
+            filterType = filterType,
+            isActive = true,
+        )
+        return FilterId(filterId)
+    }
 }
 
 class FilterSetViewModelImpl:FilterSetViewModel
@@ -70,6 +125,11 @@ class FilterSetViewModelImpl:FilterSetViewModel
         _filters.update { it + filter }
     }
 
+    override suspend fun addFilter(configurationId:ConfigurationId,filterType:FilterType):FilterId
+    {
+        _filters.update { it + filter }
+    }
+
     private fun removeFilter(filterId:FilterId)
     {
         _filters.update { it.filter { filter -> filter.filterId != filterId } }
@@ -77,27 +137,27 @@ class FilterSetViewModelImpl:FilterSetViewModel
 
     private fun createPlaceholders() = listOf(
         FilterViewModelImpl(
-            filterId = FilterId(UUID.randomUUID().toString()),
+            filterId = FilterId(Random.nextLong()),
             initialFilterString = "filterStringFlow",
             initialIsCaseSensitive = true,
             initialIsEnabled = true,
-            initialFilterType = FilterType.STRING_LITERAL,
+            initialFilterInterpretationMode = FilterInterpretationMode.STRING_LITERAL,
             onRequestDelete = ::removeFilter,
         ),
         FilterViewModelImpl(
-            filterId = FilterId(UUID.randomUUID().toString()),
+            filterId = FilterId(Random.nextLong()),
             initialFilterString = "filterStringFlow",
             initialIsCaseSensitive = true,
             initialIsEnabled = true,
-            initialFilterType = FilterType.STRING_LITERAL,
+            initialFilterInterpretationMode = FilterInterpretationMode.STRING_LITERAL,
             onRequestDelete = ::removeFilter,
         ),
         FilterViewModelImpl(
-            filterId = FilterId(UUID.randomUUID().toString()),
+            filterId = FilterId(Random.nextLong()),
             initialFilterString = "filterStringFlow",
             initialIsCaseSensitive = true,
             initialIsEnabled = true,
-            initialFilterType = FilterType.STRING_LITERAL,
+            initialFilterInterpretationMode = FilterInterpretationMode.STRING_LITERAL,
             onRequestDelete = ::removeFilter,
         ),
     )
@@ -384,7 +444,7 @@ class FilterViewModelImpl(
     initialFilterString:String,
     initialIsCaseSensitive:Boolean,
     initialIsEnabled:Boolean,
-    initialFilterType:FilterType,
+    initialFilterInterpretationMode:FilterInterpretationMode,
     private val onRequestDelete:(FilterId)->Unit,
 ):FilterViewModel
 {
@@ -398,8 +458,8 @@ class FilterViewModelImpl(
     private val _isEnabledFlow = MutableStateFlow<Boolean>(initialIsEnabled)
     override val isEnabledFlow:Flow<Boolean> get() = _isEnabledFlow
 
-    private val _filterTypeFlow = MutableStateFlow<FilterType>(initialFilterType)
-    override val filterTypeFlow:Flow<FilterType> get() = _filterTypeFlow
+    private val _filterInterpretationModeFlow = MutableStateFlow<FilterInterpretationMode>(initialFilterInterpretationMode)
+    override val filterInterpretationModeFlow:Flow<FilterInterpretationMode> get() = _filterInterpretationModeFlow
 
     override fun setFilterString(newValue:String)
     {
@@ -416,9 +476,9 @@ class FilterViewModelImpl(
         _isEnabledFlow.value = newValue
     }
 
-    override fun setFilterType(newValue:FilterType)
+    override fun setFilterType(newValue:FilterInterpretationMode)
     {
-        _filterTypeFlow.value = newValue
+        _filterInterpretationModeFlow.value = newValue
     }
 
     override fun requestDelete()
@@ -427,8 +487,6 @@ class FilterViewModelImpl(
     }
 }
 
-data class FilterId(val id:String)
-
 interface FilterViewModel
 {
     val filterId:FilterId
@@ -436,20 +494,17 @@ interface FilterViewModel
     val filterStringFlow:Flow<String>
     val isCaseSensitiveFlow:Flow<Boolean>
     val isEnabledFlow:Flow<Boolean>
-    val filterTypeFlow:Flow<FilterType>
+    val filterInterpretationModeFlow:Flow<FilterInterpretationMode>
 
     fun setFilterString(newValue:String)
     fun setCaseSensitive(newValue:Boolean)
     fun setEnabled(newValue:Boolean)
-    fun setFilterType(newValue:FilterType)
+    fun setFilterType(newValue:FilterInterpretationMode)
     fun requestDelete()
 }
 
-enum class FilterType(
-    val displayName:String,
-)
-{
-    STRING_LITERAL("Plaintext"),
-    REGEX("Regex"),
-    LOGCAT_FILTER("Logcat filter"),
+val FilterInterpretationMode.displayName:String get() = when (this){
+    FilterInterpretationMode.STRING_LITERAL -> "Plaintext"
+    FilterInterpretationMode.REGULAR_EXPRESSION -> "Regex"
+    FilterInterpretationMode.LOGCAT_FILTER -> "Logcat filter"
 }
