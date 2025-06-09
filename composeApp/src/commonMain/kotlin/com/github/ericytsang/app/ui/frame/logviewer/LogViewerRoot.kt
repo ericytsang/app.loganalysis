@@ -175,16 +175,22 @@ fun LogViewerRoot(
                         modifier = Modifier.fillMaxSize(),
                     )
                     {
-                        items(count = logLines.size)
+                        items(
+                            key = { index -> logLines[index].index },
+                            count = logLines.size,
+                        )
                         { index ->
-                            ColorCodedLogLine(
-                                text = logLines[index],
-                                modifier = Modifier.fillMaxWidth(),
-                                delimiters = delimiters,
-                                themeForColorCoding = theme,
-                                defaultColor = themeColors.onBackground,
-                                softWrap = shouldWrapText,
-                            )
+                            Row(modifier = Modifier.animateItem())
+                            {
+                                ColorCodedLogLine(
+                                    text = logLines[index].value,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    delimiters = delimiters,
+                                    themeForColorCoding = theme,
+                                    defaultColor = themeColors.onBackground,
+                                    softWrap = shouldWrapText,
+                                )
+                            }
                         }
                     }
                 }

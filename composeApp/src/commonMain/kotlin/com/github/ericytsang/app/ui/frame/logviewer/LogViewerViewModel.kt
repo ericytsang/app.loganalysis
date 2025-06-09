@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -148,11 +147,12 @@ class LogViewerViewModel(
 
     // region log lines
 
-    private val fileLines = concatenatedFiles
+    private val fileLines:Flow<List<IndexedValue<String>>> = concatenatedFiles
         .mapLatest { files -> files.flatMap { file -> file.readLines() } }
+        .mapLatest { lines -> lines.withIndex().toList() }
         .conflate()
 
-    fun getLogLinesFlow():Flow<List<String>> =
+    fun getLogLinesFlow():Flow<List<IndexedValue<String>>> =
         combine(
             fileLines,
             activeFilterParsed,
@@ -162,16 +162,16 @@ class LogViewerViewModel(
         ).flowOn(dispatchers.io)
 
     private fun applyFilterToLogLines(
-        logLines:List<String>,
+        logLines:List<IndexedValue<String>>,
         logcatFilter:ParsedLogcatFilter,
         isCaseSensitive:Boolean,
         activeFilters:List<Node>,
-    ):List<String> = logLines.filter { logLine ->
+    ):List<IndexedValue<String>> = logLines.filter { logLine ->
         val isMatchWithMasterFilter = when (logcatFilter)
         {
             is ParsedLogcatFilter.Parsed -> logcatFilterEvaluator.isMatch(
                 caseSensitive = isCaseSensitive,
-                logLine = logLine,
+                logLine = logLine.value,
                 logcatFilter = logcatFilter.node,
             )
             ParsedLogcatFilter.Empty -> true
@@ -181,7 +181,7 @@ class LogViewerViewModel(
         isMatchWithMasterFilter && activeFilters.all { filter ->
             logcatFilterEvaluator.isMatch(
                 caseSensitive = false,
-                logLine = logLine,
+                logLine = logLine.value,
                 logcatFilter = filter,
             )
         }
