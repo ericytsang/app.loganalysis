@@ -405,6 +405,38 @@ class HasSelectableItemsImpl<T>(
     }
 }
 
+class PersistedValue<T>(
+    initialValue:T,
+    updatePersistedValue: suspend (T)->Unit,
+    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+):KotlinDependencyProvider by kotlinDependencyProvider
+{
+    private sealed class Sourced<T>
+    {
+        abstract val value:T
+        data class User<T>(override val value:T):Sourced<T>()
+        data class System<T>(override val value:T):Sourced<T>()
+    }
+
+    private val _valueFlow = MutableStateFlow<Sourced<T>>(Sourced.System(initialValue))
+    val valueFlow:Flow<T> get() = _valueFlow.map { it.value }
+
+    init
+    {
+        _valueFlow
+            .filter { it is Sourced.User }
+            .conflate()
+            .map { it.value }
+            .onEach { newValue -> updatePersistedValue(newValue) }
+            .flowOn(dispatchers.io)
+            .launchIn(applicationScope)
+    }
+
+    var value:T
+        get() = _valueFlow.value.value
+        set(newValue) { _valueFlow.value = Sourced.User(newValue) }
+}
+
 class FilterViewModelImpl(
     override val filterId:FilterId,
     initialFilterString:String,
@@ -417,89 +449,58 @@ class FilterViewModelImpl(
 ):FilterViewModel,
     KotlinDependencyProvider by kotlinDependencyProvider
 {
-    private sealed class Sourced<T>
-    {
-        abstract val value:T
-        data class User<T>(override val value:T):Sourced<T>()
-        data class System<T>(override val value:T):Sourced<T>()
-    }
 
-    private val _filterStringFlow = MutableStateFlow<Sourced<String>>(Sourced.System(initialFilterString))
-    override val filterStringFlow:Flow<String> get() = _filterStringFlow.map { it.value }
+    private val _filterStringFlow = PersistedValue(
+        initialValue = initialFilterString,
+        updatePersistedValue = { newValue -> filterRepository.updateFilterString(filterId, newValue) },
+    )
 
-    private val _isCaseSensitiveFlow = MutableStateFlow<Sourced<Boolean>>(Sourced.System(initialIsCaseSensitive))
-    override val isCaseSensitiveFlow:Flow<Boolean> get() = _isCaseSensitiveFlow.map { it.value }
-
-    private val _isEnabledFlow = MutableStateFlow<Sourced<Boolean>>(Sourced.System(initialIsEnabled))
-    override val isEnabledFlow:Flow<Boolean> get() = _isEnabledFlow.map { it.value }
-
-    private val _filterInterpretationModeFlow = MutableStateFlow<Sourced<FilterInterpretationMode>>(Sourced.System(initialFilterInterpretationMode))
-    override val filterInterpretationModeFlow:Flow<FilterInterpretationMode> get() = _filterInterpretationModeFlow.map { it.value }
-
-    init
-    {
-        // update filter string in the repository when the filter string changes
-        updateFilterOnUserChanged(
-            flow = _filterStringFlow,
-            update = { newValue -> filterRepository.updateFilterString(filterId, newValue) },
-        )
-
-        // update is case sensitive in the repository when the is case sensitive changes
-        updateFilterOnUserChanged(
-            flow = _isCaseSensitiveFlow,
-            update = { newValue -> filterRepository.updateIsCaseSensitive(filterId, newValue) },
-        )
-
-        // update is enabled in the repository when the is enabled changes
-        updateFilterOnUserChanged(
-            flow = _isEnabledFlow,
-            update = { newValue -> filterRepository.updateIsActive(filterId, newValue) },
-        )
-
-        // update filter interpretation mode in the repository when the filter interpretation mode changes
-        updateFilterOnUserChanged(
-            flow = _filterInterpretationModeFlow,
-            update = { newValue -> filterRepository.updateFilterInterpretationMode(filterId, newValue) },
-        )
-    }
+    override val filterStringFlow:Flow<String> get() = _filterStringFlow.valueFlow
 
     override fun setFilterString(newValue:String)
     {
-        _filterStringFlow.value = Sourced.User(newValue)
+        _filterStringFlow.value = newValue
     }
+
+    private val _isCaseSensitiveFlow = PersistedValue(
+        initialValue = initialIsCaseSensitive,
+        updatePersistedValue = { newValue -> filterRepository.updateIsCaseSensitive(filterId, newValue) },
+    )
+
+    override val isCaseSensitiveFlow:Flow<Boolean> get() = _isCaseSensitiveFlow.valueFlow
 
     override fun setCaseSensitive(newValue:Boolean)
     {
-        _isCaseSensitiveFlow.value = Sourced.User(newValue)
+        _isCaseSensitiveFlow.value = newValue
     }
+
+    private val _isEnabledFlow = PersistedValue(
+        initialValue = initialIsEnabled,
+        updatePersistedValue = { newValue -> filterRepository.updateIsActive(filterId, newValue) },
+    )
+
+    override val isEnabledFlow:Flow<Boolean> get() = _isEnabledFlow.valueFlow
 
     override fun setEnabled(newValue:Boolean)
     {
-        _isEnabledFlow.value = Sourced.User(newValue)
+        _isEnabledFlow.value = newValue
     }
+
+    private val _filterInterpretationModeFlow = PersistedValue(
+        initialValue = initialFilterInterpretationMode,
+        updatePersistedValue = { newValue -> filterRepository.updateFilterInterpretationMode(filterId, newValue) },
+    )
+
+    override val filterInterpretationModeFlow:Flow<FilterInterpretationMode> get() = _filterInterpretationModeFlow.valueFlow
 
     override fun setFilterType(newValue:FilterInterpretationMode)
     {
-        _filterInterpretationModeFlow.value = Sourced.User(newValue)
+        _filterInterpretationModeFlow.value = newValue
     }
 
     override fun requestDelete()
     {
         onRequestDelete(filterId)
-    }
-
-    private fun <T> updateFilterOnUserChanged(
-        flow:MutableStateFlow<Sourced<T>>,
-        update:(suspend (T)->Unit),
-    )
-    {
-        flow
-            .filter { it is Sourced.User }
-            .conflate()
-            .map { it.value }
-            .onEach { newValue -> update(newValue) }
-            .flowOn(dispatchers.io)
-            .launchIn(applicationScope)
     }
 }
 
