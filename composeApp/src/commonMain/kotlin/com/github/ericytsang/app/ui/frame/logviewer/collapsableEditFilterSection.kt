@@ -70,7 +70,7 @@ fun LazyListScope.collapsableEditFilterSection(
      * list of filters to be displayed in the filter builder panel.
      * each filter is represented by a [FilterViewModel].
      */
-    filters:List<FilterViewModel>,
+    filterItemViewModels:List<FilterViewModel>,
 
     /**
      * the id of the filter that is currently expanded.
@@ -103,7 +103,7 @@ fun LazyListScope.collapsableEditFilterSection(
         filterBuilderPanel(
             themeColors = themeColors,
             lazyColumnItemKeyPrefix = "$lazyColumnItemKeyPrefix-panel",
-            filterViewModels = filters,
+            filterViewModels = filterItemViewModels,
             expandedItem = expandedFilterId,
             onTextFieldGotFocus = requestFilterExpansion,
         )
