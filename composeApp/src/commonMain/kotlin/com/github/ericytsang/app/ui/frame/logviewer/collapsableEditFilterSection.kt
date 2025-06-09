@@ -16,6 +16,7 @@ import androidx.compose.material.Checkbox
 import androidx.compose.material.Colors
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -52,7 +53,7 @@ fun LazyListScope.collapsableEditFilterSection(
      * composable to be used as the icon for the section header.
      * this is intended to be used by the host to provide a custom icon for the section header.
      */
-    sectionIcon:@Composable (contentColor:Color)->Unit,
+    sectionTitleContent:@Composable (contentColor:Color)->Unit,
 
     /**
      * whether this section is expanded or not.
@@ -83,23 +84,60 @@ fun LazyListScope.collapsableEditFilterSection(
      * this is intended to be used by the host to update [expandedFilterId].
      */
     requestFilterExpansion:(FilterId)->Unit,
+
+    /**
+     * callback to request adding a new filter.
+     * this is intended to be used by the host to add a new filter.
+     */
+    requestAddNewFilter:()->Unit,
 )
 {
-    item(key = "$lazyColumnItemKeyPrefix-header") {
-        Row(modifier = Modifier.animateItem().background(themeColors.background)) {
+    item(key = "$lazyColumnItemKeyPrefix-header")
+    {
+        Row(modifier = Modifier.animateItem().background(themeColors.background))
+        {
             ToggleButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = requestToggleSectionExpanded,
                 isToggled = isSectionExpanded,
                 isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
                 isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                content = sectionIcon,
+                content =
+                { contentColor ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    )
+                    {
+                        sectionTitleContent(contentColor)
+                    }
+                },
             )
         }
     }
 
     if (isSectionExpanded)
     {
+        // button to add a new filter
+        item(key = "$lazyColumnItemKeyPrefix-add-new-filter-button")
+        {
+            Row(modifier = Modifier.animateItem().background(themeColors.background))
+            {
+                OutlinedButton(
+                    modifier = Modifier.fillMaxWidth().animateItem().padding(Dimens.mttPadding),
+                    onClick = requestAddNewFilter,
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        backgroundColor = themeColors.surface,
+                        contentColor = themeColors.onSurface,
+                    ),
+                )
+                {
+                    Text("Add new filter")
+                }
+            }
+        }
+
+        // show the filters that the user can edit
         filterBuilderPanel(
             themeColors = themeColors,
             lazyColumnItemKeyPrefix = "$lazyColumnItemKeyPrefix-panel",
