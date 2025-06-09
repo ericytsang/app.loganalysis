@@ -59,8 +59,8 @@ fun LogViewerRoot(
     rootChildWindowManager:ChildWindowManager,
     filterSetViewModelFactory:(FilterType)->FilterSetViewModel,
     workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel,
+    logViewerViewModelFactory:()->LogViewerViewModel,
     viewModelFactory:(CoroutineScope)->LogViewerRootViewModel = { uiScope -> LogViewerRootViewModel.create(uiScope) },
-    logViewerViewModelFactory:()->LogViewerViewModel = { LogViewerViewModel.createDefault() },
 )
 {
     val uiScope = rememberCoroutineScope()

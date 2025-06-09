@@ -6,10 +6,13 @@ class LogcatFilterParser
     /**
      * Parses the input string into an AST.
      */
-    fun parse(input:String):Node
+    fun parse(
+        input:String,
+        forceIsCaseSensitive:Boolean = false,
+    ):Node
     {
         val stream = Tokenizer.tokenize(input)
-        val node = parseOrExpression(stream)
+        val node = parseOrExpression(stream, forceIsCaseSensitive)
         if (stream.peek() != null)
         {
             throw RuntimeException("Unexpected token: "+stream.peek())
@@ -20,13 +23,13 @@ class LogcatFilterParser
     /**
      * Parses an expression: term ( "|" term )
      */
-    private fun parseOrExpression(stream:TokenStream):Node
+    private fun parseOrExpression(stream:TokenStream,forceIsCaseSensitive:Boolean):Node
     {
-        var node = parseAndExpression(stream)
+        var node = parseAndExpression(stream,forceIsCaseSensitive)
         while (stream.peek() == "|")
         {
             stream.next() // consume "|"
-            val right = parseAndExpression(stream)
+            val right = parseAndExpression(stream,forceIsCaseSensitive)
             node = OrNode(node,right)
         }
         return node
@@ -35,13 +38,13 @@ class LogcatFilterParser
     /**
      * Parses a term: factor ( "&" factor )
      */
-    private fun parseAndExpression(stream:TokenStream):Node
+    private fun parseAndExpression(stream:TokenStream,forceIsCaseSensitive:Boolean):Node
     {
-        var node = parseNotExpression(stream)
+        var node = parseNotExpression(stream,forceIsCaseSensitive)
         while (stream.peek() == "&")
         {
             stream.next() // consume "&"
-            val right = parseNotExpression(stream)
+            val right = parseNotExpression(stream,forceIsCaseSensitive)
             node = AndNode(node,right)
         }
         return node
@@ -50,18 +53,18 @@ class LogcatFilterParser
     /**
      * Parses an expression: term ( "|" term )
      */
-    private fun parseNotExpression(stream:TokenStream):Node
+    private fun parseNotExpression(stream:TokenStream,forceIsCaseSensitive:Boolean):Node
     {
         var node: Node? = null
         while (stream.peek() == "-")
         {
             stream.next() // consume "-"
-            val right = parseBrackets(stream)
+            val right = parseBrackets(stream,forceIsCaseSensitive)
             node = NotNode(right)
         }
         if (node == null)
         {
-            node = parseBrackets(stream)
+            node = parseBrackets(stream,forceIsCaseSensitive)
         }
         return node
     }
@@ -69,7 +72,7 @@ class LogcatFilterParser
     /**
      * Parses a factor: leaf | "(" expression ")"
      */
-    private fun parseBrackets(stream:TokenStream):Node
+    private fun parseBrackets(stream:TokenStream,forceIsCaseSensitive:Boolean):Node
     {
         val token = stream.next()
         if (token == null)
@@ -78,7 +81,7 @@ class LogcatFilterParser
         }
         if (token == "(")
         {
-            val node = parseOrExpression(stream)
+            val node = parseOrExpression(stream,forceIsCaseSensitive)
             val close = stream.next()
             if (close != ")")
             {
@@ -88,7 +91,7 @@ class LogcatFilterParser
         }
         else if (isLeafToken(token))
         {
-            return parseLeaf(token)
+            return parseLeaf(token,forceIsCaseSensitive)
         }
         else
         {
@@ -107,7 +110,7 @@ class LogcatFilterParser
     /**
      * Parses a leaf token into a LeafNode.
      */
-    private fun parseLeaf(token:String):LeafNode
+    private fun parseLeaf(token:String, forceIsCaseSensitive:Boolean):LeafNode
     {
         var token = token
         val colonIndex by lazy { token.indexOf(":") }
@@ -120,7 +123,7 @@ class LogcatFilterParser
                 key = "message",
                 value = value,
                 regex = false,
-                caseSensitive = false,
+                caseSensitive = false || forceIsCaseSensitive,
             )
         }
         else if (colonIndex != -1)
@@ -128,7 +131,7 @@ class LogcatFilterParser
             var key = token.substring(0,colonIndex)
             var value = token.substring(colonIndex+1)
             var regex = false
-            var caseSensitive = false
+            var caseSensitive = false || forceIsCaseSensitive
             while (key.endsWith("~") || key.endsWith("^"))
             {
                 when
@@ -153,7 +156,7 @@ class LogcatFilterParser
                 key = "message",
                 value = token,
                 regex = false,
-                caseSensitive = false,
+                caseSensitive = false || forceIsCaseSensitive,
             )
         }
     }

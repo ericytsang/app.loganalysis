@@ -40,6 +40,10 @@ interface FilterRepository
         filterType:FilterType,
     ):Flow<Unit>
 
+    fun selectActiveFiltersForConfig(
+        configurationId:ConfigurationId,
+    ):Flow<List<FilterModel>>
+
     fun selectFiltersForConfig(
         configurationId:ConfigurationId,
         filterType:FilterType,
@@ -150,6 +154,14 @@ internal class FilterRepositoryImpl(
         )
         .asFlow()
         .map { }
+
+    override fun selectActiveFiltersForConfig(
+        configurationId:ConfigurationId,
+    ):Flow<List<FilterModel>> = queries
+        .selectActiveFiltersForConfig(configurationId.id)
+        .asFlow()
+        .map { it.executeAsList() }
+        .map { list -> list.map { it.toDomainModel() } }
 
     override fun selectFiltersForConfig(
         configurationId:ConfigurationId,

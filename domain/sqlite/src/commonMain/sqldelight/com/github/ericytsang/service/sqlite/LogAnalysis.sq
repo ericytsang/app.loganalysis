@@ -168,6 +168,10 @@ selectAllFiltersForConfig:
 SELECT * FROM FilterEntity
 WHERE config_id = ? AND is_exclude_filter = ?;
 
+selectActiveFiltersForConfig:
+SELECT * FROM FilterEntity
+WHERE config_id = ? AND is_active = 1;
+
 selectFiltersForConfigDesc:
 SELECT * FROM FilterEntity
 WHERE config_id = ? AND is_exclude_filter = ? AND order_index < ?
