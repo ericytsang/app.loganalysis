@@ -115,61 +115,14 @@ class FilterTypeFilterSetViewModel(
     }
 }
 
-class FilterSetViewModelImpl:FilterSetViewModel
-{
-    private val _filters = MutableStateFlow<List<FilterViewModel>>(createPlaceholders())
-    override val filters:Flow<List<FilterViewModel>> get() = _filters
-
-    override fun addFilter(filter:FilterViewModel)
-    {
-        _filters.update { it + filter }
-    }
-
-    override suspend fun addFilter(configurationId:ConfigurationId,filterType:FilterType):FilterId
-    {
-        _filters.update { it + filter }
-    }
-
-    private fun removeFilter(filterId:FilterId)
-    {
-        _filters.update { it.filter { filter -> filter.filterId != filterId } }
-    }
-
-    private fun createPlaceholders() = listOf(
-        FilterViewModelImpl(
-            filterId = FilterId(Random.nextLong()),
-            initialFilterString = "filterStringFlow",
-            initialIsCaseSensitive = true,
-            initialIsEnabled = true,
-            initialFilterInterpretationMode = FilterInterpretationMode.STRING_LITERAL,
-            onRequestDelete = ::removeFilter,
-        ),
-        FilterViewModelImpl(
-            filterId = FilterId(Random.nextLong()),
-            initialFilterString = "filterStringFlow",
-            initialIsCaseSensitive = true,
-            initialIsEnabled = true,
-            initialFilterInterpretationMode = FilterInterpretationMode.STRING_LITERAL,
-            onRequestDelete = ::removeFilter,
-        ),
-        FilterViewModelImpl(
-            filterId = FilterId(Random.nextLong()),
-            initialFilterString = "filterStringFlow",
-            initialIsCaseSensitive = true,
-            initialIsEnabled = true,
-            initialFilterInterpretationMode = FilterInterpretationMode.STRING_LITERAL,
-            onRequestDelete = ::removeFilter,
-        ),
-    )
-}
-
 @Composable
 fun LogViewerRoot(
     window:ComposeWindow,
     themeColors:Colors,
     rootChildWindowManager:ChildWindowManager,
-    includeFilterSetViewModelFactory:()->FilterSetViewModel = { FilterSetViewModelImpl() },
-    excludeFilterSetViewModelFactory:()->FilterSetViewModel = { FilterSetViewModelImpl() },
+    configurationId:ConfigurationId,
+    includeFilterSetViewModelFactory:()->FilterSetViewModel = { FilterTypeFilterSetViewModel(FilterType.INCLUDE, configurationId) },
+    excludeFilterSetViewModelFactory:()->FilterSetViewModel = { FilterTypeFilterSetViewModel(FilterType.EXCLUDE, configurationId) },
     workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel,
     viewModelFactory:(CoroutineScope)->LogViewerRootViewModel = { uiScope -> LogViewerRootViewModel.create(uiScope) },
     logViewerViewModelFactory:()->LogViewerViewModel = { LogViewerViewModel.createDefault() },
@@ -310,7 +263,7 @@ fun LogViewerRoot(
             var showExcludeFilterPanel by remember { mutableStateOf(false) }
             var showIncludeFilterPanel by remember { mutableStateOf(false) }
 
-            var filterIdOfSelectedFilterEditorPanel by remember { mutableStateOf(FilterId("nothing should be selected right now")) }
+            var filterIdOfSelectedFilterEditorPanel by remember { mutableStateOf<FilterId?>(null) }
 
             val columnWidth by derivedStateOf {
                 if (showEditFileListPanel || showExcludeFilterPanel || showIncludeFilterPanel)
@@ -464,21 +417,25 @@ class FilterViewModelImpl(
     override fun setFilterString(newValue:String)
     {
         _filterStringFlow.value = newValue
+        // todo: i need to write the new value back to the database as well
     }
 
     override fun setCaseSensitive(newValue:Boolean)
     {
         _isCaseSensitiveFlow.value = newValue
+        // todo: i need to write the new value back to the database as well
     }
 
     override fun setEnabled(newValue:Boolean)
     {
         _isEnabledFlow.value = newValue
+        // todo: i need to write the new value back to the database as well
     }
 
     override fun setFilterType(newValue:FilterInterpretationMode)
     {
         _filterInterpretationModeFlow.value = newValue
+        // todo: i need to write the new value back to the database as well
     }
 
     override fun requestDelete()
