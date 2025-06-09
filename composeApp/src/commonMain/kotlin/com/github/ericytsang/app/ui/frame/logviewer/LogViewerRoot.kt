@@ -67,7 +67,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import java.io.File
-import javax.xml.transform.Source
 
 interface FilterSetViewModel
 {
@@ -440,40 +439,28 @@ class FilterViewModelImpl(
     init
     {
         // update filter string in the repository when the filter string changes
-        _filterStringFlow
-            .filter { it is Sourced.User }
-            .conflate()
-            .map { it.value }
-            .onEach { newValue -> filterRepository.updateFilterString(filterId, newValue) }
-            .flowOn(dispatchers.io)
-            .launchIn(applicationScope)
+        updateFilterOnUserChanged(
+            flow = _filterStringFlow,
+            update = { newValue -> filterRepository.updateFilterString(filterId, newValue) },
+        )
 
         // update is case sensitive in the repository when the is case sensitive changes
-        _isCaseSensitiveFlow
-            .filter { it is Sourced.User }
-            .conflate()
-            .map { it.value }
-            .onEach { newValue -> filterRepository.updateIsCaseSensitive(filterId, newValue) }
-            .flowOn(dispatchers.io)
-            .launchIn(applicationScope)
+        updateFilterOnUserChanged(
+            flow = _isCaseSensitiveFlow,
+            update = { newValue -> filterRepository.updateIsCaseSensitive(filterId, newValue) },
+        )
 
         // update is enabled in the repository when the is enabled changes
-        _isEnabledFlow
-            .filter { it is Sourced.User }
-            .conflate()
-            .map { it.value }
-            .onEach { newValue -> filterRepository.updateIsActive(filterId, newValue) }
-            .flowOn(dispatchers.io)
-            .launchIn(applicationScope)
+        updateFilterOnUserChanged(
+            flow = _isEnabledFlow,
+            update = { newValue -> filterRepository.updateIsActive(filterId, newValue) },
+        )
 
         // update filter interpretation mode in the repository when the filter interpretation mode changes
-        _filterInterpretationModeFlow
-            .filter { it is Sourced.User }
-            .conflate()
-            .map { it.value }
-            .onEach { newValue -> filterRepository.updateFilterInterpretationMode(filterId, newValue) }
-            .flowOn(dispatchers.io)
-            .launchIn(applicationScope)
+        updateFilterOnUserChanged(
+            flow = _filterInterpretationModeFlow,
+            update = { newValue -> filterRepository.updateFilterInterpretationMode(filterId, newValue) },
+        )
     }
 
     override fun setFilterString(newValue:String)
@@ -499,6 +486,20 @@ class FilterViewModelImpl(
     override fun requestDelete()
     {
         onRequestDelete(filterId)
+    }
+
+    private fun <T> updateFilterOnUserChanged(
+        flow:MutableStateFlow<Sourced<T>>,
+        update:(suspend (T)->Unit),
+    )
+    {
+        flow
+            .filter { it is Sourced.User }
+            .conflate()
+            .map { it.value }
+            .onEach { newValue -> update(newValue) }
+            .flowOn(dispatchers.io)
+            .launchIn(applicationScope)
     }
 }
 
