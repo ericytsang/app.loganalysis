@@ -3,8 +3,11 @@ package com.github.ericytsang.kotlin
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope.Companion.asImmutableCoroutineScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
@@ -41,6 +44,10 @@ fun ImmutableCoroutineScope.newChildScope(
 {
     val job = launch(coroutineContext) { awaitCancellation() }
     return CoroutineScope(coroutineContext + job)
+}
+
+fun <T> Flow<T>.launchIn(scope: ImmutableCoroutineScope): Job = scope.launch {
+    collect() // tail-call
 }
 
 class ImmutableCoroutineScope(

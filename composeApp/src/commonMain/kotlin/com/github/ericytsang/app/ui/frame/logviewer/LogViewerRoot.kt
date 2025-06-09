@@ -54,13 +54,20 @@ import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.FilterRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
+import com.github.ericytsang.kotlin.launchIn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import java.io.File
+import javax.xml.transform.Source
 
 interface FilterSetViewModel
 {
@@ -406,39 +413,87 @@ class FilterViewModelImpl(
     initialIsEnabled:Boolean,
     initialFilterInterpretationMode:FilterInterpretationMode,
     private val onRequestDelete:(FilterId)->Unit,
-):FilterViewModel
+    filterRepository:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
+    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+):FilterViewModel,
+    KotlinDependencyProvider by kotlinDependencyProvider
 {
+    private sealed class Sourced<T>
+    {
+        abstract val value:T
+        data class User<T>(override val value:T):Sourced<T>()
+        data class System<T>(override val value:T):Sourced<T>()
+    }
 
-    private val _filterStringFlow = MutableStateFlow<String>(initialFilterString)
-    override val filterStringFlow:Flow<String> get() = _filterStringFlow
+    private val _filterStringFlow = MutableStateFlow<Sourced<String>>(Sourced.System(initialFilterString))
+    override val filterStringFlow:Flow<String> get() = _filterStringFlow.map { it.value }
 
-    private val _isCaseSensitiveFlow = MutableStateFlow<Boolean>(initialIsCaseSensitive)
-    override val isCaseSensitiveFlow:Flow<Boolean> get() = _isCaseSensitiveFlow
+    private val _isCaseSensitiveFlow = MutableStateFlow<Sourced<Boolean>>(Sourced.System(initialIsCaseSensitive))
+    override val isCaseSensitiveFlow:Flow<Boolean> get() = _isCaseSensitiveFlow.map { it.value }
 
-    private val _isEnabledFlow = MutableStateFlow<Boolean>(initialIsEnabled)
-    override val isEnabledFlow:Flow<Boolean> get() = _isEnabledFlow
+    private val _isEnabledFlow = MutableStateFlow<Sourced<Boolean>>(Sourced.System(initialIsEnabled))
+    override val isEnabledFlow:Flow<Boolean> get() = _isEnabledFlow.map { it.value }
 
-    private val _filterInterpretationModeFlow = MutableStateFlow<FilterInterpretationMode>(initialFilterInterpretationMode)
-    override val filterInterpretationModeFlow:Flow<FilterInterpretationMode> get() = _filterInterpretationModeFlow
+    private val _filterInterpretationModeFlow = MutableStateFlow<Sourced<FilterInterpretationMode>>(Sourced.System(initialFilterInterpretationMode))
+    override val filterInterpretationModeFlow:Flow<FilterInterpretationMode> get() = _filterInterpretationModeFlow.map { it.value }
+
+    init
+    {
+        // update filter string in the repository when the filter string changes
+        _filterStringFlow
+            .filter { it is Sourced.User }
+            .conflate()
+            .map { it.value }
+            .onEach { newValue -> filterRepository.updateFilterString(filterId, newValue) }
+            .flowOn(dispatchers.io)
+            .launchIn(applicationScope)
+
+        // update is case sensitive in the repository when the is case sensitive changes
+        _isCaseSensitiveFlow
+            .filter { it is Sourced.User }
+            .conflate()
+            .map { it.value }
+            .onEach { newValue -> filterRepository.updateIsCaseSensitive(filterId, newValue) }
+            .flowOn(dispatchers.io)
+            .launchIn(applicationScope)
+
+        // update is enabled in the repository when the is enabled changes
+        _isEnabledFlow
+            .filter { it is Sourced.User }
+            .conflate()
+            .map { it.value }
+            .onEach { newValue -> filterRepository.updateIsActive(filterId, newValue) }
+            .flowOn(dispatchers.io)
+            .launchIn(applicationScope)
+
+        // update filter interpretation mode in the repository when the filter interpretation mode changes
+        _filterInterpretationModeFlow
+            .filter { it is Sourced.User }
+            .conflate()
+            .map { it.value }
+            .onEach { newValue -> filterRepository.updateFilterInterpretationMode(filterId, newValue) }
+            .flowOn(dispatchers.io)
+            .launchIn(applicationScope)
+    }
 
     override fun setFilterString(newValue:String)
     {
-        _filterStringFlow.value = newValue
+        _filterStringFlow.value = Sourced.User(newValue)
     }
 
     override fun setCaseSensitive(newValue:Boolean)
     {
-        _isCaseSensitiveFlow.value = newValue
+        _isCaseSensitiveFlow.value = Sourced.User(newValue)
     }
 
     override fun setEnabled(newValue:Boolean)
     {
-        _isEnabledFlow.value = newValue
+        _isEnabledFlow.value = Sourced.User(newValue)
     }
 
     override fun setFilterType(newValue:FilterInterpretationMode)
     {
-        _filterInterpretationModeFlow.value = newValue
+        _filterInterpretationModeFlow.value = Sourced.User(newValue)
     }
 
     override fun requestDelete()
