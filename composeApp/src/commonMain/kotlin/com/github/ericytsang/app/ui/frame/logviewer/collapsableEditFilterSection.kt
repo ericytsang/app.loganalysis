@@ -102,6 +102,11 @@ fun LazyListScope.collapsableEditFilterSection(
      * this is intended to be used by the host to add a new filter.
      */
     requestAddNewFilter:()->Unit,
+
+    /**
+     * New: callback to update order in the repository
+     */
+    onMove: (fromIndex: Int, toIndex: Int) -> Unit = { _, _ -> },
 )
 {
     item(key = "$lazyColumnItemKeyPrefix-header")
@@ -164,6 +169,7 @@ fun LazyListScope.collapsableEditFilterSection(
             filterViewModels = filterItemViewModels,
             expandedItem = expandedFilterId,
             onTextFieldGotFocus = requestFilterExpansion,
+            onMove = { from, to -> onMove?.invoke(from, to) }
         )
     }
 }
@@ -212,9 +218,18 @@ fun LazyListScope.filterBuilderPanel(
      * this is intended to be used by the host to update [expandedItem].
      */
     onTextFieldGotFocus:(FilterId)->Unit,
+
+    /**
+     * New: callback to update order in the repository
+     */
+    onMove: (fromIndex: Int, toIndex: Int) -> Unit = { _, _ -> },
 )
 {
-    for (filterViewModel in filterViewModels)
+    // State for drag-and-drop
+    var draggedIndex by remember { mutableStateOf<Int?>(null) }
+    var overIndex by remember { mutableStateOf<Int?>(null) }
+
+    for ((index, filterViewModel) in filterViewModels.withIndex())
     {
         // checkbox for enable/disable the filter + text field for filter string
         item(key = "$lazyColumnItemKeyPrefix-${filterViewModel.filterId.id}-header")
@@ -234,12 +249,48 @@ fun LazyListScope.filterBuilderPanel(
                 makeSureOnlyCalledOneTime = false
             }
 
-            // show editable filter string and checkbox for enabling/disabling the filter
+            // Drag handle and row
             Row(
-                modifier = Modifier.animateItem().background(themeColors.background),
+                modifier = Modifier
+                    .animateItem()
+                    .background(
+                        when {
+                            draggedIndex == index -> themeColors.primary.copy(alpha = 0.2f)
+                            overIndex == index -> themeColors.primary.copy(alpha = 0.1f)
+                            else -> themeColors.background
+                        }
+                    )
+                    .pointerInput(index) {
+                        detectDragGestures(
+                            onDragStart = { draggedIndex = index },
+                            onDragEnd = {
+                                if (draggedIndex != null && overIndex != null && draggedIndex != overIndex) {
+                                    onMove(draggedIndex!!, overIndex!!)
+                                }
+                                draggedIndex = null
+                                overIndex = null
+                            },
+                            onDragCancel = {
+                                draggedIndex = null
+                                overIndex = null
+                            },
+                            onDrag = { change, _ ->
+                                change.consume()
+                                // Simple logic: highlight the row under the pointer
+                                overIndex = index
+                            }
+                        )
+                    },
                 verticalAlignment = Alignment.CenterVertically,
             )
             {
+                // Drag handle icon
+                androidx.compose.material.Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Default.DragHandle,
+                    contentDescription = "Drag to reorder",
+                    tint = themeColors.onSurface,
+                    modifier = Modifier.padding(end = Dimens.mttPadding)
+                )
                 Checkbox(
                     checked = filterViewModel.isEnabledFlow.collectAsState(false).value,
                     onCheckedChange = { newValue -> filterViewModel.setEnabled(newValue) },
@@ -248,7 +299,7 @@ fun LazyListScope.filterBuilderPanel(
                     value = filterViewModel.filterStringFlow.collectAsState("").value,
                     interactionSource = textFieldInteractionSource,
                     onValueChange = { newValue -> filterViewModel.setFilterString(newValue) },
-                    modifier = Modifier.weight(1f,fill = true).padding(end = Dimens.mttPadding),
+                    modifier = Modifier.weight(1f, fill = true).padding(end = Dimens.mttPadding),
                     colors = TextFieldDefaults.textFieldColors(
                         textColor = themeColors.onBackground,
                     ),

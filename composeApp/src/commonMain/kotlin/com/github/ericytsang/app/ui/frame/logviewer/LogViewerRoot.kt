@@ -260,7 +260,8 @@ fun LogViewerRoot(
                         filterItemViewModels = excludeFilterSet,
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
-                        requestAddNewFilter = excludeFilterSetViewModel::addFilter
+                        requestAddNewFilter = excludeFilterSetViewModel::addFilter,
+                        onMove = { from, to -> uiScope.launch { excludeFilterSetViewModel.moveFilter(from, to) } }
                     )
 
                     collapsableEditFilterSection(
@@ -274,7 +275,8 @@ fun LogViewerRoot(
                         filterItemViewModels = includeFilterSet,
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
-                        requestAddNewFilter = includeFilterSetViewModel::addFilter
+                        requestAddNewFilter = includeFilterSetViewModel::addFilter,
+                        onMove = { from, to -> uiScope.launch { includeFilterSetViewModel.moveFilter(from, to) } }
                     )
                 }
             }

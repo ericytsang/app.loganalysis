@@ -14,6 +14,9 @@ interface FilterSetViewModel
 {
     val filters:Flow<List<FilterViewModel>>
     fun addFilter()
+
+    // Move filter in the list and update order in repository
+    suspend fun moveFilter(fromIndex: Int, toIndex: Int)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -53,6 +56,20 @@ class FilterTypeFilterSetViewModel(
                 filterType = filterType,
                 isActive = true,
             )
+        }
+    }
+
+    // Move filter in the list and update order in repository
+    override suspend fun moveFilter(fromIndex: Int, toIndex: Int) {
+        val current = filterRepo.selectFiltersForConfig(configurationId, filterType)
+            .mapLatest { it }
+            .first()
+        if (fromIndex !in current.indices || toIndex !in current.indices) return
+        val reordered = current.toMutableList().apply {
+            add(toIndex, removeAt(fromIndex))
+        }
+        reordered.forEachIndexed { idx, filter ->
+            filterRepo.updateOrderIndex(filter.id, idx)
         }
     }
 }
