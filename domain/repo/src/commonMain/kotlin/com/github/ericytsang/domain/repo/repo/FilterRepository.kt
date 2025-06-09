@@ -69,6 +69,10 @@ interface FilterRepository
         filterId:FilterId,
         isActive:Boolean,
     )
+
+    suspend fun delete(
+        filterId:FilterId,
+    )
 }
 
 internal class FilterRepositoryImpl(
@@ -226,6 +230,14 @@ internal class FilterRepositoryImpl(
                 id = filterId.id,
                 is_active = isActive.toSqLiteLong(),
             )
+        }
+    }
+
+    override suspend fun delete(filterId:FilterId) = withContext<Unit>(dispatchers.io)
+    {
+        transaction()
+        {
+            queries.deleteFilter(filterId.id)
         }
     }
 
