@@ -415,25 +415,21 @@ class FilterViewModelImpl(
     override fun setFilterString(newValue:String)
     {
         _filterStringFlow.value = newValue
-        // todo: i need to write the new value back to the database as well
     }
 
     override fun setCaseSensitive(newValue:Boolean)
     {
         _isCaseSensitiveFlow.value = newValue
-        // todo: i need to write the new value back to the database as well
     }
 
     override fun setEnabled(newValue:Boolean)
     {
         _isEnabledFlow.value = newValue
-        // todo: i need to write the new value back to the database as well
     }
 
     override fun setFilterType(newValue:FilterInterpretationMode)
     {
         _filterInterpretationModeFlow.value = newValue
-        // todo: i need to write the new value back to the database as well
     }
 
     override fun requestDelete()
