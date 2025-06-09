@@ -159,7 +159,7 @@ fun LogViewerRoot(
                 colors = ButtonDefaults.buttonColors(themeColors.surface),
             )
 
-            // new project button
+            // open project browser button
             Button(
                 onClick = { rootChildWindowManager.openProjectBrowser() },
                 content = { Text("Recent projects") },
