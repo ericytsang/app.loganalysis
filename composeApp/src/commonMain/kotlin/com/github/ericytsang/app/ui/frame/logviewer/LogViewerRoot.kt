@@ -261,11 +261,17 @@ fun LogViewerRoot(
 
             var filterIdOfSelectedFilterEditorPanel by remember { mutableStateOf<FilterId?>(null) }
 
+            val isSidebarExpanded by derivedStateOf { showEditFileListPanel || showExcludeFilterPanel || showIncludeFilterPanel }
+
             val columnWidth by derivedStateOf {
-                if (showEditFileListPanel || showExcludeFilterPanel || showIncludeFilterPanel)
+                if (isSidebarExpanded)
+                {
                     Modifier.width(400.dp)
+                }
                 else
+                {
                     Modifier.width(Dimens.mttPadding*2+Dimens.mttSize)
+                }
             }
 
             val excludeFilterSet by excludeFilterSetViewModel.filters.collectAsState(emptyList())
@@ -287,7 +293,18 @@ fun LogViewerRoot(
                     collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showEditFileListPanel",
-                        sectionIcon = { contentColor -> IconEditFileList(contentColor) },
+                        sectionTitleContent =
+                        { contentColor ->
+                            IconEditFileList(contentColor)
+                            if (isSidebarExpanded)
+                            {
+                                Text(
+                                    text = "Edit file list",
+                                    color = contentColor,
+                                    modifier = Modifier.padding(start = Dimens.mttPadding),
+                                )
+                            }
+                        },
                         isSectionExpanded = showEditFileListPanel,
                         requestToggleSectionExpanded = { showEditFileListPanel = !showEditFileListPanel },
                         filterItemViewModels = emptyList(),
@@ -298,7 +315,18 @@ fun LogViewerRoot(
                     collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showExcludeFilterPanel",
-                        sectionIcon = { contentColor -> IconExcludeFilter(contentColor) },
+                        sectionTitleContent =
+                        { contentColor ->
+                            IconExcludeFilter(contentColor)
+                            if (isSidebarExpanded)
+                            {
+                                Text(
+                                    text = "Exclude filters",
+                                    color = contentColor,
+                                    modifier = Modifier.padding(start = Dimens.mttPadding),
+                                )
+                            }
+                        },
                         isSectionExpanded = showExcludeFilterPanel,
                         requestToggleSectionExpanded = { showExcludeFilterPanel = !showExcludeFilterPanel },
                         filterItemViewModels = excludeFilterSet,
@@ -309,7 +337,18 @@ fun LogViewerRoot(
                     collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showIncludeFilterPanel",
-                        sectionIcon = { contentColor -> IconIncludeFilter(contentColor) },
+                        sectionTitleContent =
+                        { contentColor ->
+                            IconIncludeFilter(contentColor)
+                            if (isSidebarExpanded)
+                            {
+                                Text(
+                                    text = "Include filters",
+                                    color = contentColor,
+                                    modifier = Modifier.padding(start = Dimens.mttPadding),
+                                )
+                            }
+                        },
                         isSectionExpanded = showIncludeFilterPanel,
                         requestToggleSectionExpanded = { showIncludeFilterPanel = !showIncludeFilterPanel },
                         filterItemViewModels = includeFilterSet,
