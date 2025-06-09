@@ -154,8 +154,6 @@ fun LazyListScope.filterBuilderPanel(
      * this is intended to be used by the host to update [expandedItem].
      */
     onTextFieldGotFocus:(FilterId)->Unit,
-
-    //mutableHasSelectableItems:MutableHasSelectableItems<FilterId>
 )
 {
     for (filterViewModel in filterViewModels)
