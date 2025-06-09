@@ -4,7 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import com.github.ericytsang.domain.objects.ConfigurationId
 import com.github.ericytsang.domain.objects.FilterInterpretationMode
 import com.github.ericytsang.domain.objects.FilterModel
-import com.github.ericytsang.domain.objects.FilterModelId
+import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.objects.OrderIndex
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
@@ -16,6 +16,15 @@ import kotlinx.coroutines.withContext
 
 interface FilterRepository
 {
+    suspend fun insertFilterAtTop(
+        configurationId:ConfigurationId,
+        filterString:String,
+        isCaseSensitive:Boolean,
+        filterInterpretationMode:FilterInterpretationMode,
+        filterType:FilterType,
+        isActive:Boolean,
+    ):Long
+
     suspend fun insertFilter(
         configurationId:ConfigurationId,
         filterString:String,
@@ -24,7 +33,12 @@ interface FilterRepository
         filterType:FilterType,
         isActive:Boolean,
         orderIndex:OrderIndex,
-    )
+    ):Long
+
+    fun onFiltersForConfigChanged(
+        configurationId:ConfigurationId,
+        filterType:FilterType,
+    ):Flow<Unit>
 
     fun selectFiltersForConfig(
         configurationId:ConfigurationId,
@@ -32,27 +46,27 @@ interface FilterRepository
     ):Flow<List<FilterModel>>
 
     suspend fun updateOrderIndex(
-        filterModelId:FilterModelId,
+        filterId:FilterId,
         newOrderIndex:OrderIndex,
     )
 
     suspend fun updateFilterString(
-        filterModelId:FilterModelId,
+        filterId:FilterId,
         newFilterString:String,
     )
 
     suspend fun updateIsCaseSensitive(
-        filterModelId:FilterModelId,
+        filterId:FilterId,
         isCaseSensitive:Boolean,
     )
 
     suspend fun updateFilterInterpretationMode(
-        filterModelId:FilterModelId,
+        filterId:FilterId,
         newFilterInterpretationMode:FilterInterpretationMode,
     )
 
     suspend fun updateIsActive(
-        filterModelId:FilterModelId,
+        filterId:FilterId,
         isActive:Boolean,
     )
 }
@@ -64,6 +78,38 @@ internal class FilterRepositoryImpl(
     KotlinDependencyProvider by kotlinDependencyProvider,
     DatabaseService by databaseService
 {
+    override suspend fun insertFilterAtTop(
+        configurationId:ConfigurationId,
+        filterString:String,
+        isCaseSensitive:Boolean,
+        filterInterpretationMode:FilterInterpretationMode,
+        filterType:FilterType,
+        isActive:Boolean,
+    ) = withContext<Long>(dispatchers.io)
+    {
+        transaction()
+        {
+            val currentMaxOrderIndex = queries
+                .selectFiltersForConfigDesc(
+                    config_id = configurationId.id,
+                    is_exclude_filter = filterType.toSqLiteLong(),
+                    order_index = Long.MAX_VALUE,
+                    value_ = 1L,
+                )
+                .executeAsOneOrNull()
+                ?.order_index ?: 0L
+            queries.insertFilter(
+                config_id = configurationId.id,
+                filter_string = filterString,
+                is_case_sensitive = isCaseSensitive.toSqLiteLong(),
+                filter_interpretation_mode = filterInterpretationMode.toSqLiteText(),
+                is_exclude_filter = filterType.toSqLiteLong(),
+                is_active = isActive.toSqLiteLong(),
+                order_index = currentMaxOrderIndex,
+            )
+            queries.lastInsertId().executeAsOne()
+        }
+    }
 
     override suspend fun insertFilter(
         configurationId:ConfigurationId,
@@ -73,24 +119,39 @@ internal class FilterRepositoryImpl(
         filterType:FilterType,
         isActive:Boolean,
         orderIndex:OrderIndex,
-    ) = withContext<Unit>(dispatchers.io)
+    ) = withContext<Long>(dispatchers.io)
     {
-        queries.insertFilter(
-            config_id = configurationId.id,
-            filter_string = filterString,
-            is_case_sensitive = isCaseSensitive.toSqLiteLong(),
-            filter_interpretation_mode = filterInterpretationMode.toSqLiteText(),
-            is_exclude_filter = filterType.toSqLiteLong(),
-            is_active = isActive.toSqLiteLong(),
-            order_index = orderIndex.orderIndex,
-        )
+        transaction()
+        {
+            queries.insertFilter(
+                config_id = configurationId.id,
+                filter_string = filterString,
+                is_case_sensitive = isCaseSensitive.toSqLiteLong(),
+                filter_interpretation_mode = filterInterpretationMode.toSqLiteText(),
+                is_exclude_filter = filterType.toSqLiteLong(),
+                is_active = isActive.toSqLiteLong(),
+                order_index = orderIndex.orderIndex,
+            )
+            queries.lastInsertId().executeAsOne()
+        }
     }
+
+    override fun onFiltersForConfigChanged(
+        configurationId:ConfigurationId,
+        filterType:FilterType,
+    ):Flow<Unit> = queries
+        .selectAllFiltersForConfig(
+            config_id = configurationId.id,
+            is_exclude_filter = filterType.toSqLiteLong(),
+        )
+        .asFlow()
+        .map { }
 
     override fun selectFiltersForConfig(
         configurationId:ConfigurationId,
         filterType:FilterType,
     ):Flow<List<FilterModel>> = queries
-        .selectFiltersForConfig(
+        .selectAllFiltersForConfig(
             config_id = configurationId.id,
             is_exclude_filter = filterType.toSqLiteLong(),
         )
@@ -99,58 +160,73 @@ internal class FilterRepositoryImpl(
         .map { list -> list.map { it.toDomainModel() } }
 
     override suspend fun updateOrderIndex(
-        filterModelId:FilterModelId,
+        filterId:FilterId,
         newOrderIndex:OrderIndex,
     ) = withContext<Unit>(dispatchers.io)
     {
-        queries.updateOrderIndex(
-            id = filterModelId.id,
-            order_index = newOrderIndex.orderIndex,
-        )
+        transaction()
+        {
+            queries.updateOrderIndex(
+                id = filterId.id,
+                order_index = newOrderIndex.orderIndex,
+            )
+        }
     }
 
     override suspend fun updateFilterString(
-        filterModelId:FilterModelId,
+        filterId:FilterId,
         newFilterString:String,
     ) = withContext<Unit>(dispatchers.io)
     {
-        queries.updateFilterString(
-            id = filterModelId.id,
-            filter_string = newFilterString,
-        )
+        transaction()
+        {
+            queries.updateFilterString(
+                id = filterId.id,
+                filter_string = newFilterString,
+            )
+        }
     }
 
     override suspend fun updateIsCaseSensitive(
-        filterModelId:FilterModelId,
+        filterId:FilterId,
         isCaseSensitive:Boolean,
     ) = withContext<Unit>(dispatchers.io)
     {
-        queries.updateIsCaseSensitive(
-            id = filterModelId.id,
-            is_case_sensitive = isCaseSensitive.toSqLiteLong(),
-        )
+        transaction()
+        {
+            queries.updateIsCaseSensitive(
+                id = filterId.id,
+                is_case_sensitive = isCaseSensitive.toSqLiteLong(),
+            )
+        }
     }
 
     override suspend fun updateFilterInterpretationMode(
-        filterModelId:FilterModelId,
+        filterId:FilterId,
         newFilterInterpretationMode:FilterInterpretationMode,
     ) = withContext<Unit>(dispatchers.io)
     {
-        queries.updateFilterInterpretationMode(
-            id = filterModelId.id,
-            filter_interpretation_mode = newFilterInterpretationMode.toSqLiteText(),
-        )
+        transaction()
+        {
+            queries.updateFilterInterpretationMode(
+                id = filterId.id,
+                filter_interpretation_mode = newFilterInterpretationMode.toSqLiteText(),
+            )
+        }
     }
 
     override suspend fun updateIsActive(
-        filterModelId:FilterModelId,
+        filterId:FilterId,
         isActive:Boolean,
     ) = withContext<Unit>(dispatchers.io)
     {
-        queries.updateIsActive(
-            id = filterModelId.id,
-            is_active = isActive.toSqLiteLong(),
-        )
+        transaction()
+        {
+            queries.updateIsActive(
+                id = filterId.id,
+                is_active = isActive.toSqLiteLong(),
+            )
+        }
     }
 
     companion object
@@ -194,7 +270,7 @@ internal class FilterRepositoryImpl(
         }
 
         private fun FilterEntity.toDomainModel() = FilterModel(
-            id = FilterModelId(id),
+            id = FilterId(id),
             configurationId = ConfigurationId(config_id),
             filterString = filter_string,
             isCaseSensitive = is_case_sensitive.toBoolean(),

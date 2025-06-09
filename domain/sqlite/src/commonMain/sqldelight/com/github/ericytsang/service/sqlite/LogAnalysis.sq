@@ -164,10 +164,21 @@ insertFilter:
 INSERT INTO FilterEntity (config_id, is_exclude_filter, order_index, filter_string, is_case_sensitive, filter_interpretation_mode, is_active)
 VALUES (?, ?, ?, ?, ?, ?, ?);
 
-selectFiltersForConfig:
+selectAllFiltersForConfig:
 SELECT * FROM FilterEntity
-WHERE config_id = ? AND is_exclude_filter = ?
-ORDER BY order_index ASC;
+WHERE config_id = ? AND is_exclude_filter = ?;
+
+selectFiltersForConfigDesc:
+SELECT * FROM FilterEntity
+WHERE config_id = ? AND is_exclude_filter = ? AND order_index < ?
+ORDER BY order_index DESC
+LIMIT ?;
+
+selectFiltersForConfigAsc:
+SELECT * FROM FilterEntity
+WHERE config_id = ? AND is_exclude_filter = ? AND order_index > ?
+ORDER BY order_index ASC
+LIMIT ?;
 
 updateOrderIndex:
 UPDATE FilterEntity
@@ -192,6 +203,10 @@ WHERE id = ?;
 updateIsActive:
 UPDATE FilterEntity
 SET is_active = ?
+WHERE id = ?;
+
+deleteFilter:
+DELETE FROM FilterEntity
 WHERE id = ?;
 
 -- endregion
