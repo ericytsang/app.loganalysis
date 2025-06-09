@@ -45,69 +45,15 @@ import com.github.ericytsang.app.ui.util.component.CommonWindowHeader
 import com.github.ericytsang.app.ui.util.component.ToggleButton
 import com.github.ericytsang.app.ui.util.openNewProjectWizard
 import com.github.ericytsang.app.ui.util.openProjectBrowser
-import com.github.ericytsang.domain.objects.ConfigurationId
 import com.github.ericytsang.domain.objects.FilterId
-import com.github.ericytsang.domain.objects.FilterInterpretationMode
 import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
-import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
-import com.github.ericytsang.domain.repo.repo.FilterRepository
-import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
 import java.io.File
-
-interface FilterSetViewModel
-{
-    val filters:Flow<List<FilterViewModel>>
-    fun addFilter()
-}
-
-@OptIn(ExperimentalCoroutinesApi::class)
-class FilterTypeFilterSetViewModel(
-    private val filterType:FilterType,
-    private val configurationId:ConfigurationId,
-    private val filterRepo:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
-    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
-):FilterSetViewModel,
-    KotlinDependencyProvider by kotlinDependencyProvider
-{
-    override val filters:Flow<List<FilterViewModel>> = filterRepo.selectFiltersForConfig(
-        configurationId = configurationId,
-        filterType = filterType,
-    ).mapLatest { rows ->
-        rows.map { row ->
-            FilterViewModelImpl(
-                filterId = row.id,
-                initialFilterString = row.filterString,
-                initialIsCaseSensitive = row.isCaseSensitive,
-                initialIsEnabled = row.isActive,
-                initialFilterInterpretationMode = row.filterInterpretationMode,
-                onRequestDelete = { filterId -> applicationScope.launch { filterRepo.delete(row.id) } },
-            )
-        }
-    }
-
-    override fun addFilter()
-    {
-        applicationScope.launch(dispatchers.io)
-        {
-            filterRepo.insertFilterAtTop(
-                configurationId = configurationId,
-                filterString = "",
-                isCaseSensitive = false,
-                filterInterpretationMode = FilterInterpretationMode.STRING_LITERAL,
-                filterType = filterType,
-                isActive = true,
-            )
-        }
-    }
-}
 
 @Composable
 fun LogViewerRoot(
@@ -399,85 +345,3 @@ class HasSelectableItemsImpl<T>(
     }
 }
 
-interface FilterViewModel
-{
-    val filterId:FilterId
-
-    val filterStringFlow:Flow<String>
-    val isCaseSensitiveFlow:Flow<Boolean>
-    val isEnabledFlow:Flow<Boolean>
-    val filterInterpretationModeFlow:Flow<FilterInterpretationMode>
-
-    fun setFilterString(newValue:String)
-    fun setCaseSensitive(newValue:Boolean)
-    fun setEnabled(newValue:Boolean)
-    fun setFilterType(newValue:FilterInterpretationMode)
-    fun requestDelete()
-}
-
-class FilterViewModelImpl(
-    override val filterId:FilterId,
-    initialFilterString:String,
-    initialIsCaseSensitive:Boolean,
-    initialIsEnabled:Boolean,
-    initialFilterInterpretationMode:FilterInterpretationMode,
-    private val onRequestDelete:(FilterId)->Unit,
-    filterRepository:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
-    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
-):FilterViewModel,
-    KotlinDependencyProvider by kotlinDependencyProvider
-{
-
-    private val _filterStringFlow = PersistedValue(
-        initialValue = initialFilterString,
-        updatePersistedValue = { newValue -> filterRepository.updateFilterString(filterId, newValue) },
-    )
-
-    override val filterStringFlow:Flow<String> get() = _filterStringFlow.valueFlow
-
-    override fun setFilterString(newValue:String)
-    {
-        _filterStringFlow.value = newValue
-    }
-
-    private val _isCaseSensitiveFlow = PersistedValue(
-        initialValue = initialIsCaseSensitive,
-        updatePersistedValue = { newValue -> filterRepository.updateIsCaseSensitive(filterId, newValue) },
-    )
-
-    override val isCaseSensitiveFlow:Flow<Boolean> get() = _isCaseSensitiveFlow.valueFlow
-
-    override fun setCaseSensitive(newValue:Boolean)
-    {
-        _isCaseSensitiveFlow.value = newValue
-    }
-
-    private val _isEnabledFlow = PersistedValue(
-        initialValue = initialIsEnabled,
-        updatePersistedValue = { newValue -> filterRepository.updateIsActive(filterId, newValue) },
-    )
-
-    override val isEnabledFlow:Flow<Boolean> get() = _isEnabledFlow.valueFlow
-
-    override fun setEnabled(newValue:Boolean)
-    {
-        _isEnabledFlow.value = newValue
-    }
-
-    private val _filterInterpretationModeFlow = PersistedValue(
-        initialValue = initialFilterInterpretationMode,
-        updatePersistedValue = { newValue -> filterRepository.updateFilterInterpretationMode(filterId, newValue) },
-    )
-
-    override val filterInterpretationModeFlow:Flow<FilterInterpretationMode> get() = _filterInterpretationModeFlow.valueFlow
-
-    override fun setFilterType(newValue:FilterInterpretationMode)
-    {
-        _filterInterpretationModeFlow.value = newValue
-    }
-
-    override fun requestDelete()
-    {
-        onRequestDelete(filterId)
-    }
-}
