@@ -48,7 +48,7 @@ CREATE TABLE FilterEntity (
   is_active INTEGER NOT NULL,
 
   FOREIGN KEY (config_id) REFERENCES ProjectEntity(id) ON DELETE CASCADE,
-  UNIQUE (filter_string, config_id, is_exclude_filter)
+  UNIQUE (order_index, config_id, is_exclude_filter)
 );
 
 CREATE TABLE SettingsEntity (

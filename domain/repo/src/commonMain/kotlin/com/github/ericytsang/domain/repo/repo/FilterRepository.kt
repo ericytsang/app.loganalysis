@@ -109,7 +109,7 @@ internal class FilterRepositoryImpl(
                 filter_interpretation_mode = filterInterpretationMode.toSqLiteText(),
                 is_exclude_filter = filterType.toSqLiteLong(),
                 is_active = isActive.toSqLiteLong(),
-                order_index = currentMaxOrderIndex,
+                order_index = currentMaxOrderIndex+1,
             )
             queries.lastInsertId().executeAsOne()
         }

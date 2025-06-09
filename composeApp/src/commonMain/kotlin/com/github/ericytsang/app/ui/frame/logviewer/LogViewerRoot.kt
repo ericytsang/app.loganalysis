@@ -46,8 +46,8 @@ import com.github.ericytsang.app.ui.util.component.ToggleButton
 import com.github.ericytsang.app.ui.util.openNewProjectWizard
 import com.github.ericytsang.app.ui.util.openProjectBrowser
 import com.github.ericytsang.domain.objects.ConfigurationId
-import com.github.ericytsang.domain.objects.FilterInterpretationMode
 import com.github.ericytsang.domain.objects.FilterId
+import com.github.ericytsang.domain.objects.FilterInterpretationMode
 import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
@@ -65,10 +65,7 @@ import java.io.File
 interface FilterSetViewModel
 {
     val filters:Flow<List<FilterViewModel>>
-    suspend fun addFilter(
-        configurationId:ConfigurationId,
-        filterType:FilterType,
-    ):FilterId
+    fun addFilter()
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -96,20 +93,19 @@ class FilterTypeFilterSetViewModel(
         }
     }
 
-    override suspend fun addFilter(
-        configurationId:ConfigurationId,
-        filterType:FilterType,
-    ):FilterId
+    override fun addFilter()
     {
-        val filterId = filterRepo.insertFilterAtTop(
-            configurationId = configurationId,
-            filterString = "",
-            isCaseSensitive = false,
-            filterInterpretationMode = FilterInterpretationMode.STRING_LITERAL,
-            filterType = filterType,
-            isActive = true,
-        )
-        return FilterId(filterId)
+        applicationScope.launch(dispatchers.io)
+        {
+            filterRepo.insertFilterAtTop(
+                configurationId = configurationId,
+                filterString = "",
+                isCaseSensitive = false,
+                filterInterpretationMode = FilterInterpretationMode.STRING_LITERAL,
+                filterType = filterType,
+                isActive = true,
+            )
+        }
     }
 }
 
@@ -310,6 +306,7 @@ fun LogViewerRoot(
                         filterItemViewModels = emptyList(),
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
+                        requestAddNewFilter = {},
                     )
 
                     collapsableEditFilterSection(
@@ -332,6 +329,7 @@ fun LogViewerRoot(
                         filterItemViewModels = excludeFilterSet,
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
+                        requestAddNewFilter = excludeFilterSetViewModel::addFilter
                     )
 
                     collapsableEditFilterSection(
@@ -354,6 +352,7 @@ fun LogViewerRoot(
                         filterItemViewModels = includeFilterSet,
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
+                        requestAddNewFilter = includeFilterSetViewModel::addFilter
                     )
                 }
             }
