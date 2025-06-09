@@ -329,3 +329,9 @@ fun LazyListScope.filterBuilderPanel(
         }
     }
 }
+
+val FilterInterpretationMode.displayName:String get() = when (this){
+    FilterInterpretationMode.STRING_LITERAL -> "Plaintext"
+    FilterInterpretationMode.REGULAR_EXPRESSION -> "Regex"
+    FilterInterpretationMode.LOGCAT_FILTER -> "Logcat filter"
+}

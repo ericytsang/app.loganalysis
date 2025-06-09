@@ -54,17 +54,11 @@ import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.FilterRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
-import com.github.ericytsang.kotlin.launchIn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import java.io.File
 
@@ -405,36 +399,20 @@ class HasSelectableItemsImpl<T>(
     }
 }
 
-class PersistedValue<T>(
-    initialValue:T,
-    updatePersistedValue: suspend (T)->Unit,
-    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
-):KotlinDependencyProvider by kotlinDependencyProvider
+interface FilterViewModel
 {
-    private sealed class Sourced<T>
-    {
-        abstract val value:T
-        data class User<T>(override val value:T):Sourced<T>()
-        data class System<T>(override val value:T):Sourced<T>()
-    }
+    val filterId:FilterId
 
-    private val _valueFlow = MutableStateFlow<Sourced<T>>(Sourced.System(initialValue))
-    val valueFlow:Flow<T> get() = _valueFlow.map { it.value }
+    val filterStringFlow:Flow<String>
+    val isCaseSensitiveFlow:Flow<Boolean>
+    val isEnabledFlow:Flow<Boolean>
+    val filterInterpretationModeFlow:Flow<FilterInterpretationMode>
 
-    init
-    {
-        _valueFlow
-            .filter { it is Sourced.User }
-            .conflate()
-            .map { it.value }
-            .onEach { newValue -> updatePersistedValue(newValue) }
-            .flowOn(dispatchers.io)
-            .launchIn(applicationScope)
-    }
-
-    var value:T
-        get() = _valueFlow.value.value
-        set(newValue) { _valueFlow.value = Sourced.User(newValue) }
+    fun setFilterString(newValue:String)
+    fun setCaseSensitive(newValue:Boolean)
+    fun setEnabled(newValue:Boolean)
+    fun setFilterType(newValue:FilterInterpretationMode)
+    fun requestDelete()
 }
 
 class FilterViewModelImpl(
@@ -502,26 +480,4 @@ class FilterViewModelImpl(
     {
         onRequestDelete(filterId)
     }
-}
-
-interface FilterViewModel
-{
-    val filterId:FilterId
-
-    val filterStringFlow:Flow<String>
-    val isCaseSensitiveFlow:Flow<Boolean>
-    val isEnabledFlow:Flow<Boolean>
-    val filterInterpretationModeFlow:Flow<FilterInterpretationMode>
-
-    fun setFilterString(newValue:String)
-    fun setCaseSensitive(newValue:Boolean)
-    fun setEnabled(newValue:Boolean)
-    fun setFilterType(newValue:FilterInterpretationMode)
-    fun requestDelete()
-}
-
-val FilterInterpretationMode.displayName:String get() = when (this){
-    FilterInterpretationMode.STRING_LITERAL -> "Plaintext"
-    FilterInterpretationMode.REGULAR_EXPRESSION -> "Regex"
-    FilterInterpretationMode.LOGCAT_FILTER -> "Logcat filter"
 }
