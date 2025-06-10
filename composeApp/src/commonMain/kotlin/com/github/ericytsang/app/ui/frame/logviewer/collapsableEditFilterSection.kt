@@ -241,8 +241,8 @@ fun LazyListScope.filterBuilderPanel(
         {
 
             // state for drag-and-drop
-            var draggedIndex by remember { mutableStateOf<Int?>(null) }
-            var overIndex by remember { mutableStateOf<Int?>(null) }
+            var draggedIndex by remember { mutableStateOf<Int>(-1) }
+            var overIndex by remember { mutableStateOf<Int>(-1) }
 
             // interaction source for the text field to detect focus changes
             val textFieldInteractionSource = remember { MutableInteractionSource() }
@@ -273,22 +273,18 @@ fun LazyListScope.filterBuilderPanel(
                     )
                     .pointerInput(index) {
                         detectDragGestures(
-                            onDragStart = { draggedIndex = index },
-                            onDragEnd = {
-                                if (draggedIndex != null && overIndex != null && draggedIndex != overIndex) {
-                                    onMoveCallback.onMove(draggedIndex!!, overIndex!!)
-                                }
-                                draggedIndex = null
-                                overIndex = null
+                            onDragStart = {
+                                draggedIndex = index
+                                overIndex = index
                             },
-                            onDragCancel = {
-                                draggedIndex = null
-                                overIndex = null
+                            onDragEnd = {
+                                if (draggedIndex != overIndex) {
+                                    onMoveCallback.onMove(draggedIndex, overIndex)
+                                }
                             },
                             onDrag = { change, _ ->
                                 change.consume()
-                                // Simple logic: highlight the row under the pointer
-                                overIndex = index
+                                overIndex = index // Always update overIndex to the current row's index
                             }
                         )
                     },
