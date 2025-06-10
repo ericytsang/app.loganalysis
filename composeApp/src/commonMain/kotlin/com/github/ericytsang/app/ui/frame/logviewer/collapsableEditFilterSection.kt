@@ -1,12 +1,18 @@
 package com.github.ericytsang.app.ui.frame.logviewer
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.draganddrop.dragAndDropSource
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,6 +21,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Colors
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.RadioButton
@@ -22,6 +29,8 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,12 +39,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.util.component.DoubleClickButton
 import com.github.ericytsang.app.ui.util.component.ToggleButton
 import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterInterpretationMode
+
+fun interface OnMoveCallback {
+    fun onMove(fromIndex: Int, toIndex: Int)
+}
 
 @ExperimentalMaterialApi
 fun LazyListScope.collapsableEditFilterSection(
@@ -102,6 +117,11 @@ fun LazyListScope.collapsableEditFilterSection(
      * this is intended to be used by the host to add a new filter.
      */
     requestAddNewFilter:()->Unit,
+
+    /**
+     * callback to request updating the item ordering in the repository.
+     */
+    onMoveCallback: OnMoveCallback,
 )
 {
     item(key = "$lazyColumnItemKeyPrefix-header")
@@ -164,6 +184,7 @@ fun LazyListScope.collapsableEditFilterSection(
             filterViewModels = filterItemViewModels,
             expandedItem = expandedFilterId,
             onTextFieldGotFocus = requestFilterExpansion,
+            onMoveCallback = onMoveCallback,
         )
     }
 }
@@ -180,6 +201,7 @@ fun LazyListScope.collapsableEditFilterSection(
  * - case sensitivity toggle
  * - filter type toggle.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalMaterialApi
 fun LazyListScope.filterBuilderPanel(
 
@@ -212,6 +234,11 @@ fun LazyListScope.filterBuilderPanel(
      * this is intended to be used by the host to update [expandedItem].
      */
     onTextFieldGotFocus:(FilterId)->Unit,
+
+    /**
+     * callback to request updating the item ordering in the repository.
+     */
+    onMoveCallback: OnMoveCallback,
 )
 {
     for (filterViewModel in filterViewModels)
@@ -219,6 +246,14 @@ fun LazyListScope.filterBuilderPanel(
         // checkbox for enable/disable the filter + text field for filter string
         item(key = "$lazyColumnItemKeyPrefix-${filterViewModel.filterId.id}-header")
         {
+            // drag-and-drop state
+            var dragAmountTotal by remember { mutableStateOf(0f) }
+            val dragAndDropState = rememberDraggableState { delta ->
+                dragAmountTotal += delta
+                println("dragged by $delta - dragAmountTotal: $dragAmountTotal")
+            }
+
+            // interaction source for the text field
             val textFieldInteractionSource = remember { MutableInteractionSource() }
 
             // call onTextFieldGotFocus one time when the text field gets focus
@@ -236,14 +271,32 @@ fun LazyListScope.filterBuilderPanel(
 
             // show editable filter string and checkbox for enabling/disabling the filter
             Row(
-                modifier = Modifier.animateItem().background(themeColors.background),
+                modifier = Modifier.animateItem().background(themeColors.background).offset(y = dragAmountTotal.dp),
                 verticalAlignment = Alignment.CenterVertically,
             )
             {
+
+                // drag-and-drop handle
+                Icon(
+                    imageVector = Icons.Default.Menu,
+                    modifier = Modifier.draggable(
+                        startDragImmediately = true,
+                        state = dragAndDropState,
+                        orientation = Orientation.Vertical,
+                        onDragStarted = { println("drag started") },
+                        onDragStopped = { delta -> println("drag stopped, delta: $delta") },
+                    ),
+                    contentDescription = "Drag to reorder",
+                    tint = themeColors.onSurface,
+                )
+
+                // checkbox for enabling/disabling the filter
                 Checkbox(
                     checked = filterViewModel.isEnabledFlow.collectAsState(false).value,
                     onCheckedChange = { newValue -> filterViewModel.setEnabled(newValue) },
                 )
+
+                // text field for filter string
                 TextField(
                     value = filterViewModel.filterStringFlow.collectAsState("").value,
                     interactionSource = textFieldInteractionSource,
