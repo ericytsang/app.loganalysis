@@ -2,10 +2,7 @@ package com.github.ericytsang.app.ui.frame.logviewer
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.draganddrop.dragAndDropSource
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Column
@@ -39,8 +36,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.util.component.DoubleClickButton
@@ -247,11 +245,7 @@ fun LazyListScope.filterBuilderPanel(
         item(key = "$lazyColumnItemKeyPrefix-${filterViewModel.filterId.id}-header")
         {
             // drag-and-drop state
-            var dragAmountTotal by remember { mutableStateOf(0f) }
-            val dragAndDropState = rememberDraggableState { delta ->
-                dragAmountTotal += delta
-                println("dragged by $delta - dragAmountTotal: $dragAmountTotal")
-            }
+            var rememberDragAmount by remember { mutableStateOf(Offset(0f,0f)) }
 
             // interaction source for the text field
             val textFieldInteractionSource = remember { MutableInteractionSource() }
@@ -271,7 +265,10 @@ fun LazyListScope.filterBuilderPanel(
 
             // show editable filter string and checkbox for enabling/disabling the filter
             Row(
-                modifier = Modifier.animateItem().background(themeColors.background).offset(y = dragAmountTotal.dp),
+                modifier = Modifier
+                    .animateItem()
+                    .background(themeColors.background)
+                    .offset(y = rememberDragAmount.y.dp),
                 verticalAlignment = Alignment.CenterVertically,
             )
             {
@@ -279,13 +276,16 @@ fun LazyListScope.filterBuilderPanel(
                 // drag-and-drop handle
                 Icon(
                     imageVector = Icons.Default.Menu,
-                    modifier = Modifier.draggable(
-                        startDragImmediately = true,
-                        state = dragAndDropState,
-                        orientation = Orientation.Vertical,
-                        onDragStarted = { println("drag started") },
-                        onDragStopped = { delta -> println("drag stopped, delta: $delta") },
-                    ),
+                    modifier = Modifier.pointerInput("$lazyColumnItemKeyPrefix-${filterViewModel.filterId.id}-pointer-input") {
+                        detectDragGestures(
+                            onDragStart = { println("drag started") },
+                            onDragEnd = { println("drag ended") },
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                rememberDragAmount += dragAmount
+                            },
+                        )
+                    },
                     contentDescription = "Drag to reorder",
                     tint = themeColors.onSurface,
                 )
