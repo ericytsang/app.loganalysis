@@ -276,16 +276,17 @@ fun LazyListScope.filterBuilderPanel(
                 // drag-and-drop handle
                 Icon(
                     imageVector = Icons.Default.Menu,
-                    modifier = Modifier.pointerInput("$lazyColumnItemKeyPrefix-${filterViewModel.filterId.id}-pointer-input") {
-                        detectDragGestures(
-                            onDragStart = { println("drag started") },
-                            onDragEnd = { println("drag ended") },
-                            onDrag = { change, dragAmount ->
-                                change.consume()
-                                rememberDragAmount += dragAmount
-                            },
-                        )
-                    },
+                    modifier = Modifier
+                        .pointerInput("$lazyColumnItemKeyPrefix-${filterViewModel.filterId.id}-pointer-input") {
+                            detectDragGestures(
+                                onDragStart = { println("drag started") },
+                                onDragEnd = { println("drag ended") },
+                                onDrag = { change, dragAmount ->
+                                    change.consume()
+                                    rememberDragAmount += dragAmount
+                                },
+                            )
+                        },
                     contentDescription = "Drag to reorder",
                     tint = themeColors.onSurface,
                 )
