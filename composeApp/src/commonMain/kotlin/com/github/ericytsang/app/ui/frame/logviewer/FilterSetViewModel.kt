@@ -3,11 +3,13 @@ package com.github.ericytsang.app.ui.frame.logviewer
 import com.github.ericytsang.domain.objects.ConfigurationId
 import com.github.ericytsang.domain.objects.FilterInterpretationMode
 import com.github.ericytsang.domain.objects.FilterType
+import com.github.ericytsang.domain.objects.OrderIndex
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.FilterRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
 
 interface FilterSetViewModel
@@ -69,7 +71,7 @@ class FilterTypeFilterSetViewModel(
             add(toIndex, removeAt(fromIndex))
         }
         reordered.forEachIndexed { idx, filter ->
-            filterRepo.updateOrderIndex(filter.id, idx)
+            filterRepo.updateOrderIndex(filter.id,OrderIndex(idx.toLong()))
         }
     }
 }

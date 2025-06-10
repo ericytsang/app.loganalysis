@@ -50,6 +50,7 @@ import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.io.File
 
 @Composable
@@ -247,6 +248,7 @@ fun LogViewerRoot(
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = {},
+                        onMoveCallback = {_,_ -> },
                     )
 
                     collapsableEditFilterSection(
@@ -261,7 +263,7 @@ fun LogViewerRoot(
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = excludeFilterSetViewModel::addFilter,
-                        onMove = { from, to -> uiScope.launch { excludeFilterSetViewModel.moveFilter(from, to) } }
+                        onMoveCallback = { from, to -> uiScope.launch { excludeFilterSetViewModel.moveFilter(from, to) } }
                     )
 
                     collapsableEditFilterSection(
@@ -276,7 +278,7 @@ fun LogViewerRoot(
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = includeFilterSetViewModel::addFilter,
-                        onMove = { from, to -> uiScope.launch { includeFilterSetViewModel.moveFilter(from, to) } }
+                        onMoveCallback = { from, to -> uiScope.launch { includeFilterSetViewModel.moveFilter(from, to) } }
                     )
                 }
             }

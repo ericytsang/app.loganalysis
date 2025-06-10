@@ -1,6 +1,7 @@
 package com.github.ericytsang.app.ui.frame.logviewer
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Colors
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.RadioButton
@@ -22,6 +24,8 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,11 +35,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.util.component.DoubleClickButton
 import com.github.ericytsang.app.ui.util.component.ToggleButton
 import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterInterpretationMode
+
+fun interface OnMoveCallback {
+    fun onMove(fromIndex: Int, toIndex: Int)
+}
 
 @ExperimentalMaterialApi
 fun LazyListScope.collapsableEditFilterSection(
@@ -104,9 +113,9 @@ fun LazyListScope.collapsableEditFilterSection(
     requestAddNewFilter:()->Unit,
 
     /**
-     * New: callback to update order in the repository
+     * callback to request updating the item ordering in the repository.
      */
-    onMove: (fromIndex: Int, toIndex: Int) -> Unit = { _, _ -> },
+    onMoveCallback: OnMoveCallback,
 )
 {
     item(key = "$lazyColumnItemKeyPrefix-header")
@@ -169,7 +178,7 @@ fun LazyListScope.collapsableEditFilterSection(
             filterViewModels = filterItemViewModels,
             expandedItem = expandedFilterId,
             onTextFieldGotFocus = requestFilterExpansion,
-            onMove = { from, to -> onMove?.invoke(from, to) }
+            onMoveCallback = onMoveCallback,
         )
     }
 }
@@ -220,20 +229,22 @@ fun LazyListScope.filterBuilderPanel(
     onTextFieldGotFocus:(FilterId)->Unit,
 
     /**
-     * New: callback to update order in the repository
+     * callback to request updating the item ordering in the repository.
      */
-    onMove: (fromIndex: Int, toIndex: Int) -> Unit = { _, _ -> },
+    onMoveCallback: OnMoveCallback,
 )
 {
-    // State for drag-and-drop
-    var draggedIndex by remember { mutableStateOf<Int?>(null) }
-    var overIndex by remember { mutableStateOf<Int?>(null) }
-
     for ((index, filterViewModel) in filterViewModels.withIndex())
     {
         // checkbox for enable/disable the filter + text field for filter string
         item(key = "$lazyColumnItemKeyPrefix-${filterViewModel.filterId.id}-header")
         {
+
+            // state for drag-and-drop
+            var draggedIndex by remember { mutableStateOf<Int?>(null) }
+            var overIndex by remember { mutableStateOf<Int?>(null) }
+
+            // interaction source for the text field to detect focus changes
             val textFieldInteractionSource = remember { MutableInteractionSource() }
 
             // call onTextFieldGotFocus one time when the text field gets focus
@@ -265,7 +276,7 @@ fun LazyListScope.filterBuilderPanel(
                             onDragStart = { draggedIndex = index },
                             onDragEnd = {
                                 if (draggedIndex != null && overIndex != null && draggedIndex != overIndex) {
-                                    onMove(draggedIndex!!, overIndex!!)
+                                    onMoveCallback.onMove(draggedIndex!!, overIndex!!)
                                 }
                                 draggedIndex = null
                                 overIndex = null
@@ -285,8 +296,8 @@ fun LazyListScope.filterBuilderPanel(
             )
             {
                 // Drag handle icon
-                androidx.compose.material.Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Default.DragHandle,
+                Icon(
+                    imageVector = Icons.Default.Menu,
                     contentDescription = "Drag to reorder",
                     tint = themeColors.onSurface,
                     modifier = Modifier.padding(end = Dimens.mttPadding)
