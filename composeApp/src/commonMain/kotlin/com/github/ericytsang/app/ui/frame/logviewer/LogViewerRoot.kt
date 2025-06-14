@@ -51,10 +51,10 @@ import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.io.File
-import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun LogViewerRoot(
@@ -223,83 +223,65 @@ fun LogViewerRoot(
                 }
             }
 
-            val excludeFilterSet by excludeFilterSetViewModel.filters.collectAsState(emptyList())
-            val includeFilterSet by includeFilterSetViewModel.filters.collectAsState(emptyList())
-
             Surface(
                 modifier = Modifier.fillMaxHeight(),
                 shape = MaterialTheme.shapes.small,
                 border = ButtonDefaults.outlinedBorder,
             )
             {
-                // lazy column drag-and-drop state
-                val lazyListState = rememberLazyListState()
-                var isReorderingInProgress by remember { mutableStateOf(false) }
-                val reorderableLazyListState = rememberReorderableLazyListState(lazyListState)
-                { from, to ->
-                    isReorderingInProgress = true
-                    try
-                    {
-                        println("Reordering from $from to $to")
-                        delay(2.seconds)
-                    }
-                    finally
-                    {
-                        isReorderingInProgress = false
-                    }
-                }
-
-                LazyColumn(
+                Column(
                     modifier = columnWidth
                         .fillMaxHeight()
                         .padding(Dimens.mttPadding),
-                    state = lazyListState,
-                    verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
+                    verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding)
                 )
                 {
-                    collapsableEditFilterSection(
+                    // lazy column drag-and-drop state
+                    val noOpFilterSetViewModel = object:FilterSetViewModel
+                    {
+                        override val filters:Flow<List<FilterViewModel>> = emptyFlow()
+                        override fun addFilter() = Unit
+                        override suspend fun reorderFilters(fromIndex:Int,toIndex:Int) = Unit
+                    }
+                    collapsableEditFilterSectionLazyColumn(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showEditFileListPanel",
                         sectionIcon = { contentColor -> IconEditFileList(contentColor) },
-                        reorderableLazyListState = reorderableLazyListState,
+                        filterSetViewModel = noOpFilterSetViewModel, // no-op for working file set
                         sectionTitle = "Edit file list",
                         shouldShowSectionHeader = isSidebarExpanded,
                         isSectionExpanded = showEditFileListPanel,
                         requestToggleSectionExpanded = { showEditFileListPanel = !showEditFileListPanel },
-                        filterItemViewModels = emptyList(),
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
-                        requestAddNewFilter = {},
                     )
 
-                    collapsableEditFilterSection(
+                    // lazy column drag-and-drop state
+                    collapsableEditFilterSectionLazyColumn(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showExcludeFilterPanel",
                         sectionIcon = { contentColor -> IconExcludeFilter(contentColor) },
-                        reorderableLazyListState = reorderableLazyListState,
+                        filterSetViewModel = excludeFilterSetViewModel,
                         sectionTitle = "Exclude filters",
                         shouldShowSectionHeader = isSidebarExpanded,
                         isSectionExpanded = showExcludeFilterPanel,
                         requestToggleSectionExpanded = { showExcludeFilterPanel = !showExcludeFilterPanel },
-                        filterItemViewModels = excludeFilterSet,
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
-                        requestAddNewFilter = excludeFilterSetViewModel::addFilter,
                     )
 
-                    collapsableEditFilterSection(
+                    // lazy column drag-and-drop state
+                    collapsableEditFilterSectionLazyColumn(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showIncludeFilterPanel",
                         sectionIcon = { contentColor -> IconIncludeFilter(contentColor) },
-                        reorderableLazyListState = reorderableLazyListState,
+                        filterSetViewModel = includeFilterSetViewModel,
                         sectionTitle = "Include filters",
                         shouldShowSectionHeader = isSidebarExpanded,
                         isSectionExpanded = showIncludeFilterPanel,
                         requestToggleSectionExpanded = { showIncludeFilterPanel = !showIncludeFilterPanel },
-                        filterItemViewModels = includeFilterSet,
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
-                        requestAddNewFilter = includeFilterSetViewModel::addFilter,
                     )
                 }
             }

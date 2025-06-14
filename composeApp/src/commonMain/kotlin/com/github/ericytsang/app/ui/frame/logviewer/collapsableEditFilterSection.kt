@@ -1,11 +1,15 @@
 package com.github.ericytsang.app.ui.frame.logviewer
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Colors
@@ -47,6 +52,97 @@ import com.github.ericytsang.domain.objects.FilterInterpretationMode
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
+import sh.calvin.reorderable.rememberReorderableLazyListState
+
+@Composable
+@ExperimentalMaterialApi
+fun collapsableEditFilterSectionLazyColumn(
+
+    /** colors to be used for the UI components. */
+    themeColors:Colors,
+
+    /**
+     * [LazyColumn] uses keys to keep track of its contained items
+     * so it can infer what animations to perform as items CRUD
+     */
+    lazyColumnItemKeyPrefix:String,
+
+    /**
+     * composable to be used as the icon for the section header.
+     * this is intended to be used by the host to provide a custom icon for the section header.
+     */
+    sectionIcon:@Composable (contentColor:Color)->Unit,
+
+    /**
+     * what to show as the title of the section when the section is expanded.
+     */
+    sectionTitle:String,
+
+    /**
+     * view model for the filter set.
+     */
+    filterSetViewModel:FilterSetViewModel,
+
+    /**
+     * whether this section is expanded or not.
+     * if it is expanded, the filter builder panel is shown.
+     */
+    isSectionExpanded:Boolean,
+
+    /**
+     * whether to show the section header.
+     * this is intended to be used by the host to hide the section header when it is not needed.
+     * currently the intention is to show the section header while the sidebar is expanded.
+     */
+    shouldShowSectionHeader:Boolean,
+
+    /**
+     * callback to request toggling the section expanded state.
+     * this is intended to be used by the host to update [isSectionExpanded].
+     */
+    requestToggleSectionExpanded:()->Unit,
+
+    /**
+     * the id of the filter that is currently expanded.
+     * this is used to determine whether to show the additional settings for a filter.
+     */
+    expandedFilterId:FilterId?,
+
+    /**
+     * callback when the text field gets focus.
+     * this is intended to be used by the host to update [expandedFilterId].
+     */
+    requestFilterExpansion:(FilterId)->Unit,
+)
+{
+    val stateForLazyListOfIncludeFilters = rememberLazyListState()
+    val reorderableLazyListStateForLazyListOfIncludeFilters = rememberReorderableLazyListState(stateForLazyListOfIncludeFilters)
+    { from, to ->
+        filterSetViewModel.reorderFilters(from.index, to.index)
+    }
+    val includeFilterSet by filterSetViewModel.filters.collectAsState(emptyList())
+
+    LazyColumn(
+        state = stateForLazyListOfIncludeFilters,
+        verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
+    )
+    {
+        collapsableEditFilterSection(
+            themeColors = themeColors,
+            lazyColumnItemKeyPrefix = lazyColumnItemKeyPrefix,
+            sectionIcon = sectionIcon,
+            reorderableLazyListState = reorderableLazyListStateForLazyListOfIncludeFilters,
+            sectionTitle = sectionTitle,
+            shouldShowSectionHeader = shouldShowSectionHeader,
+            isSectionExpanded = isSectionExpanded,
+            requestToggleSectionExpanded = requestToggleSectionExpanded,
+            filterItemViewModels = includeFilterSet,
+            expandedFilterId = expandedFilterId,
+            requestFilterExpansion = requestFilterExpansion,
+            requestAddNewFilter = filterSetViewModel::addFilter,
+        )
+    }
+}
 
 @ExperimentalMaterialApi
 fun LazyListScope.collapsableEditFilterSection(
