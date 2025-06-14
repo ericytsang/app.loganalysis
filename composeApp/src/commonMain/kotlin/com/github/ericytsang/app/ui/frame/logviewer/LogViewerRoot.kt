@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Colors
@@ -50,7 +51,10 @@ import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.io.File
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun LogViewerRoot(
@@ -228,10 +232,28 @@ fun LogViewerRoot(
                 border = ButtonDefaults.outlinedBorder,
             )
             {
+                // lazy column drag-and-drop state
+                val lazyListState = rememberLazyListState()
+                var isReorderingInProgress by remember { mutableStateOf(false) }
+                val reorderableLazyListState = rememberReorderableLazyListState(lazyListState)
+                { from, to ->
+                    isReorderingInProgress = true
+                    try
+                    {
+                        println("Reordering from $from to $to")
+                        delay(2.seconds)
+                    }
+                    finally
+                    {
+                        isReorderingInProgress = false
+                    }
+                }
+
                 LazyColumn(
                     modifier = columnWidth
                         .fillMaxHeight()
                         .padding(Dimens.mttPadding),
+                    state = lazyListState,
                     verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
                 )
                 {
@@ -239,6 +261,7 @@ fun LogViewerRoot(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showEditFileListPanel",
                         sectionIcon = { contentColor -> IconEditFileList(contentColor) },
+                        reorderableLazyListState = reorderableLazyListState,
                         sectionTitle = "Edit file list",
                         shouldShowSectionHeader = isSidebarExpanded,
                         isSectionExpanded = showEditFileListPanel,
@@ -254,6 +277,7 @@ fun LogViewerRoot(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showExcludeFilterPanel",
                         sectionIcon = { contentColor -> IconExcludeFilter(contentColor) },
+                        reorderableLazyListState = reorderableLazyListState,
                         sectionTitle = "Exclude filters",
                         shouldShowSectionHeader = isSidebarExpanded,
                         isSectionExpanded = showExcludeFilterPanel,
@@ -269,6 +293,7 @@ fun LogViewerRoot(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showIncludeFilterPanel",
                         sectionIcon = { contentColor -> IconIncludeFilter(contentColor) },
+                        reorderableLazyListState = reorderableLazyListState,
                         sectionTitle = "Include filters",
                         shouldShowSectionHeader = isSidebarExpanded,
                         isSectionExpanded = showIncludeFilterPanel,

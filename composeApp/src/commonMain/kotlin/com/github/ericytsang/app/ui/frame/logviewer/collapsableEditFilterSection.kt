@@ -1,5 +1,6 @@
 package com.github.ericytsang.app.ui.frame.logviewer
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -12,11 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Colors
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.RadioButton
@@ -35,11 +38,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.util.component.DoubleClickButton
 import com.github.ericytsang.app.ui.util.component.ToggleButton
 import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterInterpretationMode
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.ReorderableLazyListState
 
 fun interface OnMoveCallback {
     fun onMove(fromIndex: Int, toIndex: Int)
@@ -56,6 +62,12 @@ fun LazyListScope.collapsableEditFilterSection(
      * so it can infer what animations to perform as items CRUD
      */
     lazyColumnItemKeyPrefix:String,
+
+    /**
+     * [ReorderableLazyListState] to be used when creating reorderable items.
+     * this is used to allow drag-and-drop reordering of the filters.
+     */
+    reorderableLazyListState: ReorderableLazyListState,
 
     /**
      * composable to be used as the icon for the section header.
@@ -174,6 +186,7 @@ fun LazyListScope.collapsableEditFilterSection(
         filterBuilderPanel(
             themeColors = themeColors,
             lazyColumnItemKeyPrefix = "$lazyColumnItemKeyPrefix-panel",
+            reorderableLazyListState = reorderableLazyListState,
             filterViewModels = filterItemViewModels,
             expandedItem = expandedFilterId,
             onTextFieldGotFocus = requestFilterExpansion,
@@ -211,6 +224,12 @@ fun LazyListScope.filterBuilderPanel(
     lazyColumnItemKeyPrefix:String,
 
     /**
+     * [ReorderableLazyListState] to be used when creating reorderable items.
+     * this is used to allow drag-and-drop reordering of the filters.
+     */
+    reorderableLazyListState: ReorderableLazyListState,
+
+    /**
      * flow that emits the list of filters to be displayed.
      * each filter is represented by a FilterViewModel.
      */
@@ -237,9 +256,9 @@ fun LazyListScope.filterBuilderPanel(
     for (filterViewModel in filterViewModels)
     {
         // checkbox for enable/disable the filter + text field for filter string
-        item(key = "$lazyColumnItemKeyPrefix-${filterViewModel.filterId.id}-header")
+        val key = "$lazyColumnItemKeyPrefix-${filterViewModel.filterId.id}-header"
+        item(key = key)
         {
-            // drag-and-drop state
 
             // interaction source for the text field
             val textFieldInteractionSource = remember { MutableInteractionSource() }
@@ -257,38 +276,58 @@ fun LazyListScope.filterBuilderPanel(
                 makeSureOnlyCalledOneTime = false
             }
 
-            // show editable filter string and checkbox for enabling/disabling the filter
-            Row(
-                modifier = Modifier
-                    .animateItem()
-                    .background(themeColors.background),
-                verticalAlignment = Alignment.CenterVertically,
+            ReorderableItem(
+                state = reorderableLazyListState,
+                key = key,
             )
-            {
+            { isDragging ->
 
-                // drag-and-drop handle
-                Icon(
-                    imageVector = Icons.Default.Menu,
-                    contentDescription = "Drag to reorder",
-                    tint = themeColors.onSurface,
-                )
+                // increase elevation during dragging
+                val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
 
-                // checkbox for enabling/disabling the filter
-                Checkbox(
-                    checked = filterViewModel.isEnabledFlow.collectAsState(false).value,
-                    onCheckedChange = { newValue -> filterViewModel.setEnabled(newValue) },
-                )
+                Surface(elevation = elevation)
+                {
 
-                // text field for filter string
-                TextField(
-                    value = filterViewModel.filterStringFlow.collectAsState("").value,
-                    interactionSource = textFieldInteractionSource,
-                    onValueChange = { newValue -> filterViewModel.setFilterString(newValue) },
-                    modifier = Modifier.weight(1f,fill = true).padding(end = Dimens.mttPadding),
-                    colors = TextFieldDefaults.textFieldColors(
-                        textColor = themeColors.onBackground,
-                    ),
-                )
+                    // show editable filter string and checkbox for enabling/disabling the filter
+                    Row(
+                        modifier = Modifier
+                            .animateItem()
+                            .background(themeColors.background),
+                        verticalAlignment = Alignment.CenterVertically,
+                    )
+                    {
+
+                        // drag-and-drop handle
+                        IconButton(
+                            modifier = Modifier.draggableHandle(),
+                            onClick = {},
+                        )
+                        {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Drag to reorder",
+                                tint = themeColors.onSurface,
+                            )
+                        }
+
+                        // checkbox for enabling/disabling the filter
+                        Checkbox(
+                            checked = filterViewModel.isEnabledFlow.collectAsState(false).value,
+                            onCheckedChange = { newValue -> filterViewModel.setEnabled(newValue) },
+                        )
+
+                        // text field for filter string
+                        TextField(
+                            value = filterViewModel.filterStringFlow.collectAsState("").value,
+                            interactionSource = textFieldInteractionSource,
+                            onValueChange = { newValue -> filterViewModel.setFilterString(newValue) },
+                            modifier = Modifier.weight(1f,fill = true).padding(end = Dimens.mttPadding),
+                            colors = TextFieldDefaults.textFieldColors(
+                                textColor = themeColors.onBackground,
+                            ),
+                        )
+                    }
+                }
             }
         }
 
