@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Colors
@@ -48,10 +47,6 @@ import com.github.ericytsang.domain.objects.FilterInterpretationMode
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
-
-fun interface OnMoveCallback {
-    fun onMove(fromIndex: Int, toIndex: Int)
-}
 
 @ExperimentalMaterialApi
 fun LazyListScope.collapsableEditFilterSection(
@@ -124,11 +119,6 @@ fun LazyListScope.collapsableEditFilterSection(
      * this is intended to be used by the host to add a new filter.
      */
     requestAddNewFilter:()->Unit,
-
-    /**
-     * callback to request updating the item ordering in the repository.
-     */
-    onMoveCallback: OnMoveCallback,
 )
 {
     item(key = "$lazyColumnItemKeyPrefix-header")
@@ -192,7 +182,6 @@ fun LazyListScope.collapsableEditFilterSection(
             filterViewModels = filterItemViewModels,
             expandedItem = expandedFilterId,
             onTextFieldGotFocus = requestFilterExpansion,
-            onMoveCallback = onMoveCallback,
         )
     }
 }
@@ -248,11 +237,6 @@ fun LazyListScope.filterBuilderPanel(
      * this is intended to be used by the host to update [expandedItem].
      */
     onTextFieldGotFocus:(FilterId)->Unit,
-
-    /**
-     * callback to request updating the item ordering in the repository.
-     */
-    onMoveCallback: OnMoveCallback,
 )
 {
     for (filterViewModel in filterViewModels)

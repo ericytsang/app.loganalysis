@@ -270,7 +270,6 @@ fun LogViewerRoot(
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = {},
-                        onMoveCallback = { from, to -> /* No-op for file list */ },
                     )
 
                     collapsableEditFilterSection(
@@ -286,7 +285,6 @@ fun LogViewerRoot(
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = excludeFilterSetViewModel::addFilter,
-                        onMoveCallback = { from, to -> /* No-op for file list */ },
                     )
 
                     collapsableEditFilterSection(
@@ -302,7 +300,6 @@ fun LogViewerRoot(
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = includeFilterSetViewModel::addFilter,
-                        onMoveCallback = { from, to -> /* No-op for file list */ },
                     )
                 }
             }
