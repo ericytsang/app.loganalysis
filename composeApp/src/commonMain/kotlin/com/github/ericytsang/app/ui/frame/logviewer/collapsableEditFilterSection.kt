@@ -1,5 +1,6 @@
 package com.github.ericytsang.app.ui.frame.logviewer
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -270,134 +271,130 @@ fun LazyListScope.filterBuilderPanel(
 
                 Surface(elevation = elevation)
                 {
-
-                    // show editable filter string and checkbox for enabling/disabling the filter
-                    Row(
-                        modifier = Modifier
-                            .animateItem()
-                            .background(themeColors.background),
-                        verticalAlignment = Alignment.CenterVertically,
-                    )
+                    Column(Modifier.fillMaxWidth().animateItem().background(themeColors.background))
                     {
 
-                        // drag-and-drop handle
-                        IconButton(
-                            modifier = Modifier.draggableHandle(),
-                            onClick = {},
-                        )
+                        // show editable filter string and checkbox for enabling/disabling the filter
+                        Row(verticalAlignment = Alignment.CenterVertically)
                         {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Drag to reorder",
-                                tint = themeColors.onSurface,
+
+                            // drag-and-drop handle
+                            IconButton(
+                                modifier = Modifier.draggableHandle(),
+                                onClick = {},
                             )
-                        }
-
-                        // checkbox for enabling/disabling the filter
-                        Checkbox(
-                            checked = filterViewModel.isEnabledFlow.collectAsState(false).value,
-                            onCheckedChange = { newValue -> filterViewModel.setEnabled(newValue) },
-                        )
-
-                        // interaction source for the text field
-                        val textFieldInteractionSource = remember { MutableInteractionSource() }
-
-                        // call onTextFieldGotFocus one time when the text field gets focus
-                        val isTextFieldFocused by textFieldInteractionSource.collectIsFocusedAsState()
-                        var makeSureOnlyCalledOneTime by remember { mutableStateOf(false) }
-                        if (isTextFieldFocused && !makeSureOnlyCalledOneTime)
-                        {
-                            makeSureOnlyCalledOneTime = true
-                            onTextFieldGotFocus(filterViewModel.filterId)
-                        }
-                        else if (!isTextFieldFocused)
-                        {
-                            makeSureOnlyCalledOneTime = false
-                        }
-
-                        // text field for filter string
-                        TextField(
-                            value = filterViewModel.filterStringFlow.collectAsState("").value,
-                            interactionSource = textFieldInteractionSource,
-                            onValueChange = { newValue -> filterViewModel.setFilterString(newValue) },
-                            modifier = Modifier.weight(1f,fill = true).padding(end = Dimens.mttPadding),
-                            colors = TextFieldDefaults.textFieldColors(
-                                textColor = themeColors.onBackground,
-                            ),
-                        )
-                    }
-                }
-            }
-        }
-
-        // show the additional settings for this filter if it is expanded ([expandedItem])
-        if (filterViewModel.filterId == expandedItem)
-        {
-            item(key = "$lazyColumnItemKeyPrefix-${filterViewModel.filterId.id}-settings")
-            {
-                Column(Modifier.fillMaxWidth().animateItem().background(themeColors.background))
-                {
-                    // checkbox for case sensitivity
-                    val isCaseSensitive by filterViewModel.isCaseSensitiveFlow.collectAsState(false)
-                    val toggleCaseSensitivity = { filterViewModel.setCaseSensitive(!isCaseSensitive) }
-                    Surface(
-                        modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
-                        shape = MaterialTheme.shapes.small,
-                        onClick = toggleCaseSensitivity,
-                    )
-                    {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                        )
-                        {
-                            Checkbox(
-                                checked = isCaseSensitive,
-                                onCheckedChange = { newValue -> toggleCaseSensitivity() },
-                            )
-                            Text("Case sensitive")
-                        }
-                    }
-
-                    // spacing
-                    Spacer(modifier = Modifier.size(Dimens.mttPadding))
-
-                    // radio buttons for filter type
-                    Text("Filter type",modifier = Modifier.padding(start = Dimens.mttSize))
-                    val filterTypeFlow by filterViewModel.filterInterpretationModeFlow.collectAsState(null)
-                    for (filterType in FilterInterpretationMode.entries)
-                    {
-                        val onClick = { filterViewModel.setFilterType(filterType) }
-                        Surface(
-                            modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
-                            shape = MaterialTheme.shapes.small,
-                            onClick = onClick,
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(
-                                    selected = filterTypeFlow == filterType,
-                                    onClick = onClick,
+                            {
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Drag to reorder",
+                                    tint = themeColors.onSurface,
                                 )
-                                Text(filterType.displayName)
+                            }
+
+                            // checkbox for enabling/disabling the filter
+                            Checkbox(
+                                checked = filterViewModel.isEnabledFlow.collectAsState(false).value,
+                                onCheckedChange = { newValue -> filterViewModel.setEnabled(newValue) },
+                            )
+
+                            // interaction source for the text field
+                            val textFieldInteractionSource = remember { MutableInteractionSource() }
+
+                            // call onTextFieldGotFocus one time when the text field gets focus
+                            val isTextFieldFocused by textFieldInteractionSource.collectIsFocusedAsState()
+                            var makeSureOnlyCalledOneTime by remember { mutableStateOf(false) }
+                            if (isTextFieldFocused && !makeSureOnlyCalledOneTime)
+                            {
+                                makeSureOnlyCalledOneTime = true
+                                onTextFieldGotFocus(filterViewModel.filterId)
+                            }
+                            else if (!isTextFieldFocused)
+                            {
+                                makeSureOnlyCalledOneTime = false
+                            }
+
+                            // text field for filter string
+                            TextField(
+                                value = filterViewModel.filterStringFlow.collectAsState("").value,
+                                interactionSource = textFieldInteractionSource,
+                                onValueChange = { newValue -> filterViewModel.setFilterString(newValue) },
+                                modifier = Modifier.weight(1f,fill = true).padding(end = Dimens.mttPadding),
+                                colors = TextFieldDefaults.textFieldColors(
+                                    textColor = themeColors.onBackground,
+                                ),
+                            )
+                        }
+
+                        // show the additional settings for this filter if it is expanded ([expandedItem])
+                        AnimatedVisibility(filterViewModel.filterId == expandedItem)
+                        {
+                            Column()
+                            {
+
+                                // checkbox for case sensitivity
+                                val isCaseSensitive by filterViewModel.isCaseSensitiveFlow.collectAsState(false)
+                                val toggleCaseSensitivity = { filterViewModel.setCaseSensitive(!isCaseSensitive) }
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
+                                    shape = MaterialTheme.shapes.small,
+                                    onClick = toggleCaseSensitivity,
+                                )
+                                {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    )
+                                    {
+                                        Checkbox(
+                                            checked = isCaseSensitive,
+                                            onCheckedChange = { newValue -> toggleCaseSensitivity() },
+                                        )
+                                        Text("Case sensitive")
+                                    }
+                                }
+
+                                // spacing
+                                Spacer(modifier = Modifier.size(Dimens.mttPadding))
+
+                                // radio buttons for filter type
+                                Text("Filter type",modifier = Modifier.padding(start = Dimens.mttSize))
+                                val filterTypeFlow by filterViewModel.filterInterpretationModeFlow.collectAsState(null)
+                                for (filterType in FilterInterpretationMode.entries)
+                                {
+                                    val onClick = { filterViewModel.setFilterType(filterType) }
+                                    Surface(
+                                        modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
+                                        shape = MaterialTheme.shapes.small,
+                                        onClick = onClick,
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            RadioButton(
+                                                selected = filterTypeFlow == filterType,
+                                                onClick = onClick,
+                                            )
+                                            Text(filterType.displayName)
+                                        }
+                                    }
+                                }
+
+                                // spacing
+                                Spacer(modifier = Modifier.size(Dimens.mttPadding))
+
+                                // delete button
+                                DoubleClickButton(
+                                    modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
+                                    onDoubleClick = { filterViewModel.requestDelete() },
+                                    idleButtonColors = ButtonDefaults.buttonColors(themeColors.error),
+                                    idleContent = { Text("Delete filter") },
+                                    clickedOnceButtonColors = ButtonDefaults.buttonColors(themeColors.error),
+                                    clickedOnceContent = { Text("Really delete filter?") },
+                                )
                             }
                         }
                     }
-
-                    // spacing
-                    Spacer(modifier = Modifier.size(Dimens.mttPadding))
-
-                    // delete button
-                    DoubleClickButton(
-                        modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
-                        onDoubleClick = { filterViewModel.requestDelete() },
-                        idleButtonColors = ButtonDefaults.buttonColors(themeColors.error),
-                        idleContent = { Text("Delete filter") },
-                        clickedOnceButtonColors = ButtonDefaults.buttonColors(themeColors.error),
-                        clickedOnceContent = { Text("Really delete filter?") },
-                    )
                 }
             }
         }
