@@ -259,23 +259,6 @@ fun LazyListScope.filterBuilderPanel(
         val key = "$lazyColumnItemKeyPrefix-${filterViewModel.filterId.id}-header"
         item(key = key)
         {
-
-            // interaction source for the text field
-            val textFieldInteractionSource = remember { MutableInteractionSource() }
-
-            // call onTextFieldGotFocus one time when the text field gets focus
-            val isTextFieldFocused by textFieldInteractionSource.collectIsFocusedAsState()
-            var makeSureOnlyCalledOneTime by remember { mutableStateOf(false) }
-            if (isTextFieldFocused && !makeSureOnlyCalledOneTime)
-            {
-                makeSureOnlyCalledOneTime = true
-                onTextFieldGotFocus(filterViewModel.filterId)
-            }
-            else if (!isTextFieldFocused)
-            {
-                makeSureOnlyCalledOneTime = false
-            }
-
             ReorderableItem(
                 state = reorderableLazyListState,
                 key = key,
@@ -315,6 +298,22 @@ fun LazyListScope.filterBuilderPanel(
                             checked = filterViewModel.isEnabledFlow.collectAsState(false).value,
                             onCheckedChange = { newValue -> filterViewModel.setEnabled(newValue) },
                         )
+
+                        // interaction source for the text field
+                        val textFieldInteractionSource = remember { MutableInteractionSource() }
+
+                        // call onTextFieldGotFocus one time when the text field gets focus
+                        val isTextFieldFocused by textFieldInteractionSource.collectIsFocusedAsState()
+                        var makeSureOnlyCalledOneTime by remember { mutableStateOf(false) }
+                        if (isTextFieldFocused && !makeSureOnlyCalledOneTime)
+                        {
+                            makeSureOnlyCalledOneTime = true
+                            onTextFieldGotFocus(filterViewModel.filterId)
+                        }
+                        else if (!isTextFieldFocused)
+                        {
+                            makeSureOnlyCalledOneTime = false
+                        }
 
                         // text field for filter string
                         TextField(
