@@ -9,11 +9,13 @@ import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.withContext
 
 interface FilterSetViewModel
 {
     val filters:Flow<List<FilterViewModel>>
     fun addFilter()
+    suspend fun reorderFilters(fromIndex:Int,toIndex:Int)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -54,5 +56,9 @@ class FilterTypeFilterSetViewModel(
                 isActive = true,
             )
         }
+    }
+
+    override suspend fun reorderFilters(fromIndex:Int,toIndex:Int) = withContext(dispatchers.io)
+    {
     }
 }

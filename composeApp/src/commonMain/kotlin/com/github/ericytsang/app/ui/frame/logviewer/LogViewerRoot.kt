@@ -51,8 +51,6 @@ import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.io.File
 
@@ -229,59 +227,66 @@ fun LogViewerRoot(
                 border = ButtonDefaults.outlinedBorder,
             )
             {
-                Column(
+                val stateForLazyListOfIncludeFilters = rememberLazyListState()
+                val reorderableLazyListStateForLazyListOfIncludeFilters = rememberReorderableLazyListState(stateForLazyListOfIncludeFilters)
+                { from, to ->
+                }
+                val excludeFilterItemViewModels by excludeFilterSetViewModel.filters.collectAsState(emptyList())
+                val includeFilterItemViewModels by includeFilterSetViewModel.filters.collectAsState(emptyList())
+                LazyColumn(
                     modifier = columnWidth
                         .fillMaxHeight()
                         .padding(Dimens.mttPadding),
-                    verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding)
+                    state = stateForLazyListOfIncludeFilters,
+                    verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
                 )
                 {
                     // lazy column drag-and-drop state
-                    val noOpFilterSetViewModel = object:FilterSetViewModel
-                    {
-                        override val filters:Flow<List<FilterViewModel>> = emptyFlow()
-                        override fun addFilter() = Unit
-                        override suspend fun reorderFilters(fromIndex:Int,toIndex:Int) = Unit
-                    }
-                    collapsableEditFilterSectionLazyColumn(
+                    collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showEditFileListPanel",
+                        reorderableLazyListState = reorderableLazyListStateForLazyListOfIncludeFilters,
                         sectionIcon = { contentColor -> IconEditFileList(contentColor) },
-                        filterSetViewModel = noOpFilterSetViewModel, // no-op for working file set
+                        filterItemViewModels = emptyList(),
                         sectionTitle = "Edit file list",
                         shouldShowSectionHeader = isSidebarExpanded,
                         isSectionExpanded = showEditFileListPanel,
                         requestToggleSectionExpanded = { showEditFileListPanel = !showEditFileListPanel },
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
+                        requestAddNewFilter = { },
                     )
 
                     // lazy column drag-and-drop state
-                    collapsableEditFilterSectionLazyColumn(
+                    collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showExcludeFilterPanel",
+                        reorderableLazyListState = reorderableLazyListStateForLazyListOfIncludeFilters,
                         sectionIcon = { contentColor -> IconExcludeFilter(contentColor) },
-                        filterSetViewModel = excludeFilterSetViewModel,
+                        filterItemViewModels = excludeFilterItemViewModels,
                         sectionTitle = "Exclude filters",
                         shouldShowSectionHeader = isSidebarExpanded,
                         isSectionExpanded = showExcludeFilterPanel,
                         requestToggleSectionExpanded = { showExcludeFilterPanel = !showExcludeFilterPanel },
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
+                        requestAddNewFilter = excludeFilterSetViewModel::addFilter,
                     )
 
                     // lazy column drag-and-drop state
-                    collapsableEditFilterSectionLazyColumn(
+                    collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showIncludeFilterPanel",
+                        reorderableLazyListState = reorderableLazyListStateForLazyListOfIncludeFilters,
                         sectionIcon = { contentColor -> IconIncludeFilter(contentColor) },
-                        filterSetViewModel = includeFilterSetViewModel,
+                        filterItemViewModels = includeFilterItemViewModels,
                         sectionTitle = "Include filters",
                         shouldShowSectionHeader = isSidebarExpanded,
                         isSectionExpanded = showIncludeFilterPanel,
                         requestToggleSectionExpanded = { showIncludeFilterPanel = !showIncludeFilterPanel },
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
+                        requestAddNewFilter = includeFilterSetViewModel::addFilter,
                     )
                 }
             }
