@@ -17,6 +17,8 @@ kotlin {
         implementation(projects.domain.repo)
         implementation(projects.domain.appinfo)
 
+        implementation("sh.calvin.reorderable:reorderable:2.5.1")
+
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material)
