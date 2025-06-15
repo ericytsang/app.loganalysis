@@ -192,12 +192,12 @@ WHERE id = ?;
 updateOrderIndexBulkIncrement:
 UPDATE FilterEntity
 SET order_index = order_index + 1
-WHERE order_index > ? AND config_id = ? AND is_exclude_filter = ?;
+WHERE order_index >= ? AND order_index <= ? AND config_id = ? AND is_exclude_filter = ?;
 
 updateOrderIndexBulkDecrement:
 UPDATE FilterEntity
 SET order_index = order_index - 1
-WHERE order_index > ? AND config_id = ? AND is_exclude_filter = ?;
+WHERE order_index >= ? AND order_index <= ? AND config_id = ? AND is_exclude_filter = ?;
 
 updateOrderIndex:
 UPDATE FilterEntity
