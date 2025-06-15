@@ -166,7 +166,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?);
 
 selectAllFiltersForConfig:
 SELECT * FROM FilterEntity
-WHERE config_id = ? AND is_exclude_filter = ?;
+WHERE config_id = ? AND is_exclude_filter = ?
+ORDER BY order_index DESC;
 
 selectActiveFiltersForConfig:
 SELECT * FROM FilterEntity
@@ -183,6 +184,20 @@ SELECT * FROM FilterEntity
 WHERE config_id = ? AND is_exclude_filter = ? AND order_index > ?
 ORDER BY order_index ASC
 LIMIT ?;
+
+selectFilterById:
+SELECT * FROM FilterEntity
+WHERE id = ?;
+
+updateOrderIndexBulkIncrement:
+UPDATE FilterEntity
+SET order_index = order_index + 1
+WHERE order_index > ? AND config_id = ? AND is_exclude_filter = ?;
+
+updateOrderIndexBulkDecrement:
+UPDATE FilterEntity
+SET order_index = order_index - 1
+WHERE order_index > ? AND config_id = ? AND is_exclude_filter = ?;
 
 updateOrderIndex:
 UPDATE FilterEntity

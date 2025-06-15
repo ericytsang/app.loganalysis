@@ -121,7 +121,7 @@ fun LazyListScope.collapsableEditFilterSection(
     requestAddNewFilter:()->Unit,
 )
 {
-    item(key = "$lazyColumnItemKeyPrefix-header")
+    item(key = ReorderableSidebarItemKey.Other("$lazyColumnItemKeyPrefix-header"))
     {
         Row(modifier = Modifier.animateItem().background(themeColors.background))
         {
@@ -156,7 +156,7 @@ fun LazyListScope.collapsableEditFilterSection(
     if (isSectionExpanded)
     {
         // button to add a new filter
-        item(key = "$lazyColumnItemKeyPrefix-add-new-filter-button")
+        item(key = ReorderableSidebarItemKey.Other("$lazyColumnItemKeyPrefix-add-new-filter-button"))
         {
             Row(modifier = Modifier.animateItem().background(themeColors.background))
             {
@@ -242,7 +242,7 @@ fun LazyListScope.filterBuilderPanel(
     for (filterViewModel in filterViewModels)
     {
         // checkbox for enable/disable the filter + text field for filter string
-        val key = "$lazyColumnItemKeyPrefix-${filterViewModel.filterId.id}-header"
+        val key = ReorderableSidebarItemKey.FilterItem(filterViewModel.filterId)
         item(key = key)
         {
             ReorderableItem(

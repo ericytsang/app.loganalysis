@@ -49,6 +49,11 @@ interface FilterRepository
         filterType:FilterType,
     ):Flow<List<FilterModel>>
 
+    suspend fun moveFilter(
+        idOfFilterBeingMoved:FilterId,
+        idOfFilterAtDestination:FilterId,
+    )
+
     suspend fun updateOrderIndex(
         filterId:FilterId,
         newOrderIndex:OrderIndex,
@@ -174,6 +179,47 @@ internal class FilterRepositoryImpl(
         .asFlow()
         .map { it.executeAsList() }
         .map { list -> list.map { it.toDomainModel() } }
+
+    override suspend fun moveFilter(
+        idOfFilterBeingMoved:FilterId,
+        idOfFilterAtDestination:FilterId,
+    )
+    {
+        transaction()
+        {
+            // get the filters from the database
+            val filterBeingMoved = queries.selectFilterById(idOfFilterBeingMoved.id).executeAsOne()
+            val filterAtDestination = queries.selectFilterById(idOfFilterAtDestination.id).executeAsOne()
+
+            // see if both filters are in the same configuration and same filter type
+            if (filterBeingMoved.config_id == filterAtDestination.config_id &&
+                filterBeingMoved.is_exclude_filter == filterAtDestination.is_exclude_filter)
+            {
+                // if they are, we can just swap their order indices
+                queries.updateOrderIndex(
+                    id = idOfFilterBeingMoved.id,
+                    order_index = filterAtDestination.order_index,
+                )
+                queries.updateOrderIndex(
+                    id = idOfFilterAtDestination.id,
+                    order_index = filterBeingMoved.order_index,
+                )
+            }
+            else
+            {
+                // otherwise, delete the filter from the database
+                queries.updateOrderIndex(
+                    id = idOfFilterBeingMoved.id,
+                    order_index = filterAtDestination.order_index + 1,
+                )
+
+                // move all filters that are after the destination filter down by one
+
+
+                // add a new filter with the same properties as the one being moved in the destination configuration
+            }
+        }
+    }
 
     override suspend fun updateOrderIndex(
         filterId:FilterId,

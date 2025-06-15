@@ -63,6 +63,7 @@ fun LogViewerRoot(
     workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel,
     logViewerViewModelFactory:()->LogViewerViewModel,
     viewModelFactory:(CoroutineScope)->LogViewerRootViewModel = { uiScope -> LogViewerRootViewModel.create(uiScope) },
+    reorderSidebarItemViewModel:ReorderSidebarItemViewModel = ReorderSidebarItemViewModel.create(),
 )
 {
     val uiScope = rememberCoroutineScope()
@@ -230,6 +231,11 @@ fun LogViewerRoot(
                 val stateForLazyListOfIncludeFilters = rememberLazyListState()
                 val reorderableLazyListStateForLazyListOfIncludeFilters = rememberReorderableLazyListState(stateForLazyListOfIncludeFilters)
                 { from, to ->
+                    // fyi, the key is of type ReorderableSidebarItemKey, which is a sealed interface
+                    println("reorder from ${from.key} to ${to.key}")
+                    val fromKey = from.key as? ReorderableSidebarItemKey.FilterItem ?: error("unexpected from key type: ${from.key}")
+                    val toKey = to.key as? ReorderableSidebarItemKey.FilterItem ?: error("unexpected to key type: ${to.key}")
+                    reorderSidebarItemViewModel.moveItem(fromKey,toKey)
                 }
                 val excludeFilterItemViewModels by excludeFilterSetViewModel.filters.collectAsState(emptyList())
                 val includeFilterItemViewModels by includeFilterSetViewModel.filters.collectAsState(emptyList())

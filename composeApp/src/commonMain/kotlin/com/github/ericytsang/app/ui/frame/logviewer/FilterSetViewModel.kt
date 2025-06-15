@@ -1,6 +1,7 @@
 package com.github.ericytsang.app.ui.frame.logviewer
 
 import com.github.ericytsang.domain.objects.ConfigurationId
+import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterInterpretationMode
 import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
@@ -15,15 +16,14 @@ interface FilterSetViewModel
 {
     val filters:Flow<List<FilterViewModel>>
     fun addFilter()
-    suspend fun reorderFilters(fromIndex:Int,toIndex:Int)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class FilterTypeFilterSetViewModel(
     private val filterType:FilterType,
     private val configurationId:ConfigurationId,
-    private val filterRepo:FilterRepository = RepositoryDependencyProvider.Companion.instance.filterRepository,
-    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
+    private val filterRepo:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
+    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
 ):FilterSetViewModel,
     KotlinDependencyProvider by kotlinDependencyProvider
 {
@@ -57,8 +57,49 @@ class FilterTypeFilterSetViewModel(
             )
         }
     }
+}
 
-    override suspend fun reorderFilters(fromIndex:Int,toIndex:Int) = withContext(dispatchers.io)
+interface ReorderSidebarItemViewModel
+{
+    suspend fun moveItem(from:ReorderableSidebarItemKey,to:ReorderableSidebarItemKey)
+
+    companion object
     {
+        fun create():ReorderSidebarItemViewModel = ReorderSidebarItemViewModelImpl()
     }
+}
+
+class ReorderSidebarItemViewModelImpl(
+    private val filterRepo:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
+    private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+):ReorderSidebarItemViewModel,KotlinDependencyProvider by kotlinDependencyProvider
+{
+    override suspend fun moveItem(from:ReorderableSidebarItemKey,to:ReorderableSidebarItemKey)
+    {
+        when (from)
+        {
+            // non reorderable item, do nothing
+            is ReorderableSidebarItemKey.Other -> return
+
+            is ReorderableSidebarItemKey.FilterItem -> when (to)
+            {
+                // non reorderable item, do nothing
+                is ReorderableSidebarItemKey.Other -> return
+
+                is ReorderableSidebarItemKey.FilterItem -> withContext(dispatchers.io)
+                {
+                    filterRepo.moveFilter(from.filterId,to.filterId)
+                }
+            }
+        }
+    }
+}
+
+sealed interface ReorderableSidebarItemKey
+{
+    /** key for non reorderable item */
+    data class Other(val key:String):ReorderableSidebarItemKey
+
+    /** key for reorderable filter item */
+    data class FilterItem(val filterId:FilterId):ReorderableSidebarItemKey
 }
