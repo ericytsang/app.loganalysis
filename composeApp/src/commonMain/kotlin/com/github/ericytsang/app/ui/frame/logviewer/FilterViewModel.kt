@@ -2,15 +2,18 @@ package com.github.ericytsang.app.ui.frame.logviewer
 
 import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterInterpretationMode
+import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.FilterRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 interface FilterViewModel
 {
     val filterId:FilterId
 
+    val filterTypeFlow:Flow<FilterType>
     val filterStringFlow:Flow<String>
     val isCaseSensitiveFlow:Flow<Boolean>
     val isEnabledFlow:Flow<Boolean>
@@ -35,6 +38,8 @@ class FilterViewModelImpl(
 ):FilterViewModel,
     KotlinDependencyProvider by kotlinDependencyProvider
 {
+
+    override val filterTypeFlow:Flow<FilterType> = filterRepository.selectFilterById(filterId).map { it.filterType }
 
     private val _filterStringFlow = PersistedValue(
         initialValue = initialFilterString,

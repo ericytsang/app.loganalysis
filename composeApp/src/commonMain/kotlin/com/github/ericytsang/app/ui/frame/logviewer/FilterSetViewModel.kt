@@ -114,9 +114,7 @@ sealed interface ReorderableSidebarItemKey
      * key for the "new filter" button which will be treated as the user
      * trying to add the filter to the top of the section.
      */
-    data class NewFilterButton(
-        val filterType:FilterType,
-    ):ReorderableSidebarItemKey
+    data class NewFilterButton(val filterType:FilterType):ReorderableSidebarItemKey
 
     /** key for reorderable filter item */
     data class FilterItem(val filterId:FilterId):ReorderableSidebarItemKey

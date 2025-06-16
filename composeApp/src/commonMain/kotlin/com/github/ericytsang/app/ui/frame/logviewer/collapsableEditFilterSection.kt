@@ -44,6 +44,7 @@ import com.github.ericytsang.app.ui.util.component.DoubleClickButton
 import com.github.ericytsang.app.ui.util.component.ToggleButton
 import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterInterpretationMode
+import com.github.ericytsang.domain.objects.FilterType
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
@@ -121,10 +122,25 @@ fun LazyListScope.collapsableEditFilterSection(
     requestAddNewFilter:()->Unit,
 
     /**
-     * key for the "new filter" button which when used as a drag-ang-drop drop target,
-     * it will be treated as the user trying to add the filter to the top of the section.
+     * key for item that is currently being dragged.
+     * we use this to be able to enable/disable drag-and-drop of certain elements.
      */
-    newFilterButtonKey:ReorderableSidebarItemKey.NewFilterButton
+    filterTypeOfItemCurrentlyBeingDragged:FilterType?,
+
+    /**
+     * type of the filter that is being edited.
+     */
+    filterType:FilterType,
+
+    /**
+     * called when the user starts dragging a filter item.
+     */
+    onDragStarted:(FilterType) -> Unit,
+
+    /**
+     * called when the user stops dragging a filter item.
+     */
+    onDragStopped:() -> Unit,
 )
 {
     // header for the section
@@ -164,11 +180,15 @@ fun LazyListScope.collapsableEditFilterSection(
     if (isSectionExpanded)
     {
         // button to add a new filter
-        item(key = newFilterButtonKey)
+        val itemKey = ReorderableSidebarItemKey.NewFilterButton(filterType)
+        item(key = itemKey)
         {
             ReorderableItem(
                 state = reorderableLazyListState,
-                key = newFilterButtonKey,
+                key = itemKey,
+                // disable drag-and-drop if the filter that is being dragged already belongs to this type;
+                // only enable drag-and-drop if the filter that is being dragged belongs to a different type.
+                enabled = filterTypeOfItemCurrentlyBeingDragged != filterType,
             )
             {
                 Row(modifier = Modifier.animateItem().background(themeColors.background))
@@ -191,11 +211,12 @@ fun LazyListScope.collapsableEditFilterSection(
         // show the filters that the user can edit
         filterBuilderPanel(
             themeColors = themeColors,
-            lazyColumnItemKeyPrefix = "$lazyColumnItemKeyPrefix-panel",
             reorderableLazyListState = reorderableLazyListState,
             filterViewModels = filterItemViewModels,
             expandedItem = expandedFilterId,
             onTextFieldGotFocus = requestFilterExpansion,
+            onDragStarted = { filterType -> onDragStarted(filterType) },
+            onDragStopped = { onDragStopped() },
         )
     }
 }
@@ -223,12 +244,6 @@ fun LazyListScope.filterBuilderPanel(
     themeColors:Colors,
 
     /**
-     * [LazyColumn] uses keys to keep track of its contained items
-     * so it can infer what animations to perform as items CRUD
-     */
-    lazyColumnItemKeyPrefix:String,
-
-    /**
      * [ReorderableLazyListState] to be used when creating reorderable items.
      * this is used to allow drag-and-drop reordering of the filters.
      */
@@ -251,6 +266,16 @@ fun LazyListScope.filterBuilderPanel(
      * this is intended to be used by the host to update [expandedItem].
      */
     onTextFieldGotFocus:(FilterId)->Unit,
+
+    /**
+     * called when the user starts dragging a filter item.
+     */
+    onDragStarted:(FilterType) -> Unit,
+
+    /**
+     * called when the user stops dragging a filter item.
+     */
+    onDragStopped:() -> Unit,
 )
 {
     for (filterViewModel in filterViewModels)
@@ -274,7 +299,13 @@ fun LazyListScope.filterBuilderPanel(
                     {
 
                         // show editable filter string and checkbox for enabling/disabling the filter
-                        filterHeader(themeColors,filterViewModel,onTextFieldGotFocus)
+                        filterHeader(
+                            themeColors = themeColors,
+                            filterViewModel = filterViewModel,
+                            onTextFieldGotFocus = onTextFieldGotFocus,
+                            onDragStarted = { filterType -> onDragStarted(filterType) },
+                            onDragStopped = { onDragStopped() },
+                        )
 
                         // show the additional settings for this filter if it is expanded ([expandedItem])
                         AnimatedVisibility(filterViewModel.filterId == expandedItem)
@@ -299,14 +330,21 @@ private fun ReorderableCollectionItemScope.filterHeader(
     themeColors:Colors,
     filterViewModel:FilterViewModel,
     onTextFieldGotFocus:(FilterId)->Unit,
+    onDragStarted:(FilterType) -> Unit,
+    onDragStopped:() -> Unit,
 )
 {
+    val filterType = filterViewModel.filterTypeFlow.collectAsState(FilterType.INCLUDE).value
+
     Row(verticalAlignment = Alignment.CenterVertically)
     {
 
         // drag-and-drop handle
         IconButton(
-            modifier = Modifier.draggableHandle(),
+            modifier = Modifier.draggableHandle(
+                onDragStarted = { onDragStarted(filterType) },
+                onDragStopped = { onDragStopped() },
+            ),
             onClick = {},
         )
         {

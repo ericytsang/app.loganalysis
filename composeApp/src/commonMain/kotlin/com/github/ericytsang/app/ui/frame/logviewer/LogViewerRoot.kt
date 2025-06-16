@@ -229,6 +229,7 @@ fun LogViewerRoot(
                 border = ButtonDefaults.outlinedBorder,
             )
             {
+                var filterTypeOfItemCurrentlyBeingDragged by remember { mutableStateOf<FilterType?>(null) }
                 val stateForLazyListOfIncludeFilters = rememberLazyListState()
                 val reorderableLazyListStateForLazyListOfIncludeFilters = rememberReorderableLazyListState(stateForLazyListOfIncludeFilters)
                 { from, to ->
@@ -262,7 +263,13 @@ fun LogViewerRoot(
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = { },
-                        newFilterButtonKey = ReorderableSidebarItemKey.NewFilterButton(filterType = FilterType.EXCLUDE)
+                        filterType = FilterType.EXCLUDE,
+                        filterTypeOfItemCurrentlyBeingDragged = filterTypeOfItemCurrentlyBeingDragged,
+                        onDragStarted = { filterType ->
+                            println("filterTypeOfItemCurrentlyBeingDragged = $filterType")
+                            filterTypeOfItemCurrentlyBeingDragged = filterType
+                        },
+                        onDragStopped = { filterTypeOfItemCurrentlyBeingDragged = null },
                     )
 
                     // lazy column drag-and-drop state
@@ -279,7 +286,13 @@ fun LogViewerRoot(
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = excludeFilterSetViewModel::addFilter,
-                        newFilterButtonKey = ReorderableSidebarItemKey.NewFilterButton(filterType = FilterType.EXCLUDE)
+                        filterType = FilterType.EXCLUDE,
+                        filterTypeOfItemCurrentlyBeingDragged = filterTypeOfItemCurrentlyBeingDragged,
+                        onDragStarted = { filterType ->
+                            println("filterTypeOfItemCurrentlyBeingDragged = $filterType")
+                            filterTypeOfItemCurrentlyBeingDragged = filterType
+                        },
+                        onDragStopped = { filterTypeOfItemCurrentlyBeingDragged = null },
                     )
 
                     // lazy column drag-and-drop state
@@ -296,7 +309,13 @@ fun LogViewerRoot(
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = includeFilterSetViewModel::addFilter,
-                        newFilterButtonKey = ReorderableSidebarItemKey.NewFilterButton(filterType = FilterType.INCLUDE)
+                        filterType = FilterType.INCLUDE,
+                        filterTypeOfItemCurrentlyBeingDragged = filterTypeOfItemCurrentlyBeingDragged,
+                        onDragStarted = { filterType ->
+                            println("filterTypeOfItemCurrentlyBeingDragged = $filterType")
+                            filterTypeOfItemCurrentlyBeingDragged = filterType
+                        },
+                        onDragStopped = { filterTypeOfItemCurrentlyBeingDragged = null },
                     )
                 }
             }
