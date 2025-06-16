@@ -209,20 +209,18 @@ internal class FilterRepositoryImpl(
                 // increment or decrement the order index of other filters
                 if (shouldIncrementOrderIndexOfOthers)
                 {
-                    queries.updateOrderIndexBulkIncrement(
-                        order_index = filterAtDestination.order_index,
-                        order_index_ = filterBeingMoved.order_index,
-                        config_id = filterAtDestination.config_id,
-                        is_exclude_filter = filterAtDestination.is_exclude_filter,
+                    updateOrderIndexBulkIncrement(
+                        orderIndexRange = OrderIndex(filterAtDestination.order_index)..OrderIndex(filterBeingMoved.order_index),
+                        configurationId = ConfigurationId(filterAtDestination.config_id),
+                        filterType = filterAtDestination.is_exclude_filter.toFilterType(),
                     )
                 }
                 else
                 {
-                    queries.updateOrderIndexBulkDecrement(
-                        order_index = filterBeingMoved.order_index,
-                        order_index_ = filterAtDestination.order_index,
-                        config_id = filterAtDestination.config_id,
-                        is_exclude_filter = filterAtDestination.is_exclude_filter,
+                    updateOrderIndexBulkDecrement(
+                        orderIndexRange = OrderIndex(filterBeingMoved.order_index)..OrderIndex(filterAtDestination.order_index),
+                        configurationId = ConfigurationId(filterAtDestination.config_id),
+                        filterType = filterAtDestination.is_exclude_filter.toFilterType(),
                     )
                 }
             }
@@ -231,11 +229,10 @@ internal class FilterRepositoryImpl(
             else
             {
                 // increment all the filters that are at or higher than the destination order index
-                queries.updateOrderIndexBulkIncrement(
-                    order_index = filterAtDestination.order_index,
-                    order_index_ = Long.MAX_VALUE,
-                    config_id = filterAtDestination.config_id,
-                    is_exclude_filter = filterAtDestination.is_exclude_filter,
+                updateOrderIndexBulkIncrement(
+                    orderIndexRange = OrderIndex(filterAtDestination.order_index)..OrderIndex(Long.MAX_VALUE),
+                    configurationId = ConfigurationId(filterAtDestination.config_id),
+                    filterType = filterAtDestination.is_exclude_filter.toFilterType(),
                 )
             }
 
@@ -247,6 +244,74 @@ internal class FilterRepositoryImpl(
                 config_id = filterAtDestination.config_id,
             )
         }
+    }
+
+    private fun updateOrderIndexBulkIncrement(
+        orderIndexRange:ClosedRange<OrderIndex>,
+        configurationId:ConfigurationId,
+        filterType:FilterType,
+        pageSize:Int = 2,
+    )
+    {
+        // select the next pageSize filters that are in the range
+        val filters = queries.selectNFiltersAtOrLtOrderIndex(
+            config_id = configurationId.id,
+            is_exclude_filter = filterType.toSqLiteLong(),
+            order_index = orderIndexRange.endInclusive.orderIndex,
+            value_ = pageSize.toLong(),
+        ).executeAsList()
+
+        // for the filters in the range, increment their order index by 1
+        val filtersInRange = filters.filter { OrderIndex(it.order_index) in orderIndexRange }
+        filtersInRange.forEach { filter ->
+            queries.updateOrderIndex(
+                id = filter.id,
+                order_index = filter.order_index + 1,
+            )
+        }
+
+        // call recursively, but with a smaller range, to continue processing until no more filters in the range
+        val newEndIndex = filtersInRange.minOfOrNull { it.order_index }?.minus(1)?.let { OrderIndex(it) } ?: return
+        updateOrderIndexBulkIncrement(
+            orderIndexRange = orderIndexRange.start..newEndIndex,
+            configurationId = configurationId,
+            filterType = filterType,
+            pageSize = pageSize,
+        )
+    }
+
+    private fun updateOrderIndexBulkDecrement(
+        orderIndexRange:ClosedRange<OrderIndex>,
+        configurationId:ConfigurationId,
+        filterType:FilterType,
+        pageSize:Int = 2,
+    )
+    {
+        // select the next pageSize filters that are in the range
+        val filters = queries.selectNFiltersAtOrGtOrderIndex(
+            config_id = configurationId.id,
+            is_exclude_filter = filterType.toSqLiteLong(),
+            order_index = orderIndexRange.start.orderIndex,
+            value_ = pageSize.toLong(),
+        ).executeAsList()
+
+        // for the filters in the range, decrement their order index by 1
+        val filtersInRange = filters.filter { OrderIndex(it.order_index) in orderIndexRange }
+        filtersInRange.forEach { filter ->
+            queries.updateOrderIndex(
+                id = filter.id,
+                order_index = filter.order_index - 1,
+            )
+        }
+
+        // call recursively, but with a smaller range, to continue processing until no more filters in the range
+        val newStartIndex = filtersInRange.maxOfOrNull { it.order_index }?.plus(1)?.let { OrderIndex(it) } ?: return
+        updateOrderIndexBulkDecrement(
+            orderIndexRange = newStartIndex..orderIndexRange.endInclusive,
+            configurationId = configurationId,
+            filterType = filterType,
+            pageSize = pageSize,
+        )
     }
 
     override suspend fun updateOrderIndex(

@@ -189,6 +189,18 @@ selectFilterById:
 SELECT * FROM FilterEntity
 WHERE id = ?;
 
+selectNFiltersAtOrLtOrderIndex:
+SELECT * FROM FilterEntity
+WHERE order_index <= ? AND config_id = ? AND is_exclude_filter = ?
+ORDER BY order_index DESC
+LIMIT ?;
+
+selectNFiltersAtOrGtOrderIndex:
+SELECT * FROM FilterEntity
+WHERE order_index >= ? AND config_id = ? AND is_exclude_filter = ?
+ORDER BY order_index ASC
+LIMIT ?;
+
 updateOrderIndexBulkIncrement:
 UPDATE FilterEntity
 SET order_index = order_index + 1

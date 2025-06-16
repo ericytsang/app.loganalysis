@@ -33,7 +33,10 @@ data class ConfigurationId(
 
 data class OrderIndex(
     val orderIndex: Long,
-)
+):Comparable<OrderIndex>
+{
+    override fun compareTo(other: OrderIndex): Int = orderIndex.compareTo(other.orderIndex)
+}
 
 data class Configuration(
     val id: ConfigurationId,
