@@ -237,16 +237,11 @@ internal class FilterRepositoryImpl(
             // algorithm when filters are in different configurations or filter types:
             else
             {
-                // otherwise, delete the filter from the database
-                queries.updateOrderIndex(
-                    id = idOfFilterBeingMoved.id,
-                    order_index = filterAtDestination.order_index + 1,
-                )
+                // delete the filter from the database
 
-                // move all filters that are after the destination filter down by one
+                // increment all the filters that are at or higher than the destination order index
 
-
-                // add a new filter with the same properties as the one being moved in the destination configuration
+                // add back the deleted filter, but at the new destination
             }
         }
     }
