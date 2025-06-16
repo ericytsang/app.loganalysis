@@ -191,12 +191,16 @@ internal class FilterRepositoryImpl(
             val filterBeingMoved = queries.selectFilterById(idOfFilterBeingMoved.id).executeAsOne()
             val filterAtDestination = queries.selectFilterById(idOfFilterAtDestination.id).executeAsOne()
 
+            // move the filter being moved to a temporary order index
+            queries.updateOrderIndex(
+                id = filterBeingMoved.id,
+                order_index = Long.MIN_VALUE,
+            )
+
             // algorithm when filters are in the same configuration and filter type:
             if (filterBeingMoved.config_id == filterAtDestination.config_id &&
                 filterBeingMoved.is_exclude_filter == filterAtDestination.is_exclude_filter)
             {
-                // delete the filter from the database
-                queries.deleteFilter(idOfFilterBeingMoved.id)
 
                 // decide if we need to increment or decrement the order index of other filters,
                 // which depends on whether the filter being moved to a higher or lower order index
@@ -221,28 +225,27 @@ internal class FilterRepositoryImpl(
                         is_exclude_filter = filterAtDestination.is_exclude_filter,
                     )
                 }
-
-                // add back the deleted filter, but at the new order index
-                queries.insertFilter(
-                    config_id = filterBeingMoved.config_id,
-                    filter_string = filterBeingMoved.filter_string,
-                    is_case_sensitive = filterBeingMoved.is_case_sensitive,
-                    filter_interpretation_mode = filterBeingMoved.filter_interpretation_mode,
-                    is_exclude_filter = filterBeingMoved.is_exclude_filter,
-                    is_active = filterBeingMoved.is_active,
-                    order_index = filterAtDestination.order_index,
-                )
             }
 
             // algorithm when filters are in different configurations or filter types:
             else
             {
-                // delete the filter from the database
-
                 // increment all the filters that are at or higher than the destination order index
-
-                // add back the deleted filter, but at the new destination
+                queries.updateOrderIndexBulkIncrement(
+                    order_index = filterAtDestination.order_index,
+                    order_index_ = Long.MAX_VALUE,
+                    config_id = filterAtDestination.config_id,
+                    is_exclude_filter = filterAtDestination.is_exclude_filter,
+                )
             }
+
+            // update the filter being moved to move it to the destination
+            queries.updateFilterForMove(
+                id = filterBeingMoved.id,
+                order_index = filterAtDestination.order_index,
+                is_exclude_filter = filterAtDestination.is_exclude_filter,
+                config_id = filterAtDestination.config_id,
+            )
         }
     }
 

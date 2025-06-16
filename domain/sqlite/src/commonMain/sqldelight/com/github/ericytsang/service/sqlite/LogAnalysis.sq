@@ -204,6 +204,13 @@ UPDATE FilterEntity
 SET order_index = ?
 WHERE id = ?;
 
+updateFilterForMove:
+UPDATE FilterEntity
+SET order_index = ?,
+    is_exclude_filter = ?,
+    config_id = ?
+WHERE id = ?;
+
 updateFilterString:
 UPDATE FilterEntity
 SET filter_string = ?
