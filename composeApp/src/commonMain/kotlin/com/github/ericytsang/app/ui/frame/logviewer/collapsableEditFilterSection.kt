@@ -121,6 +121,7 @@ fun LazyListScope.collapsableEditFilterSection(
     requestAddNewFilter:()->Unit,
 )
 {
+    // header for the section
     item(key = ReorderableSidebarItemKey.Other("$lazyColumnItemKeyPrefix-header"))
     {
         Row(modifier = Modifier.animateItem().background(themeColors.background))
@@ -153,6 +154,7 @@ fun LazyListScope.collapsableEditFilterSection(
         }
     }
 
+    // if the section is expanded, show the filter builder panel
     if (isSectionExpanded)
     {
         // button to add a new filter
@@ -246,7 +248,6 @@ fun LazyListScope.filterBuilderPanel(
         item(key = key)
         {
             ReorderableItem(
-                modifier = Modifier.animateItem(),
                 state = reorderableLazyListState,
                 key = key,
             )
