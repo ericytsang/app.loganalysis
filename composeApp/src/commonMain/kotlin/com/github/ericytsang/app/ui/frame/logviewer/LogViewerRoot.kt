@@ -62,8 +62,8 @@ fun LogViewerRoot(
     filterSetViewModelFactory:(FilterType)->FilterSetViewModel,
     workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel,
     logViewerViewModelFactory:()->LogViewerViewModel,
+    reorderSidebarItemViewModelFactory:()->ReorderSidebarItemViewModel,
     viewModelFactory:(CoroutineScope)->LogViewerRootViewModel = { uiScope -> LogViewerRootViewModel.create(uiScope) },
-    reorderSidebarItemViewModel:ReorderSidebarItemViewModel = ReorderSidebarItemViewModel.create(),
 )
 {
     val uiScope = rememberCoroutineScope()
@@ -71,6 +71,7 @@ fun LogViewerRoot(
     val includeFilterSetViewModel = remember { filterSetViewModelFactory(FilterType.INCLUDE) }
     val excludeFilterSetViewModel = remember { filterSetViewModelFactory(FilterType.EXCLUDE) }
     val logViewerViewModel = remember { logViewerViewModelFactory() }
+    val reorderSidebarItemViewModel = remember { reorderSidebarItemViewModelFactory() }
     val workingFileSetEditorViewModel = remember { workingFileSetEditorViewModelFactory() }
 
     val theme by viewModel.theme.collectAsState(Theme.DARK)
@@ -233,8 +234,8 @@ fun LogViewerRoot(
                 { from, to ->
                     // fyi, the key is of type ReorderableSidebarItemKey, which is a sealed interface
                     println("reorder from ${from.key} to ${to.key}")
-                    val fromKey = from.key as? ReorderableSidebarItemKey.FilterItem ?: error("unexpected from key type: ${from.key}")
-                    val toKey = to.key as? ReorderableSidebarItemKey.FilterItem ?: error("unexpected to key type: ${to.key}")
+                    val fromKey = from.key as? ReorderableSidebarItemKey ?: error("unexpected from key type: ${from.key}")
+                    val toKey = to.key as? ReorderableSidebarItemKey ?: error("unexpected to key type: ${to.key}")
                     reorderSidebarItemViewModel.moveItem(fromKey,toKey)
                 }
                 val excludeFilterItemViewModels by excludeFilterSetViewModel.filters.collectAsState(emptyList())
@@ -261,6 +262,7 @@ fun LogViewerRoot(
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = { },
+                        newFilterButtonKey = ReorderableSidebarItemKey.NewFilterButton(filterType = FilterType.EXCLUDE)
                     )
 
                     // lazy column drag-and-drop state
@@ -277,6 +279,7 @@ fun LogViewerRoot(
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = excludeFilterSetViewModel::addFilter,
+                        newFilterButtonKey = ReorderableSidebarItemKey.NewFilterButton(filterType = FilterType.EXCLUDE)
                     )
 
                     // lazy column drag-and-drop state
@@ -293,6 +296,7 @@ fun LogViewerRoot(
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = includeFilterSetViewModel::addFilter,
+                        newFilterButtonKey = ReorderableSidebarItemKey.NewFilterButton(filterType = FilterType.INCLUDE)
                     )
                 }
             }

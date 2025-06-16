@@ -11,6 +11,7 @@ import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import com.github.ericytsang.service.sqlite.FilterEntity
 import com.github.ericytsang.service.sqlite.dbfactory.DatabaseService
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -52,6 +53,11 @@ interface FilterRepository
     suspend fun moveFilter(
         idOfFilterBeingMoved:FilterId,
         idOfFilterAtDestination:FilterId,
+    )
+
+    suspend fun moveFilterToTopOfSection(
+        idOfFilterBeingMoved:FilterId,
+        destinationSectionFilterType:FilterType
     )
 
     suspend fun updateOrderIndex(
@@ -177,6 +183,7 @@ internal class FilterRepositoryImpl(
             is_exclude_filter = filterType.toSqLiteLong(),
         )
         .asFlow()
+        .conflate()
         .map { it.executeAsList() }
         .map { list -> list.map { it.toDomainModel() } }
 
@@ -312,6 +319,42 @@ internal class FilterRepositoryImpl(
             filterType = filterType,
             pageSize = pageSize,
         )
+    }
+
+    override suspend fun moveFilterToTopOfSection(
+        idOfFilterBeingMoved:FilterId,
+        destinationSectionFilterType:FilterType,
+    ) = withContext<Unit>(dispatchers.io)
+    {
+        transaction()
+        {
+            // get the filter being moved
+            val filterBeingMoved = queries.selectFilterById(idOfFilterBeingMoved.id).executeAsOne()
+
+            // get the max order index of the filters in the destination section
+            val currentMaxOrderRow = queries
+                .selectFiltersForConfigDesc(
+                    config_id = filterBeingMoved.config_id,
+                    is_exclude_filter = destinationSectionFilterType.toSqLiteLong(),
+                    order_index = Long.MAX_VALUE,
+                    value_ = 1L,
+                )
+                .executeAsOneOrNull()
+
+            // if the filter being moved is already at the top of the section, do nothing
+            if (currentMaxOrderRow?.id == filterBeingMoved.id)
+            {
+                return@transaction
+            }
+
+            // move the filter to the top of the section
+            queries.updateFilterForMove(
+                id = filterBeingMoved.id,
+                order_index = (currentMaxOrderRow?.order_index ?: 0L) + 1L,
+                is_exclude_filter = destinationSectionFilterType.toSqLiteLong(),
+                config_id = filterBeingMoved.config_id,
+            )
+        }
     }
 
     override suspend fun updateOrderIndex(

@@ -119,6 +119,12 @@ fun LazyListScope.collapsableEditFilterSection(
      * this is intended to be used by the host to add a new filter.
      */
     requestAddNewFilter:()->Unit,
+
+    /**
+     * key for the "new filter" button which when used as a drag-ang-drop drop target,
+     * it will be treated as the user trying to add the filter to the top of the section.
+     */
+    newFilterButtonKey:ReorderableSidebarItemKey.NewFilterButton
 )
 {
     // header for the section
@@ -158,20 +164,26 @@ fun LazyListScope.collapsableEditFilterSection(
     if (isSectionExpanded)
     {
         // button to add a new filter
-        item(key = ReorderableSidebarItemKey.Other("$lazyColumnItemKeyPrefix-add-new-filter-button"))
+        item(key = newFilterButtonKey)
         {
-            Row(modifier = Modifier.animateItem().background(themeColors.background))
+            ReorderableItem(
+                state = reorderableLazyListState,
+                key = newFilterButtonKey,
+            )
             {
-                OutlinedButton(
-                    modifier = Modifier.fillMaxWidth().animateItem().padding(Dimens.mttPadding),
-                    onClick = requestAddNewFilter,
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        backgroundColor = themeColors.surface,
-                        contentColor = themeColors.onSurface,
-                    ),
-                )
+                Row(modifier = Modifier.animateItem().background(themeColors.background))
                 {
-                    Text("Add new filter")
+                    OutlinedButton(
+                        modifier = Modifier.fillMaxWidth().animateItem().padding(Dimens.mttPadding),
+                        onClick = requestAddNewFilter,
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            backgroundColor = themeColors.surface,
+                            contentColor = themeColors.onSurface,
+                        ),
+                    )
+                    {
+                        Text("Add new filter")
+                    }
                 }
             }
         }

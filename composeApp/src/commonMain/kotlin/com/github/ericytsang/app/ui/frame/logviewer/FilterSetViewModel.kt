@@ -65,31 +65,41 @@ interface ReorderSidebarItemViewModel
 
     companion object
     {
-        fun create():ReorderSidebarItemViewModel = ReorderSidebarItemViewModelImpl()
+        fun create(
+            configurationId:ConfigurationId,
+        ):ReorderSidebarItemViewModel = ReorderSidebarItemViewModelImpl(
+            configurationId = configurationId,
+        )
     }
 }
 
 class ReorderSidebarItemViewModelImpl(
+    private val configurationId:ConfigurationId,
     private val filterRepo:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
     private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
 ):ReorderSidebarItemViewModel,KotlinDependencyProvider by kotlinDependencyProvider
 {
-    override suspend fun moveItem(from:ReorderableSidebarItemKey,to:ReorderableSidebarItemKey)
+    override suspend fun moveItem(from:ReorderableSidebarItemKey,to:ReorderableSidebarItemKey) = withContext(dispatchers.io)
     {
         when (from)
         {
             // non reorderable item, do nothing
-            is ReorderableSidebarItemKey.Other -> return
+            is ReorderableSidebarItemKey.Other -> return@withContext
+
+            // "new filter" button can only be used as a target, and cannot be moved
+            is ReorderableSidebarItemKey.NewFilterButton -> error("cannot move 'new filter' button")
 
             is ReorderableSidebarItemKey.FilterItem -> when (to)
             {
                 // non reorderable item, do nothing
-                is ReorderableSidebarItemKey.Other -> return
+                is ReorderableSidebarItemKey.Other -> return@withContext
 
-                is ReorderableSidebarItemKey.FilterItem -> withContext(dispatchers.io)
-                {
-                    filterRepo.moveFilter(from.filterId,to.filterId)
-                }
+                // move filter to the target position
+                is ReorderableSidebarItemKey.FilterItem -> filterRepo.moveFilter(from.filterId,to.filterId)
+
+                // move filter to the top of the section
+                is ReorderableSidebarItemKey.NewFilterButton ->
+                    filterRepo.moveFilterToTopOfSection(from.filterId, to.filterType)
             }
         }
     }
@@ -99,6 +109,14 @@ sealed interface ReorderableSidebarItemKey
 {
     /** key for non reorderable item */
     data class Other(val key:String):ReorderableSidebarItemKey
+
+    /**
+     * key for the "new filter" button which will be treated as the user
+     * trying to add the filter to the top of the section.
+     */
+    data class NewFilterButton(
+        val filterType:FilterType,
+    ):ReorderableSidebarItemKey
 
     /** key for reorderable filter item */
     data class FilterItem(val filterId:FilterId):ReorderableSidebarItemKey
