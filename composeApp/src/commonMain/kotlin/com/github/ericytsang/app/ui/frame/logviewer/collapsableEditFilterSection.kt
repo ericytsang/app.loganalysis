@@ -300,8 +300,6 @@ private fun ReorderableCollectionItemScope.filterHeader(
     onTextFieldGotFocus:(FilterId)->Unit,
 )
 {
-    val filterType = filterViewModel.filterTypeFlow.collectAsState(FilterType.INCLUDE).value
-
     Row(verticalAlignment = Alignment.CenterVertically)
     {
 

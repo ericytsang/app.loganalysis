@@ -13,7 +13,6 @@ interface FilterViewModel
 {
     val filterId:FilterId
 
-    val filterTypeFlow:Flow<FilterType>
     val filterStringFlow:Flow<String>
     val isCaseSensitiveFlow:Flow<Boolean>
     val isEnabledFlow:Flow<Boolean>
@@ -38,8 +37,6 @@ class FilterViewModelImpl(
 ):FilterViewModel,
     KotlinDependencyProvider by kotlinDependencyProvider
 {
-
-    override val filterTypeFlow:Flow<FilterType> = filterRepository.selectFilterById(filterId).map { it.filterType }
 
     private val _filterStringFlow = PersistedValue(
         initialValue = initialFilterString,
