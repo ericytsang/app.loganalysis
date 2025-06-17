@@ -249,7 +249,7 @@ fun LogViewerRoot(
                     verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
                 )
                 {
-                    // lazy column drag-and-drop state
+                    // reorderable list of working files
                     collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showEditFileListPanel",
@@ -272,7 +272,7 @@ fun LogViewerRoot(
                         onDragStopped = { filterTypeOfItemCurrentlyBeingDragged = null },
                     )
 
-                    // lazy column drag-and-drop state
+                    // exclude filters
                     collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showExcludeFilterPanel",
@@ -295,7 +295,7 @@ fun LogViewerRoot(
                         onDragStopped = { filterTypeOfItemCurrentlyBeingDragged = null },
                     )
 
-                    // lazy column drag-and-drop state
+                    // include filters
                     collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showIncludeFilterPanel",
