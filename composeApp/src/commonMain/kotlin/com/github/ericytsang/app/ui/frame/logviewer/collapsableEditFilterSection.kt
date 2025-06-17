@@ -122,12 +122,6 @@ fun LazyListScope.collapsableEditFilterSection(
     requestAddNewFilter:()->Unit,
 
     /**
-     * key for item that is currently being dragged.
-     * we use this to be able to enable/disable drag-and-drop of certain elements.
-     */
-    filterTypeOfItemCurrentlyBeingDragged:FilterType?,
-
-    /**
      * type of the filter that is being edited.
      */
     filterType:FilterType,
@@ -186,9 +180,7 @@ fun LazyListScope.collapsableEditFilterSection(
             ReorderableItem(
                 state = reorderableLazyListState,
                 key = itemKey,
-                // disable drag-and-drop if the filter that is being dragged already belongs to this type;
-                // only enable drag-and-drop if the filter that is being dragged belongs to a different type.
-                enabled = filterTypeOfItemCurrentlyBeingDragged != filterType,
+                enabled = filterItemViewModels.isEmpty(),
             )
             {
                 Row(modifier = Modifier.animateItem().background(themeColors.background))

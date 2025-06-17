@@ -264,7 +264,6 @@ fun LogViewerRoot(
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = { },
                         filterType = FilterType.EXCLUDE,
-                        filterTypeOfItemCurrentlyBeingDragged = filterTypeOfItemCurrentlyBeingDragged,
                         onDragStarted = { filterType ->
                             println("filterTypeOfItemCurrentlyBeingDragged = $filterType")
                             filterTypeOfItemCurrentlyBeingDragged = filterType
@@ -287,7 +286,6 @@ fun LogViewerRoot(
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = excludeFilterSetViewModel::addFilter,
                         filterType = FilterType.EXCLUDE,
-                        filterTypeOfItemCurrentlyBeingDragged = filterTypeOfItemCurrentlyBeingDragged,
                         onDragStarted = { filterType ->
                             println("filterTypeOfItemCurrentlyBeingDragged = $filterType")
                             filterTypeOfItemCurrentlyBeingDragged = filterType
@@ -310,7 +308,6 @@ fun LogViewerRoot(
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = includeFilterSetViewModel::addFilter,
                         filterType = FilterType.INCLUDE,
-                        filterTypeOfItemCurrentlyBeingDragged = filterTypeOfItemCurrentlyBeingDragged,
                         onDragStarted = { filterType ->
                             println("filterTypeOfItemCurrentlyBeingDragged = $filterType")
                             filterTypeOfItemCurrentlyBeingDragged = filterType
