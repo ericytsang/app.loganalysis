@@ -40,8 +40,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.collapsableSectionHeader
 import com.github.ericytsang.app.ui.util.component.DoubleClickButton
-import com.github.ericytsang.app.ui.util.component.ToggleButton
 import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterInterpretationMode
 import com.github.ericytsang.domain.objects.FilterType
@@ -127,38 +127,17 @@ fun LazyListScope.collapsableEditFilterSection(
     filterType:FilterType,
 )
 {
+
     // header for the section
-    item(key = ReorderableSidebarItemKey.Other("$lazyColumnItemKeyPrefix-header"))
-    {
-        Row(modifier = Modifier.animateItem().background(themeColors.background))
-        {
-            ToggleButton(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = requestToggleSectionExpanded,
-                isToggled = isSectionExpanded,
-                isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                content =
-                { contentColor ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    )
-                    {
-                        sectionIcon(contentColor)
-                        if (shouldShowSectionHeader)
-                        {
-                            Text(
-                                text = sectionTitle,
-                                color = contentColor,
-                                modifier = Modifier.padding(start = Dimens.mttPadding),
-                            )
-                        }
-                    }
-                },
-            )
-        }
-    }
+    collapsableSectionHeader(
+        themeColors = themeColors,
+        lazyColumnItemKeyPrefix = lazyColumnItemKeyPrefix,
+        sectionIcon = sectionIcon,
+        sectionTitle = sectionTitle,
+        isSectionExpanded = isSectionExpanded,
+        shouldShowSectionHeader = shouldShowSectionHeader,
+        requestToggleSectionExpanded = requestToggleSectionExpanded,
+    )
 
     // if the section is expanded, show the filter builder panel
     if (isSectionExpanded)
