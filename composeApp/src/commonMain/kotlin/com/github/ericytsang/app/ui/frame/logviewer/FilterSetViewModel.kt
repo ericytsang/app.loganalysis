@@ -12,6 +12,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.WhileSubscribed
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.seconds
@@ -31,8 +33,9 @@ class FilterTypeFilterSetViewModelFactory(
 {
     private val allFilters:Flow<Map<FilterType,List<FilterViewModel>>> = filterRepo
         .selectFiltersForConfig(configurationId = configurationId)
-        .mapLatest { rows -> rows.groupBy { it.filterType } }
-        .mapLatest { groups ->
+        .conflate()
+        .map { rows -> rows.groupBy { it.filterType } }
+        .map { groups ->
             groups.mapValues { mapEntry ->
                 val rows = mapEntry.value
                 rows.map { row ->
