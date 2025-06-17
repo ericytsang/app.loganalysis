@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
@@ -88,14 +89,11 @@ interface ReorderSidebarItemViewModel
     {
         fun create(
             configurationId:ConfigurationId,
-        ):ReorderSidebarItemViewModel = ReorderSidebarItemViewModelImpl(
-            configurationId = configurationId,
-        )
+        ):ReorderSidebarItemViewModel = ReorderSidebarItemViewModelImpl()
     }
 }
 
 class ReorderSidebarItemViewModelImpl(
-    private val configurationId:ConfigurationId,
     private val filterRepo:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
     private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
 ):ReorderSidebarItemViewModel,KotlinDependencyProvider by kotlinDependencyProvider
