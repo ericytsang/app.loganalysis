@@ -46,11 +46,12 @@ class FilterTypeFilterSetViewModelFactory(
                         initialIsCaseSensitive = row.isCaseSensitive,
                         initialIsEnabled = row.isActive,
                         initialFilterInterpretationMode = row.filterInterpretationMode,
-                        onRequestDelete = { filterId -> applicationScope.launch { filterRepo.delete(row.id) } },
+                        onRequestDelete = { filterId -> applicationScope.launch(dispatchers.io) { filterRepo.delete(row.id) } },
                     )
                 }
             }
         }
+        .flowOn(dispatchers.default)
         .shareIn(applicationScope, SharingStarted.WhileSubscribed(5.seconds), replay = 1)
 
     private fun addFilter(
