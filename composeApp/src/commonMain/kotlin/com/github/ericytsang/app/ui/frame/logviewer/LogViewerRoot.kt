@@ -76,9 +76,7 @@ fun LogViewerRoot(
 
     val theme by viewModel.theme.collectAsState(Theme.DARK)
 
-    val logcatFilterString by logViewerViewModel.logcatFilterString.collectAsState("")
     val delimiters by viewModel.getDelimiterFlow().collectAsState("")
-    val shouldMatchCase by logViewerViewModel.isCaseSensitive.collectAsState(false)
 
     val workingFileSet by workingFileSetEditorViewModel.workingFileSet.collectAsState(WorkingFileSetEmpty)
     logViewerViewModel.setConcatenatedFiles(workingFileSet.files.map { File(it.filePath) })
@@ -119,51 +117,6 @@ fun LogViewerRoot(
                 verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
             )
             {
-
-                // logcat filter input
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.small,
-                    border = ButtonDefaults.outlinedBorder,
-                )
-                {
-                    Row(
-                        modifier = Modifier.padding(Dimens.mttPadding),
-                        verticalAlignment = Alignment.CenterVertically,
-                    )
-                    {
-
-                        // user input for entering the logcat filter string
-                        TextField(
-                            value = logcatFilterString,
-                            onValueChange = { newValue -> logViewerViewModel.setLogcatFilterString(newValue) },
-                            modifier = Modifier.weight(1f).padding(end = Dimens.mttPadding),
-                            colors = TextFieldDefaults.textFieldColors(
-                                textColor = themeColors.onBackground,
-                            ),
-                        )
-
-                        // toggle button for enabling/disabling case-sensitive matching in the logcat filter
-                        ToggleButton(
-                            modifier = Modifier.padding(end = Dimens.mttPadding),
-                            onClick = { logViewerViewModel.setCaseSensitive(!logViewerViewModel.isCaseSensitive.value) },
-                            isToggled = shouldMatchCase,
-                            isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                            isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                            content = { contentColor -> IconMatchCase(contentColor) },
-                        )
-
-                        // toggle button for enabling/disabling word wrapping in the log viewer
-                        ToggleButton(
-                            modifier = Modifier.padding(end = Dimens.mttPadding),
-                            onClick = { viewModel.toggleWordWrap() },
-                            isToggled = shouldWrapText,
-                            isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
-                            isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
-                            content = { contentColor -> IconWrapText(contentColor) },
-                        )
-                    }
-                }
 
                 // region log viewer
 
@@ -219,7 +172,7 @@ fun LogViewerRoot(
                 }
                 else
                 {
-                    Modifier.width(Dimens.mttPadding*2+Dimens.mttSize)
+                    Modifier.width(Dimens.mttPadding*3+Dimens.mttSize)
                 }
             }
 
@@ -248,6 +201,18 @@ fun LogViewerRoot(
                     verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
                 )
                 {
+                    // toggle button for enabling/disabling word wrapping in the log viewer
+                    item()
+                    {
+                        ToggleButton(
+                            onClick = { viewModel.toggleWordWrap() },
+                            isToggled = shouldWrapText,
+                            isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
+                            isNotToggledColors = ButtonDefaults.buttonColors(themeColors.surface),
+                            content = { contentColor -> IconWrapText(contentColor) },
+                        )
+                    }
+
                     // reorderable list of working files
                     collapsableEditFilterSection(
                         themeColors = themeColors,

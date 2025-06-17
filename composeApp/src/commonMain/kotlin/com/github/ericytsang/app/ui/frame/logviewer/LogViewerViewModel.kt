@@ -50,50 +50,6 @@ class LogViewerViewModel(
 
     // endregion
 
-    // region logcat filter string
-
-    val logcatFilterString:StateFlow<String> get() = _logcatFilterString
-    private val _logcatFilterString = MutableStateFlow("")
-
-    fun setLogcatFilterString(filter:String)
-    {
-        _logcatFilterString.value = filter
-    }
-
-    sealed class ParsedLogcatFilter
-    {
-        data class Parsed(val node:Node):ParsedLogcatFilter()
-        data object Empty:ParsedLogcatFilter()
-        data object Error:ParsedLogcatFilter()
-    }
-
-    val activeFilterParsed:Flow<ParsedLogcatFilter> = _logcatFilterString
-        .mapLatest { filter ->
-            when
-            {
-                filter.isBlank() -> ParsedLogcatFilter.Empty
-                else -> runCatching { logcatFilterParser.parse(filter) }.fold(
-                    onSuccess = { ParsedLogcatFilter.Parsed(it) },
-                    onFailure = { ParsedLogcatFilter.Error },
-                )
-            }
-        }
-        .flowOn(dispatchers.io)
-
-    // endregion
-
-    // region case sensitivity
-
-    val isCaseSensitive:StateFlow<Boolean> get() = _isCaseSensitive
-    private val _isCaseSensitive = MutableStateFlow(false)
-
-    fun setCaseSensitive(isCaseSensitive:Boolean)
-    {
-        _isCaseSensitive.value = isCaseSensitive
-    }
-
-    // endregion
-
     // region get activated sidebar filters
 
     private val activeFilters:Flow<List<Node>> = filterRepository
@@ -155,32 +111,16 @@ class LogViewerViewModel(
     fun getLogLinesFlow():Flow<List<IndexedValue<String>>> =
         combine(
             fileLines,
-            activeFilterParsed,
-            isCaseSensitive,
             activeFilters,
             ::applyFilterToLogLines,
         ).flowOn(dispatchers.io)
 
     private fun applyFilterToLogLines(
         logLines:List<IndexedValue<String>>,
-        logcatFilter:ParsedLogcatFilter,
-        isCaseSensitive:Boolean,
         activeFilters:List<Node>,
     ):List<IndexedValue<String>> = logLines.filter { logLine ->
-        val isMatchWithMasterFilter = when (logcatFilter)
-        {
-            is ParsedLogcatFilter.Parsed -> logcatFilterEvaluator.isMatch(
-                caseSensitive = isCaseSensitive,
-                logLine = logLine.value,
-                logcatFilter = logcatFilter.node,
-            )
-            ParsedLogcatFilter.Empty -> true
-            ParsedLogcatFilter.Error -> false
-        }
-
-        isMatchWithMasterFilter && activeFilters.all { filter ->
+        activeFilters.all { filter ->
             logcatFilterEvaluator.isMatch(
-                caseSensitive = false,
                 logLine = logLine.value,
                 logcatFilter = filter,
             )
