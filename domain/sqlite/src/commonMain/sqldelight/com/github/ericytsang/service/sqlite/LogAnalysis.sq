@@ -166,7 +166,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?);
 
 selectAllFiltersForConfig:
 SELECT * FROM FilterEntity
-WHERE config_id = ? AND is_exclude_filter = ?
+WHERE config_id = ?
 ORDER BY order_index DESC;
 
 selectActiveFiltersForConfig:

@@ -7,10 +7,14 @@ import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.FilterRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
+import com.github.ericytsang.kotlin.shareIn
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.seconds
 
 interface FilterSetViewModel
 {
@@ -19,31 +23,35 @@ interface FilterSetViewModel
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class FilterTypeFilterSetViewModel(
-    private val filterType:FilterType,
+class FilterTypeFilterSetViewModelFactory(
     private val configurationId:ConfigurationId,
     private val filterRepo:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
     kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
-):FilterSetViewModel,
-    KotlinDependencyProvider by kotlinDependencyProvider
+):KotlinDependencyProvider by kotlinDependencyProvider
 {
-    override val filters:Flow<List<FilterViewModel>> = filterRepo.selectFiltersForConfig(
-        configurationId = configurationId,
-        filterType = filterType,
-    ).mapLatest { rows ->
-        rows.map { row ->
-            FilterViewModelImpl(
-                filterId = row.id,
-                initialFilterString = row.filterString,
-                initialIsCaseSensitive = row.isCaseSensitive,
-                initialIsEnabled = row.isActive,
-                initialFilterInterpretationMode = row.filterInterpretationMode,
-                onRequestDelete = { filterId -> applicationScope.launch { filterRepo.delete(row.id) } },
-            )
+    private val allFilters:Flow<Map<FilterType,List<FilterViewModel>>> = filterRepo
+        .selectFiltersForConfig(configurationId = configurationId)
+        .mapLatest { rows -> rows.groupBy { it.filterType } }
+        .mapLatest { groups ->
+            groups.mapValues { mapEntry ->
+                val rows = mapEntry.value
+                rows.map { row ->
+                    FilterViewModelImpl(
+                        filterId = row.id,
+                        initialFilterString = row.filterString,
+                        initialIsCaseSensitive = row.isCaseSensitive,
+                        initialIsEnabled = row.isActive,
+                        initialFilterInterpretationMode = row.filterInterpretationMode,
+                        onRequestDelete = { filterId -> applicationScope.launch { filterRepo.delete(row.id) } },
+                    )
+                }
+            }
         }
-    }
+        .shareIn(applicationScope, SharingStarted.WhileSubscribed(5.seconds), replay = 1)
 
-    override fun addFilter()
+    private fun addFilter(
+        filterType:FilterType,
+    )
     {
         applicationScope.launch(dispatchers.io)
         {
@@ -56,6 +64,16 @@ class FilterTypeFilterSetViewModel(
                 isActive = true,
             )
         }
+    }
+
+    fun create(
+        filterType:FilterType,
+    ):FilterSetViewModel = object:FilterSetViewModel
+    {
+        override val filters:Flow<List<FilterViewModel>> = allFilters
+            .mapLatest { map -> map[filterType] ?: emptyList() }
+
+        override fun addFilter() = addFilter(filterType)
     }
 }
 

@@ -7,7 +7,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
@@ -50,13 +53,50 @@ fun <T> Flow<T>.launchIn(scope: ImmutableCoroutineScope): Job = scope.launch {
     collect() // tail-call
 }
 
-class ImmutableCoroutineScope(
-    private val mutableCoroutineScope: CoroutineScope
-)
+sealed class ImmutableCoroutineScope
 {
-    fun launch(
+    abstract fun launch(
         context: CoroutineContext = EmptyCoroutineContext,
         start: CoroutineStart = CoroutineStart.DEFAULT,
+        block: suspend ImmutableCoroutineScope.() -> Unit,
+    ): Job
+
+    abstract fun <T> async(
+        context: CoroutineContext = EmptyCoroutineContext,
+        start: CoroutineStart = CoroutineStart.DEFAULT,
+        block: suspend ImmutableCoroutineScope.() -> T,
+    ): kotlinx.coroutines.Deferred<T>
+
+    abstract val isActive:Boolean
+
+    companion object
+    {
+        fun CoroutineScope.asImmutableCoroutineScope(): ImmutableCoroutineScope = ImmutableCoroutineScopeImpl(this)
+    }
+}
+
+fun <T> Flow<T>.shareIn(
+    scope: ImmutableCoroutineScope,
+    started: SharingStarted,
+    replay: Int = 0
+): SharedFlow<T> = shareIn(
+    scope = scope.getMutableScope(),
+    started = started,
+    replay = replay,
+)
+
+private fun ImmutableCoroutineScope.getMutableScope():CoroutineScope = when (this)
+{
+    is ImmutableCoroutineScopeImpl -> mutableCoroutineScope
+}
+
+private class ImmutableCoroutineScopeImpl(
+    val mutableCoroutineScope: CoroutineScope
+):ImmutableCoroutineScope()
+{
+    override fun launch(
+        context: CoroutineContext,
+        start: CoroutineStart,
         block: suspend ImmutableCoroutineScope.() -> Unit,
     ) = mutableCoroutineScope.launch(
         context = context,
@@ -64,9 +104,9 @@ class ImmutableCoroutineScope(
         block = { block() },
     )
 
-    fun <T> async(
-        context: CoroutineContext = EmptyCoroutineContext,
-        start: CoroutineStart = CoroutineStart.DEFAULT,
+    override fun <T> async(
+        context: CoroutineContext,
+        start: CoroutineStart,
         block: suspend ImmutableCoroutineScope.() -> T,
     ) = mutableCoroutineScope.async(
         context = context,
@@ -74,10 +114,5 @@ class ImmutableCoroutineScope(
         block = { block() },
     )
 
-    val isActive get() = mutableCoroutineScope.isActive
-
-    companion object
-    {
-        fun CoroutineScope.asImmutableCoroutineScope(): ImmutableCoroutineScope = ImmutableCoroutineScope(this)
-    }
+    override val isActive get() = mutableCoroutineScope.isActive
 }

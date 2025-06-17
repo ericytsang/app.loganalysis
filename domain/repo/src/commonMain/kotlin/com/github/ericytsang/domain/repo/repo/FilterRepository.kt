@@ -38,7 +38,6 @@ interface FilterRepository
 
     fun onFiltersForConfigChanged(
         configurationId:ConfigurationId,
-        filterType:FilterType,
     ):Flow<Unit>
 
     fun selectFilterById(
@@ -51,7 +50,6 @@ interface FilterRepository
 
     fun selectFiltersForConfig(
         configurationId:ConfigurationId,
-        filterType:FilterType,
     ):Flow<List<FilterModel>>
 
     suspend fun moveFilter(
@@ -161,12 +159,8 @@ internal class FilterRepositoryImpl(
 
     override fun onFiltersForConfigChanged(
         configurationId:ConfigurationId,
-        filterType:FilterType,
     ):Flow<Unit> = queries
-        .selectAllFiltersForConfig(
-            config_id = configurationId.id,
-            is_exclude_filter = filterType.toSqLiteLong(),
-        )
+        .selectAllFiltersForConfig(config_id = configurationId.id)
         .asFlow()
         .map { }
 
@@ -189,11 +183,9 @@ internal class FilterRepositoryImpl(
 
     override fun selectFiltersForConfig(
         configurationId:ConfigurationId,
-        filterType:FilterType,
     ):Flow<List<FilterModel>> = queries
         .selectAllFiltersForConfig(
             config_id = configurationId.id,
-            is_exclude_filter = filterType.toSqLiteLong(),
         )
         .asFlow()
         .conflate()
