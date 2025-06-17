@@ -229,7 +229,6 @@ fun LogViewerRoot(
                 border = ButtonDefaults.outlinedBorder,
             )
             {
-                var filterTypeOfItemCurrentlyBeingDragged by remember { mutableStateOf<FilterType?>(null) }
                 val stateForLazyListOfIncludeFilters = rememberLazyListState()
                 val reorderableLazyListStateForLazyListOfIncludeFilters = rememberReorderableLazyListState(stateForLazyListOfIncludeFilters)
                 { from, to ->
@@ -264,11 +263,6 @@ fun LogViewerRoot(
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = { },
                         filterType = FilterType.EXCLUDE,
-                        onDragStarted = { filterType ->
-                            println("filterTypeOfItemCurrentlyBeingDragged = $filterType")
-                            filterTypeOfItemCurrentlyBeingDragged = filterType
-                        },
-                        onDragStopped = { filterTypeOfItemCurrentlyBeingDragged = null },
                     )
 
                     // exclude filters
@@ -286,11 +280,6 @@ fun LogViewerRoot(
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = excludeFilterSetViewModel::addFilter,
                         filterType = FilterType.EXCLUDE,
-                        onDragStarted = { filterType ->
-                            println("filterTypeOfItemCurrentlyBeingDragged = $filterType")
-                            filterTypeOfItemCurrentlyBeingDragged = filterType
-                        },
-                        onDragStopped = { filterTypeOfItemCurrentlyBeingDragged = null },
                     )
 
                     // include filters
@@ -308,11 +297,6 @@ fun LogViewerRoot(
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = includeFilterSetViewModel::addFilter,
                         filterType = FilterType.INCLUDE,
-                        onDragStarted = { filterType ->
-                            println("filterTypeOfItemCurrentlyBeingDragged = $filterType")
-                            filterTypeOfItemCurrentlyBeingDragged = filterType
-                        },
-                        onDragStopped = { filterTypeOfItemCurrentlyBeingDragged = null },
                     )
                 }
             }

@@ -125,16 +125,6 @@ fun LazyListScope.collapsableEditFilterSection(
      * type of the filter that is being edited.
      */
     filterType:FilterType,
-
-    /**
-     * called when the user starts dragging a filter item.
-     */
-    onDragStarted:(FilterType) -> Unit,
-
-    /**
-     * called when the user stops dragging a filter item.
-     */
-    onDragStopped:() -> Unit,
 )
 {
     // header for the section
@@ -207,8 +197,6 @@ fun LazyListScope.collapsableEditFilterSection(
             filterViewModels = filterItemViewModels,
             expandedItem = expandedFilterId,
             onTextFieldGotFocus = requestFilterExpansion,
-            onDragStarted = { filterType -> onDragStarted(filterType) },
-            onDragStopped = { onDragStopped() },
         )
     }
 }
@@ -258,16 +246,6 @@ fun LazyListScope.filterBuilderPanel(
      * this is intended to be used by the host to update [expandedItem].
      */
     onTextFieldGotFocus:(FilterId)->Unit,
-
-    /**
-     * called when the user starts dragging a filter item.
-     */
-    onDragStarted:(FilterType) -> Unit,
-
-    /**
-     * called when the user stops dragging a filter item.
-     */
-    onDragStopped:() -> Unit,
 )
 {
     for (filterViewModel in filterViewModels)
@@ -295,8 +273,6 @@ fun LazyListScope.filterBuilderPanel(
                             themeColors = themeColors,
                             filterViewModel = filterViewModel,
                             onTextFieldGotFocus = onTextFieldGotFocus,
-                            onDragStarted = { filterType -> onDragStarted(filterType) },
-                            onDragStopped = { onDragStopped() },
                         )
 
                         // show the additional settings for this filter if it is expanded ([expandedItem])
@@ -322,8 +298,6 @@ private fun ReorderableCollectionItemScope.filterHeader(
     themeColors:Colors,
     filterViewModel:FilterViewModel,
     onTextFieldGotFocus:(FilterId)->Unit,
-    onDragStarted:(FilterType) -> Unit,
-    onDragStopped:() -> Unit,
 )
 {
     val filterType = filterViewModel.filterTypeFlow.collectAsState(FilterType.INCLUDE).value
@@ -333,10 +307,7 @@ private fun ReorderableCollectionItemScope.filterHeader(
 
         // drag-and-drop handle
         IconButton(
-            modifier = Modifier.draggableHandle(
-                onDragStarted = { onDragStarted(filterType) },
-                onDragStopped = { onDragStopped() },
-            ),
+            modifier = Modifier.draggableHandle(),
             onClick = {},
         )
         {
