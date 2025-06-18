@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.flatMap
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -103,12 +104,41 @@ class LogViewerViewModel(
 
     // region log lines
 
-    private val fileLines:Flow<List<IndexedValue<String>>> = concatenatedFiles
-        .mapLatest { files -> files.flatMap { file -> file.readLines() } }
-        .mapLatest { lines -> lines.withIndex().toList() }
+    private val fileLines:Flow<List<FileLine>> = concatenatedFiles
+        .map { files ->
+            files
+                .map { file -> FileLines(file,file.readLines().withIndex().toList()) }
+                .flatMap { fileLines ->
+                    fileLines.lines.map { line ->
+                        val key = FileLineKey(
+                            file = fileLines.file,
+                            lineNumberInFile = line.index + 1,
+                        )
+                        FileLine(
+                            key = key,
+                            line = line.value,
+                        )
+                    }
+                }
+        }
         .conflate()
 
-    fun getLogLinesFlow():Flow<List<IndexedValue<String>>> =
+    data class FileLines(
+        val file:File,
+        val lines:List<IndexedValue<String>>,
+    )
+
+    data class FileLine(
+        val key:FileLineKey,
+        val line:String,
+    )
+
+    data class FileLineKey(
+        val file:File,
+        val lineNumberInFile:Int,
+    )
+
+    fun getLogLinesFlow():Flow<List<FileLine>> =
         combine(
             fileLines,
             activeFilters,
@@ -116,12 +146,12 @@ class LogViewerViewModel(
         ).flowOn(dispatchers.io)
 
     private fun applyFilterToLogLines(
-        logLines:List<IndexedValue<String>>,
+        logLines:List<FileLine>,
         activeFilters:List<Node>,
-    ):List<IndexedValue<String>> = logLines.filter { logLine ->
+    ):List<FileLine> = logLines.filter { logLine ->
         activeFilters.all { filter ->
             logcatFilterEvaluator.isMatch(
-                logLine = logLine.value,
+                logLine = logLine.line,
                 logcatFilter = filter,
             )
         }

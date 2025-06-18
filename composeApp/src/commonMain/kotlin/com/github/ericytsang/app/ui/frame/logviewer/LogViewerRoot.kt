@@ -19,8 +19,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -41,7 +39,6 @@ import com.github.ericytsang.app.ui.util.ChildWindowManager
 import com.github.ericytsang.app.ui.util.asset.IconEditFileList
 import com.github.ericytsang.app.ui.util.asset.IconExcludeFilter
 import com.github.ericytsang.app.ui.util.asset.IconIncludeFilter
-import com.github.ericytsang.app.ui.util.asset.IconMatchCase
 import com.github.ericytsang.app.ui.util.asset.IconWrapText
 import com.github.ericytsang.app.ui.util.component.ColorCodedLogLine
 import com.github.ericytsang.app.ui.util.component.CommonWindowHeader
@@ -54,9 +51,7 @@ import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.map
 import sh.calvin.reorderable.rememberReorderableLazyListState
-import java.io.File
 
 @Composable
 fun LogViewerRoot(
@@ -139,14 +134,14 @@ fun LogViewerRoot(
                     )
                     {
                         items(
-                            key = { index -> logLines[index].index },
+                            key = { index -> logLines[index].key },
                             count = logLines.size,
                         )
                         { index ->
                             Row(modifier = Modifier.animateItem())
                             {
                                 ColorCodedLogLine(
-                                    text = logLines[index].value,
+                                    text = logLines[index].line,
                                     modifier = Modifier.fillMaxWidth(),
                                     delimiters = delimiters,
                                     themeForColorCoding = theme,
