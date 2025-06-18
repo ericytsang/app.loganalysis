@@ -262,7 +262,7 @@ internal class FilterRepositoryImpl(
         orderIndexRange:ClosedRange<OrderIndex>,
         configurationId:ConfigurationId,
         filterType:FilterType,
-        pageSize:Int = 2,
+        pageSize:Int = 10,
     )
     {
         // select the next pageSize filters that are in the range
@@ -296,7 +296,7 @@ internal class FilterRepositoryImpl(
         orderIndexRange:ClosedRange<OrderIndex>,
         configurationId:ConfigurationId,
         filterType:FilterType,
-        pageSize:Int = 2,
+        pageSize:Int = 10,
     )
     {
         // select the next pageSize filters that are in the range
