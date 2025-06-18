@@ -20,8 +20,7 @@ CREATE TABLE LogFileEntity (
   -- the order in which the log files are displayed and concatenated in the UI
   order_index INTEGER NOT NULL,
   FOREIGN KEY (config_id) REFERENCES ProjectEntity(id) ON DELETE CASCADE,
-  UNIQUE (config_id, file_path),
-  CHECK (order_index >= 0)
+  UNIQUE (config_id, file_path)
 );
 
 -- filter used to show or hide log lines that match the filter string
@@ -160,6 +159,27 @@ deleteLogFile:
 DELETE FROM LogFileEntity
 WHERE config_id = ? AND file_path = ?;
 
+-- region log file order manipulation
+
+updateLogFileOrderIndex:
+UPDATE LogFileEntity
+SET order_index = ?
+WHERE config_id = ? AND file_path = ?;
+
+updateLogFileOrderIndexBulkIncrement:
+UPDATE LogFileEntity
+SET order_index = order_index + 1
+WHERE order_index >= ? AND order_index <= ? AND config_id = ?;
+
+updateLogFileOrderIndexBulkDecrement:
+UPDATE LogFileEntity
+SET order_index = order_index - 1
+WHERE order_index >= ? AND order_index <= ? AND config_id = ?;
+
+selectLogFileByPath:
+SELECT * FROM LogFileEntity
+WHERE config_id = ? AND file_path = ?;
+
 -- endregion
 
 -- region filters
@@ -204,16 +224,6 @@ SELECT * FROM FilterEntity
 WHERE order_index >= ? AND config_id = ? AND is_exclude_filter = ?
 ORDER BY order_index ASC
 LIMIT ?;
-
-updateOrderIndexBulkIncrement:
-UPDATE FilterEntity
-SET order_index = order_index + 1
-WHERE order_index >= ? AND order_index <= ? AND config_id = ? AND is_exclude_filter = ?;
-
-updateOrderIndexBulkDecrement:
-UPDATE FilterEntity
-SET order_index = order_index - 1
-WHERE order_index >= ? AND order_index <= ? AND config_id = ? AND is_exclude_filter = ?;
 
 updateOrderIndex:
 UPDATE FilterEntity

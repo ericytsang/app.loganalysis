@@ -100,15 +100,33 @@ internal class WorkingFileSetRepositoryImpl(
         database.transaction()
         {
             // get the files to move from the database
+            val fromFile = queries.selectLogFileByPath(configurationId.id, from.filePath).executeAsOne()
+            val toFile = queries.selectLogFileByPath(configurationId.id, to.filePath).executeAsOne()
 
             // move the "from" file being moved to a temporary order index
+            queries.updateLogFileOrderIndex(Long.MIN_VALUE, configurationId.id, from.filePath)
 
             // decide if we need to increment or decrement the order index of other items,
-            // which depends on whether the item being is being moved to a higher or lower order index
+            // which depends on whether the item is being moved to a higher or lower order index
+            val shouldIncrementOrderIndexOfOthers = fromFile.order_index > toFile.order_index
 
             // increment or decrement the order index of other items
+            if (shouldIncrementOrderIndexOfOthers) {
+                queries.updateLogFileOrderIndexBulkIncrement(
+                    toFile.order_index,
+                    fromFile.order_index,
+                    configurationId.id
+                )
+            } else {
+                queries.updateLogFileOrderIndexBulkDecrement(
+                    fromFile.order_index,
+                    toFile.order_index,
+                    configurationId.id
+                )
+            }
 
-            // update the items being moved to move it to the destination
+            // update the item being moved to move it to the destination
+            queries.updateLogFileOrderIndex(toFile.order_index, configurationId.id, from.filePath)
         }
     }
 
