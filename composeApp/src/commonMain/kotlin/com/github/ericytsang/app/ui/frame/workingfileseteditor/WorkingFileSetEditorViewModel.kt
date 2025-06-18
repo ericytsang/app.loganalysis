@@ -1,8 +1,6 @@
 package com.github.ericytsang.app.ui.frame.workingfileseteditor
 
 import com.github.ericytsang.domain.objects.ConfigurationId
-import com.github.ericytsang.domain.objects.FilePath
-import com.github.ericytsang.domain.objects.FilePath.Companion.toFilePath
 import com.github.ericytsang.domain.objects.WorkingFileSet
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.WorkingFileSetRepository
@@ -16,8 +14,6 @@ interface WorkingFileSetEditorViewModel
     val configurationId:ConfigurationId
     val workingFileSet:Flow<WorkingFileSet>
     fun addFiles(newFiles:List<File>)
-    fun moveFilesToPosition(files:List<File>,position:Int)
-    fun removeFile(file:File)
 
     companion object
     {
@@ -48,22 +44,6 @@ private class WorkingFileSetEditorViewModelImpl(
         applicationScope.launch(dispatchers.io)
         {
             workingFileSetRepository.addFiles(configurationId,newFiles)
-        }
-    }
-
-    override fun moveFilesToPosition(files:List<File>,position:Int)
-    {
-        applicationScope.launch(dispatchers.io)
-        {
-            workingFileSetRepository.moveFilesToPosition(configurationId,files,position)
-        }
-    }
-
-    override fun removeFile(file:File)
-    {
-        applicationScope.launch(dispatchers.io)
-        {
-            workingFileSetRepository.removeFile(configurationId,file.toFilePath())
         }
     }
 }
