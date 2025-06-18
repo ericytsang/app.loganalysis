@@ -199,7 +199,7 @@ fun LazyListScope.collapsableEditWorkingFilesSection(
         // show each file path as a reorderable item
         for (itemViewModel in itemViewModels)
         {
-            val itemKey = ReorderableSidebarItemKey.Other("$lazyColumnItemKeyPrefix-item-${itemViewModel.filePath.filePath}")
+            val itemKey = ReorderableSidebarItemKey.LogFileItem(itemViewModel.filePath)
             item(key = itemKey)
             {
                 ReorderableItem(

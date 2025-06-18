@@ -23,7 +23,7 @@ interface WorkingFileSetRepository
 
     fun getWorkingFileSetFlow(configurationId:ConfigurationId):Flow<WorkingFileSet>
     suspend fun addFiles(configurationId:ConfigurationId,newFiles:List<File>)
-    suspend fun moveFilesToPosition(configurationId:ConfigurationId,files:List<File>,position:Int)
+    suspend fun moveFile(configurationId:ConfigurationId,from:FilePath,to:FilePath)
     suspend fun removeFile(configurationId:ConfigurationId,filePath:FilePath)
 }
 
@@ -91,13 +91,25 @@ internal class WorkingFileSetRepositoryImpl(
         }
     }
 
-    override suspend fun moveFilesToPosition(
+    override suspend fun moveFile(
         configurationId:ConfigurationId,
-        files:List<File>,
-        position:Int,
-    )
+        from:FilePath,
+        to:FilePath,
+    ) = withContext<Unit>(dispatchers.io)
     {
-        TODO("Not yet implemented")
+        database.transaction()
+        {
+            // get the files to move from the database
+
+            // move the "from" file being moved to a temporary order index
+
+            // decide if we need to increment or decrement the order index of other items,
+            // which depends on whether the item being is being moved to a higher or lower order index
+
+            // increment or decrement the order index of other items
+
+            // update the items being moved to move it to the destination
+        }
     }
 
     override suspend fun removeFile(

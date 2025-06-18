@@ -1,11 +1,13 @@
 package com.github.ericytsang.app.ui.frame.logviewer
 
 import com.github.ericytsang.domain.objects.ConfigurationId
+import com.github.ericytsang.domain.objects.FilePath
 import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterInterpretationMode
 import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.FilterRepository
+import com.github.ericytsang.domain.repo.repo.WorkingFileSetRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import com.github.ericytsang.kotlin.shareIn
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -90,11 +92,15 @@ interface ReorderSidebarItemViewModel
     {
         fun create(
             configurationId:ConfigurationId,
-        ):ReorderSidebarItemViewModel = ReorderSidebarItemViewModelImpl()
+        ):ReorderSidebarItemViewModel = ReorderSidebarItemViewModelImpl(
+            configurationId = configurationId,
+        )
     }
 }
 
 class ReorderSidebarItemViewModelImpl(
+    private val configurationId:ConfigurationId,
+    private val workingFileSetRepo:WorkingFileSetRepository = RepositoryDependencyProvider.instance.workingFileSetRepository,
     private val filterRepo:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
     private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
 ):ReorderSidebarItemViewModel,KotlinDependencyProvider by kotlinDependencyProvider
@@ -114,12 +120,31 @@ class ReorderSidebarItemViewModelImpl(
                 // non reorderable item, do nothing
                 is ReorderableSidebarItemKey.Other -> return@withContext
 
+                // not allowed to reorder with log file item
+                is ReorderableSidebarItemKey.LogFileItem -> return@withContext
+
                 // move filter to the target position
                 is ReorderableSidebarItemKey.FilterItem -> filterRepo.moveFilter(from.filterId,to.filterId)
 
                 // move filter to the top of the section
                 is ReorderableSidebarItemKey.NewFilterButton ->
                     filterRepo.moveFilterToTopOfSection(from.filterId, to.filterType)
+            }
+
+            is ReorderableSidebarItemKey.LogFileItem -> when (to)
+            {
+                // non reorderable item, do nothing
+                is ReorderableSidebarItemKey.Other -> return@withContext
+
+                // not allowed to reorder with filter item
+                is ReorderableSidebarItemKey.FilterItem -> return@withContext
+
+                // not allowed to reorder with "new filter" button
+                is ReorderableSidebarItemKey.NewFilterButton -> return@withContext
+
+                // move log file to the target position
+                is ReorderableSidebarItemKey.LogFileItem ->
+                    workingFileSetRepo.moveFile(configurationId,from.filePath,to.filePath)
             }
         }
     }
@@ -138,4 +163,7 @@ sealed interface ReorderableSidebarItemKey
 
     /** key for reorderable filter item */
     data class FilterItem(val filterId:FilterId):ReorderableSidebarItemKey
+
+    /** key for reorderable log file item */
+    data class LogFileItem(val filePath:FilePath):ReorderableSidebarItemKey
 }
