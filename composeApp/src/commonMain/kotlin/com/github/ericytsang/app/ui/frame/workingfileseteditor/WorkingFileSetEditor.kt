@@ -50,7 +50,7 @@ fun WorkingFileSetEditor(
             {
                 items(count = workingFileSet.files.size)
                 { index ->
-                    Text(text = workingFileSet.files[index].filePath)
+                    Text(text = workingFileSet.files[index].filePath.filePath)
                 }
             }
         }

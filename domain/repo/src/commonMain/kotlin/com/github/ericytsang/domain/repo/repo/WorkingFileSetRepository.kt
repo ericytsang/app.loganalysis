@@ -3,6 +3,7 @@ package com.github.ericytsang.domain.repo.repo
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.github.ericytsang.domain.objects.ConfigurationId
+import com.github.ericytsang.domain.objects.FilePath
 import com.github.ericytsang.domain.objects.LogFile
 import com.github.ericytsang.domain.objects.OrderIndex
 import com.github.ericytsang.domain.objects.WorkingFileSet
@@ -23,7 +24,7 @@ interface WorkingFileSetRepository
     fun getWorkingFileSetFlow(configurationId:ConfigurationId):Flow<WorkingFileSet>
     suspend fun addFiles(configurationId:ConfigurationId,newFiles:List<File>)
     suspend fun moveFilesToPosition(configurationId:ConfigurationId,files:List<File>,position:Int)
-    suspend fun removeFiles(configurationId:ConfigurationId,files:List<File>)
+    suspend fun removeFile(configurationId:ConfigurationId,filePath:FilePath)
 }
 
 internal class WorkingFileSetRepositoryImpl(
@@ -99,12 +100,17 @@ internal class WorkingFileSetRepositoryImpl(
         TODO("Not yet implemented")
     }
 
-    override suspend fun removeFiles(
+    override suspend fun removeFile(
         configurationId:ConfigurationId,
-        files:List<File>,
-    )
+        filePath:FilePath,
+    ) = withContext<Unit>(dispatchers.io)
     {
-        TODO("Not yet implemented")
+        database.transaction {
+            queries.deleteLogFile(
+                config_id = configurationId.id,
+                file_path = filePath.filePath,
+            )
+        }
     }
 
     companion object
@@ -112,7 +118,7 @@ internal class WorkingFileSetRepositoryImpl(
         private fun parseLogFileToDomainObject(
             logFile:LogFileEntity,
         ):LogFile = LogFile(
-            filePath = logFile.file_path,
+            filePath = FilePath(logFile.file_path),
             orderIndex = OrderIndex(logFile.order_index),
         )
     }

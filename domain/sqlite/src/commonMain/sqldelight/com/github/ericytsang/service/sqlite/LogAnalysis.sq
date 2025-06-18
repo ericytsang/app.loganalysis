@@ -156,6 +156,10 @@ SELECT * FROM LogFileEntity
 WHERE config_id = ?
 ORDER BY order_index;
 
+deleteLogFile:
+DELETE FROM LogFileEntity
+WHERE config_id = ? AND file_path = ?;
+
 -- endregion
 
 -- region filters

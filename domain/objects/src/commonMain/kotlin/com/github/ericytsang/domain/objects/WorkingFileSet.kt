@@ -1,5 +1,6 @@
 package com.github.ericytsang.domain.objects
 
+import com.github.ericytsang.domain.objects.FilePath.Companion.toFile
 import java.io.File
 
 sealed class WorkingFileSet
@@ -19,12 +20,23 @@ data object WorkingFileSetEmpty:WorkingFileSet()
     override val files: List<LogFile> get() = emptyList()
 }
 
-data class LogFile(
+data class FilePath(
     val filePath: String,
+)
+{
+    companion object
+    {
+        fun File.toFilePath(): FilePath = FilePath(absolutePath)
+        fun FilePath.toFile(): File = File(filePath)
+    }
+}
+
+data class LogFile(
+    val filePath: FilePath,
     val orderIndex: OrderIndex,
 )
 {
-    val file: File get() = File(filePath)
+    val file: File get() = filePath.toFile()
 }
 
 data class ConfigurationId(

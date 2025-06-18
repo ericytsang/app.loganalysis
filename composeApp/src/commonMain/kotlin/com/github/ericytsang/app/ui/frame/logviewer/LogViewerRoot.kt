@@ -34,7 +34,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.LogFileListViewModel
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
+import com.github.ericytsang.app.ui.frame.workingfileseteditor.collapsableEditWorkingFilesSection
 import com.github.ericytsang.app.ui.util.ChildWindowManager
 import com.github.ericytsang.app.ui.util.asset.IconEditFileList
 import com.github.ericytsang.app.ui.util.asset.IconExcludeFilter
@@ -46,11 +48,13 @@ import com.github.ericytsang.app.ui.util.component.CommonWindowHeader
 import com.github.ericytsang.app.ui.util.component.ToggleButton
 import com.github.ericytsang.app.ui.util.openNewProjectWizard
 import com.github.ericytsang.app.ui.util.openProjectBrowser
+import com.github.ericytsang.domain.objects.FilePath.Companion.toFile
 import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.map
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.io.File
 
@@ -59,6 +63,7 @@ fun LogViewerRoot(
     window:ComposeWindow,
     themeColors:Colors,
     rootChildWindowManager:ChildWindowManager,
+    logFileListViewModelFactory:()->LogFileListViewModel,
     filterSetViewModelFactory:(FilterType)->FilterSetViewModel,
     workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel,
     logViewerViewModelFactory:()->LogViewerViewModel,
@@ -68,6 +73,7 @@ fun LogViewerRoot(
 {
     val uiScope = rememberCoroutineScope()
     val viewModel = remember { viewModelFactory(uiScope) }
+    val logFileListViewModel = remember { logFileListViewModelFactory() }
     val includeFilterSetViewModel = remember { filterSetViewModelFactory(FilterType.INCLUDE) }
     val excludeFilterSetViewModel = remember { filterSetViewModelFactory(FilterType.EXCLUDE) }
     val logViewerViewModel = remember { logViewerViewModelFactory() }
@@ -79,7 +85,7 @@ fun LogViewerRoot(
     val delimiters by viewModel.getDelimiterFlow().collectAsState("")
 
     val workingFileSet by workingFileSetEditorViewModel.workingFileSet.collectAsState(WorkingFileSetEmpty)
-    logViewerViewModel.setConcatenatedFiles(workingFileSet.files.map { File(it.filePath) })
+    logViewerViewModel.setConcatenatedFiles(workingFileSet.files.map { it.filePath.toFile() })
 
     val shouldWrapText by viewModel.getWordWrapFlow().collectAsState(false)
 
@@ -191,6 +197,7 @@ fun LogViewerRoot(
                     val toKey = to.key as? ReorderableSidebarItemKey ?: error("unexpected to key type: ${to.key}")
                     reorderSidebarItemViewModel.moveItem(fromKey,toKey)
                 }
+                val workingFileItemViewModels by logFileListViewModel.itemViewModels.collectAsState(emptyList())
                 val excludeFilterItemViewModels by excludeFilterSetViewModel.filters.collectAsState(emptyList())
                 val includeFilterItemViewModels by includeFilterSetViewModel.filters.collectAsState(emptyList())
                 LazyColumn(
@@ -214,20 +221,17 @@ fun LogViewerRoot(
                     }
 
                     // reorderable list of working files
-                    collapsableEditFilterSection(
+                    collapsableEditWorkingFilesSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = "showEditFileListPanel",
                         reorderableLazyListState = reorderableLazyListStateForLazyListOfIncludeFilters,
                         sectionIcon = { contentColor -> IconEditFileList(contentColor) },
-                        filterItemViewModels = emptyList(),
+                        itemViewModels = workingFileItemViewModels,
                         sectionTitle = "Edit file list",
                         shouldShowSectionHeader = isSidebarExpanded,
                         isSectionExpanded = showEditFileListPanel,
                         requestToggleSectionExpanded = { showEditFileListPanel = !showEditFileListPanel },
-                        expandedFilterId = filterIdOfSelectedFilterEditorPanel,
-                        requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
-                        requestAddNewFilter = { },
-                        filterType = FilterType.EXCLUDE,
+                        requestAddNewWorkingFile = { },
                     )
 
                     // exclude filters

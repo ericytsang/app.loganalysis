@@ -1,18 +1,83 @@
 package com.github.ericytsang.app.ui.frame.workingfileseteditor
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Colors
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.OutlinedButton
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import com.github.ericytsang.app.model.Dimens
+import com.github.ericytsang.app.ui.frame.logviewer.ReorderableSidebarItemKey
+import com.github.ericytsang.domain.objects.ConfigurationId
+import com.github.ericytsang.domain.objects.FilePath
+import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
+import com.github.ericytsang.domain.repo.repo.WorkingFileSetRepository
+import com.github.ericytsang.kotlin.KotlinDependencyProvider
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.map
+import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
-import java.io.File
 
-interface WorkingFileViewModel
+interface LogFileViewModel
 {
-    val file:File
+    val filePath:FilePath
     fun requestDelete()
 }
+
+interface LogFileListViewModel
+{
+    val itemViewModels:Flow<List<LogFileViewModel>>
+}
+
+class LogFileListViewModelImpl(
+    private val configurationId:ConfigurationId,
+    private val workingFileSetRepository:WorkingFileSetRepository = RepositoryDependencyProvider.Companion.instance.workingFileSetRepository,
+    private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
+):LogFileListViewModel, KotlinDependencyProvider by kotlinDependencyProvider
+{
+    override val itemViewModels:Flow<List<LogFileViewModel>> = workingFileSetRepository
+        .getWorkingFileSetFlow(configurationId)
+        .map {
+            it.files.map { file ->
+                object : LogFileViewModel
+                {
+                    override val filePath = file.filePath
+                    override fun requestDelete()
+                    {
+                        applicationScope.launch(dispatchers.io)
+                        {
+                            workingFileSetRepository.removeFile(configurationId,file.filePath)
+                        }
+                    }
+                }
+            }
+        }
+        .conflate()
+}
+
 
 @ExperimentalMaterialApi
 fun LazyListScope.collapsableEditWorkingFilesSection(
@@ -66,7 +131,12 @@ fun LazyListScope.collapsableEditWorkingFilesSection(
      * list of filters to be displayed in the filter builder panel.
      * each filter is represented by a [com.github.ericytsang.app.ui.frame.logviewer.FilterViewModel].
      */
-    itemViewModels:List<WorkingFileViewModel>,
+    itemViewModels:List<LogFileViewModel>,
+
+    /**
+     * invoked when the user presses the button to add more files to this configuration.
+     */
+    requestAddNewWorkingFile:() -> Unit,
 )
 {
 
@@ -80,4 +150,103 @@ fun LazyListScope.collapsableEditWorkingFilesSection(
         shouldShowSectionHeader = shouldShowSectionHeader,
         requestToggleSectionExpanded = requestToggleSectionExpanded,
     )
+
+    // if the section is expanded, show the filter builder panel
+    if (isSectionExpanded)
+    {
+        // button to add a new filter
+        val itemKey = ReorderableSidebarItemKey.Other("$lazyColumnItemKeyPrefix-header-add_new_file_button")
+        item(key = itemKey)
+        {
+            Row(modifier = Modifier.animateItem().background(themeColors.background))
+            {
+                OutlinedButton(
+                    modifier = Modifier.fillMaxWidth().animateItem().padding(Dimens.mttPadding),
+                    onClick = requestAddNewWorkingFile,
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        backgroundColor = themeColors.surface,
+                        contentColor = themeColors.onSurface,
+                    ),
+                )
+                {
+                    Text("Add files")
+                }
+            }
+        }
+
+        // region show the filters that the user can edit
+
+        val filePaths = itemViewModels.map { it.filePath.filePath }
+        val commonPrefix = when (val firstFile = filePaths.firstOrNull())
+        {
+            null -> ""
+            else -> filePaths.fold(firstFile) { acc,path -> acc.commonPrefixWith(path) }
+        }
+
+        // show the common prefix in its own item
+        item(key = ReorderableSidebarItemKey.Other("$lazyColumnItemKeyPrefix-header-common_prefix"))
+        {
+            val secondaryTextColor = themeColors.onBackground.copy(alpha = ContentAlpha.medium)
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(SpanStyle(color = secondaryTextColor)) { append("$commonPrefix...") }
+                },
+                modifier = Modifier.fillMaxWidth().padding(Dimens.mttPadding),
+                color = themeColors.onBackground.copy(alpha = ContentAlpha.medium),
+            )
+        }
+
+        // show each file path as a reorderable item
+        for (itemViewModel in itemViewModels)
+        {
+            val itemKey = ReorderableSidebarItemKey.Other("$lazyColumnItemKeyPrefix-item-${itemViewModel.filePath.filePath}")
+            item(key = itemKey)
+            {
+                ReorderableItem(
+                    key = itemKey,
+                    state = reorderableLazyListState,
+                )
+                { isDragging ->
+
+                    // increase elevation during dragging
+                    val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
+
+                    Surface(elevation = elevation)
+                    {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().background(themeColors.background),
+                            horizontalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
+                        )
+                        {
+                            // drag-and-drop handle
+                            IconButton(
+                                modifier = Modifier.draggableHandle(),
+                                onClick = {},
+                            )
+                            {
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Drag to reorder",
+                                    tint = themeColors.onSurface,
+                                )
+                            }
+
+                            // file path text
+                            Text(
+                                modifier = Modifier.fillMaxWidth().padding(Dimens.mttPadding),
+                                // if the texts have a common prefix, then make the common prefix portion the secondary text color
+                                text = buildAnnotatedString {
+                                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append(itemViewModel.filePath.filePath.removePrefix(commonPrefix))
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // endregion
+    }
 }
