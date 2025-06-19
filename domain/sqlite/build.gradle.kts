@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.ksp)
