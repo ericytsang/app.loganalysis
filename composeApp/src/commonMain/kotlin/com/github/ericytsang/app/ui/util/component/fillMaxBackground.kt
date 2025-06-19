@@ -30,7 +30,7 @@ fun fillMaxBackground(
     MaterialTheme(colors = themeColors)
     {
         Column(
-            modifier = Modifier.Companion
+            modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colors.background),
             content = { content(themeColors) },

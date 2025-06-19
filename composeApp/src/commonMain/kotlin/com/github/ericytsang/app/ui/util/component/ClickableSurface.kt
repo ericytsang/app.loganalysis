@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ClickableSurface(
     onClick: () -> Unit,
-    modifier:Modifier = Modifier.Companion,
+    modifier:Modifier = Modifier,
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource? = null,
     elevation: ButtonElevation? = ButtonDefaults.elevation(),

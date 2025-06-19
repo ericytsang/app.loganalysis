@@ -19,7 +19,7 @@ fun ColorCodedLogLine(
     themeForColorCoding:Theme,
     delimiters:String,
     softWrap:Boolean,
-    modifier:Modifier = Modifier.Companion,
+    modifier:Modifier = Modifier,
 )
 {
     val logLineString = buildColorCodedLogLine(

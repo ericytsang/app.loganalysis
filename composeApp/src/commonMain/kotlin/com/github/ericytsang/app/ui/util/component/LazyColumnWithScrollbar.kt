@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun LazyColumnWithScrollbar(
-    modifier:Modifier = Modifier.Companion,
+    modifier:Modifier = Modifier,
     lazyListState:LazyListState = rememberLazyListState(),
     content:LazyListScope.()->Unit,
 )
@@ -27,7 +27,7 @@ fun LazyColumnWithScrollbar(
         )
 
         VerticalScrollbar(
-            modifier = Modifier.Companion.align(Alignment.Companion.CenterEnd),
+            modifier = Modifier.align(Alignment.CenterEnd),
             adapter = rememberScrollbarAdapter(lazyListState)
         )
     }
