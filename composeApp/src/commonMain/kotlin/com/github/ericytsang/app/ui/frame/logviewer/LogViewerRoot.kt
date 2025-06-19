@@ -3,7 +3,9 @@
 package com.github.ericytsang.app.ui.frame.logviewer
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -13,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Colors
@@ -121,27 +125,37 @@ fun LogViewerRoot(
                 border = ButtonDefaults.outlinedBorder,
             )
             {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                )
+                Box()
                 {
-                    items(
-                        key = { index -> logLines[index].key },
-                        count = logLines.size,
+                    val lazyListState = rememberLazyListState()
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        state = lazyListState,
                     )
-                    { index ->
-                        Row(modifier = Modifier.animateItem())
-                        {
-                            ColorCodedLogLine(
-                                text = logLines[index].line,
-                                modifier = Modifier.fillMaxWidth(),
-                                delimiters = delimiters,
-                                themeForColorCoding = theme,
-                                defaultColor = themeColors.onBackground,
-                                softWrap = shouldWrapText,
-                            )
+                    {
+                        items(
+                            key = { index -> logLines[index].key },
+                            count = logLines.size,
+                        )
+                        { index ->
+                            Row(modifier = Modifier.animateItem())
+                            {
+                                ColorCodedLogLine(
+                                    text = logLines[index].line,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    delimiters = delimiters,
+                                    themeForColorCoding = theme,
+                                    defaultColor = themeColors.onBackground,
+                                    softWrap = shouldWrapText,
+                                )
+                            }
                         }
                     }
+
+                    VerticalScrollbar(
+                        modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                        adapter = rememberScrollbarAdapter(lazyListState)
+                    )
                 }
             }
 
