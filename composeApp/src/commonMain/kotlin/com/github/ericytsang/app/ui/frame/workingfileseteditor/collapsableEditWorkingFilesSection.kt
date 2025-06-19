@@ -53,8 +53,8 @@ interface LogFileListViewModel
 
 class LogFileListViewModelImpl(
     private val configurationId:ConfigurationId,
-    private val workingFileSetRepository:WorkingFileSetRepository = RepositoryDependencyProvider.Companion.instance.workingFileSetRepository,
-    private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
+    private val workingFileSetRepository:WorkingFileSetRepository = RepositoryDependencyProvider.instance.workingFileSetRepository,
+    private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
 ):LogFileListViewModel, KotlinDependencyProvider by kotlinDependencyProvider
 {
     override val itemViewModels:Flow<List<LogFileViewModel>> = workingFileSetRepository

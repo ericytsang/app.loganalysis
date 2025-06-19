@@ -2,12 +2,10 @@ package com.github.ericytsang.app.ui.frame.logviewer
 
 import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterInterpretationMode
-import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.FilterRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 interface FilterViewModel
 {
@@ -32,8 +30,8 @@ class FilterViewModelImpl(
     initialIsEnabled:Boolean,
     initialFilterInterpretationMode:FilterInterpretationMode,
     private val onRequestDelete:(FilterId)->Unit,
-    filterRepository:FilterRepository = RepositoryDependencyProvider.Companion.instance.filterRepository,
-    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
+    filterRepository:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
+    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
 ):FilterViewModel,
     KotlinDependencyProvider by kotlinDependencyProvider
 {

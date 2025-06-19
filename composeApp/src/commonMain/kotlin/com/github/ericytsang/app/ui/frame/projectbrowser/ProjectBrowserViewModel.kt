@@ -1,5 +1,6 @@
 package com.github.ericytsang.app.ui.frame.projectbrowser
 
+import com.github.ericytsang.app.ui.frame.projectbrowser.ProjectBrowserViewModelImpl.Companion.AMOUNT_TO_LOAD_ON_DEMAND
 import com.github.ericytsang.domain.objects.Configuration
 import com.github.ericytsang.domain.objects.ConfigurationUpdateSequence
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
@@ -8,13 +9,11 @@ import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * ViewModel for the Project Browser window.

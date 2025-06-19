@@ -43,16 +43,15 @@ sealed class FirstAppAction
 }
 
 private class FirstAppActionComputerImpl(
-    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
-    private val configurationRepository:ConfigurationRepository = RepositoryDependencyProvider.Companion.instance.configurationRepository,
+    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+    private val configurationRepository:ConfigurationRepository = RepositoryDependencyProvider.instance.configurationRepository,
 ):FirstAppActionComputer,
     KotlinDependencyProvider by kotlinDependencyProvider
 {
     override suspend fun decideFirstAppAction():FirstAppAction = withContext(dispatchers.io)
     {
         // if there are no projects at all, then open the "New Project" wizard
-        val oldProjects =
-            configurationRepository.loadNextNConfigurationIdsBefore(1,ConfigurationUpdateSequence.Companion.max)
+        val oldProjects = configurationRepository.loadNextNConfigurationIdsBefore(1,ConfigurationUpdateSequence.max)
         if (oldProjects.isEmpty())
         {
             return@withContext FirstAppAction.OpenNewProjectWizard

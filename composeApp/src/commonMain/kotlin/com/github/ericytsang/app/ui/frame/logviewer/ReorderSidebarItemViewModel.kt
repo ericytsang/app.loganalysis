@@ -23,9 +23,9 @@ interface ReorderSidebarItemViewModel
 
 class ReorderSidebarItemViewModelImpl(
     private val configurationId:ConfigurationId,
-    private val workingFileSetRepo:WorkingFileSetRepository = RepositoryDependencyProvider.Companion.instance.workingFileSetRepository,
-    private val filterRepo:FilterRepository = RepositoryDependencyProvider.Companion.instance.filterRepository,
-    private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
+    private val workingFileSetRepo:WorkingFileSetRepository = RepositoryDependencyProvider.instance.workingFileSetRepository,
+    private val filterRepo:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
+    private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
 ):ReorderSidebarItemViewModel,KotlinDependencyProvider by kotlinDependencyProvider
 {
     override suspend fun moveItem(from:ReorderableSidebarItemKey,to:ReorderableSidebarItemKey) =

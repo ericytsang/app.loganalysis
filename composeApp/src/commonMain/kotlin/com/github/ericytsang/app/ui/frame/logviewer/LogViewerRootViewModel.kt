@@ -22,9 +22,9 @@ interface LogViewerRootViewModel:ThemeUseCase,DelimiterRepository
     {
         fun create(
             uiScope:CoroutineScope,
-            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
-            settingsRepository:SettingsRepository = RepositoryDependencyProvider.Companion.instance.settingsRepository,
-            delimiterRepository:DelimiterRepository = RepositoryDependencyProvider.Companion.instance.delimiterRepository,
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
+            settingsRepository:SettingsRepository = RepositoryDependencyProvider.instance.settingsRepository,
+            delimiterRepository:DelimiterRepository = RepositoryDependencyProvider.instance.delimiterRepository,
         ):LogViewerRootViewModel = LogViewerComposableViewModelImpl(
             uiScope = uiScope,
             kotlinDependencyProvider = kotlinDependencyProvider,

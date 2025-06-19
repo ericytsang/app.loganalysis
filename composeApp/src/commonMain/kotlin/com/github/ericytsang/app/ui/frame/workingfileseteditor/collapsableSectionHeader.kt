@@ -63,10 +63,10 @@ fun LazyListScope.collapsableSectionHeader(
     // header for the section
     item(key = ReorderableSidebarItemKey.Other("$lazyColumnItemKeyPrefix-header"))
     {
-        Row(modifier = Modifier.Companion.animateItem().background(themeColors.background))
+        Row(modifier = Modifier.animateItem().background(themeColors.background))
         {
             ToggleButton(
-                modifier = Modifier.Companion.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = requestToggleSectionExpanded,
                 isToggled = isSectionExpanded,
                 isToggledColors = ButtonDefaults.buttonColors(themeColors.primary),
@@ -74,8 +74,8 @@ fun LazyListScope.collapsableSectionHeader(
                 content =
                 { contentColor ->
                     Row(
-                        modifier = Modifier.Companion.fillMaxWidth(),
-                        verticalAlignment = Alignment.Companion.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
                     )
                     {
                         sectionIcon(contentColor)
@@ -84,7 +84,7 @@ fun LazyListScope.collapsableSectionHeader(
                             Text(
                                 text = sectionTitle,
                                 color = contentColor,
-                                modifier = Modifier.Companion.padding(start = Dimens.mttPadding),
+                                modifier = Modifier.padding(start = Dimens.mttPadding),
                             )
                         }
                     }

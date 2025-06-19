@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.onEach
 class PersistedValue<T>(
     initialValue:T,
     updatePersistedValue: suspend (T)->Unit,
-    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
+    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
 ):KotlinDependencyProvider by kotlinDependencyProvider
 {
     private sealed class Sourced<T>

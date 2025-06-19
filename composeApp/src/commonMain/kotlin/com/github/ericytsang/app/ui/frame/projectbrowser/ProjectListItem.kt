@@ -45,7 +45,7 @@ fun ProjectListItem(
                 projectBrowserViewModel.loadMoreItems(item)
                 Text(
                     text = "Loading more items...",
-                    modifier = Modifier.Companion.padding(Dimens.mttPadding),
+                    modifier = Modifier.padding(Dimens.mttPadding),
                 )
             }
 
@@ -54,7 +54,7 @@ fun ProjectListItem(
                 projectBrowserViewModel.loadMoreItems(item)
                 Text(
                     text = "Loading more items...",
-                    modifier = Modifier.Companion.padding(Dimens.mttPadding),
+                    modifier = Modifier.padding(Dimens.mttPadding),
                 )
             }
         }
