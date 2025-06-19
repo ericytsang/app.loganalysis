@@ -11,7 +11,6 @@ import java.io.File
 
 interface WorkingFileSetEditorViewModel
 {
-    val configurationId:ConfigurationId
     val workingFileSet:Flow<WorkingFileSet>
     fun addFiles(newFiles:List<File>)
 
@@ -31,7 +30,7 @@ interface WorkingFileSetEditorViewModel
 
 @OptIn(ExperimentalCoroutinesApi::class)
 private class WorkingFileSetEditorViewModelImpl(
-    override val configurationId:ConfigurationId,
+    private val configurationId:ConfigurationId,
     private val kotlinDependencyProvider:KotlinDependencyProvider,
     private val workingFileSetRepository:WorkingFileSetRepository,
 ):WorkingFileSetEditorViewModel,
