@@ -3,12 +3,15 @@
 package com.github.ericytsang.app.ui.frame.logviewer
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -123,6 +126,14 @@ fun LogViewerRoot(
             {
                 LazyColumnWithScrollbar()
                 {
+                    // put an item at top so that if new items are added to the top, the scroll will stick to the top.
+                    // without this, when we re-order the top log line, the scroll would move to where the log line is
+                    // being re-ordered to.
+                    item {
+                        Spacer(Modifier.size(1.dp))
+                    }
+
+                    // show log lines
                     items(
                         key = { index -> logLines[index].key },
                         count = logLines.size,
