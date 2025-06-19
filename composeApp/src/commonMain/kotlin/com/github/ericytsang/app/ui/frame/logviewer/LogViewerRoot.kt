@@ -2,6 +2,7 @@
 
 package com.github.ericytsang.app.ui.frame.logviewer
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -164,16 +165,7 @@ fun LogViewerRoot(
 
             val isSidebarExpanded by derivedStateOf { showEditFileListPanel || showExcludeFilterPanel || showIncludeFilterPanel }
 
-            val columnWidth by derivedStateOf {
-                if (isSidebarExpanded)
-                {
-                    Modifier.width(400.dp)
-                }
-                else
-                {
-                    Modifier.width(Dimens.mttPadding*3+Dimens.mttSize)
-                }
-            }
+            val columnWidth by derivedStateOf { if (isSidebarExpanded) 400.dp else Dimens.mttPadding*3+Dimens.mttSize }
 
             Surface(
                 modifier = Modifier.fillMaxHeight(),
@@ -183,7 +175,7 @@ fun LogViewerRoot(
             {
                 val stateForLazyListOfIncludeFilters = rememberLazyListState()
                 val reorderableLazyListStateForLazyListOfIncludeFilters = rememberReorderableLazyListState(stateForLazyListOfIncludeFilters)
-                { from, to ->
+                { from,to ->
                     // fyi, the key is of type ReorderableSidebarItemKey, which is a sealed interface
                     println("reorder from ${from.key} to ${to.key}")
                     val fromKey = from.key as? ReorderableSidebarItemKey ?: error("unexpected from key type: ${from.key}")
@@ -194,7 +186,8 @@ fun LogViewerRoot(
                 val excludeFilterItemViewModels by excludeFilterSetViewModel.filters.collectAsState(emptyList())
                 val includeFilterItemViewModels by includeFilterSetViewModel.filters.collectAsState(emptyList())
                 LazyColumn(
-                    modifier = columnWidth
+                    modifier = Modifier
+                        .width(columnWidth)
                         .fillMaxHeight()
                         .padding(Dimens.mttPadding),
                     state = stateForLazyListOfIncludeFilters,
@@ -262,8 +255,9 @@ fun LogViewerRoot(
                     )
                 }
             }
-
-            // endregion
         }
+
+        // endregion
     }
+}
 }
