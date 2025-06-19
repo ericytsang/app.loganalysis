@@ -111,49 +111,41 @@ fun LogViewerRoot(
             horizontalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
         )
         {
-            // logcat filter input and log viewer
-            Column(
+            // region log viewer
+
+            val logLines by logViewerViewModel.getLogLinesFlow().collectAsState(emptyList())
+
+            Surface(
                 modifier = Modifier.weight(1f,fill = true),
-                verticalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
+                shape = MaterialTheme.shapes.small,
+                border = ButtonDefaults.outlinedBorder,
             )
             {
-
-                // region log viewer
-
-                val logLines by logViewerViewModel.getLogLinesFlow().collectAsState(emptyList())
-
-                Surface(
-                    modifier = Modifier.weight(1f),
-                    shape = MaterialTheme.shapes.small,
-                    border = ButtonDefaults.outlinedBorder,
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
                 )
                 {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
+                    items(
+                        key = { index -> logLines[index].key },
+                        count = logLines.size,
                     )
-                    {
-                        items(
-                            key = { index -> logLines[index].key },
-                            count = logLines.size,
-                        )
-                        { index ->
-                            Row(modifier = Modifier.animateItem())
-                            {
-                                ColorCodedLogLine(
-                                    text = logLines[index].line,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    delimiters = delimiters,
-                                    themeForColorCoding = theme,
-                                    defaultColor = themeColors.onBackground,
-                                    softWrap = shouldWrapText,
-                                )
-                            }
+                    { index ->
+                        Row(modifier = Modifier.animateItem())
+                        {
+                            ColorCodedLogLine(
+                                text = logLines[index].line,
+                                modifier = Modifier.fillMaxWidth(),
+                                delimiters = delimiters,
+                                themeForColorCoding = theme,
+                                defaultColor = themeColors.onBackground,
+                                softWrap = shouldWrapText,
+                            )
                         }
                     }
                 }
-
-                // endregion
             }
+
+            // endregion
 
             // region filter helpers and working file set editor
 
@@ -259,5 +251,4 @@ fun LogViewerRoot(
 
         // endregion
     }
-}
 }
