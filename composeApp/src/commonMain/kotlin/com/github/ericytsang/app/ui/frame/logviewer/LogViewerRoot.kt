@@ -2,10 +2,7 @@
 
 package com.github.ericytsang.app.ui.frame.logviewer
 
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -15,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Colors
@@ -46,6 +41,7 @@ import com.github.ericytsang.app.ui.util.asset.IconIncludeFilter
 import com.github.ericytsang.app.ui.util.asset.IconWrapText
 import com.github.ericytsang.app.ui.util.component.ColorCodedLogLine
 import com.github.ericytsang.app.ui.util.component.CommonWindowHeader
+import com.github.ericytsang.app.ui.util.component.LazyColumnWithScrollbar
 import com.github.ericytsang.app.ui.util.component.ToggleButton
 import com.github.ericytsang.app.ui.util.openNewProjectWizard
 import com.github.ericytsang.app.ui.util.openProjectBrowser
@@ -125,37 +121,25 @@ fun LogViewerRoot(
                 border = ButtonDefaults.outlinedBorder,
             )
             {
-                Box()
+                LazyColumnWithScrollbar()
                 {
-                    val lazyListState = rememberLazyListState()
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        state = lazyListState,
+                    items(
+                        key = { index -> logLines[index].key },
+                        count = logLines.size,
                     )
-                    {
-                        items(
-                            key = { index -> logLines[index].key },
-                            count = logLines.size,
-                        )
-                        { index ->
-                            Row(modifier = Modifier.animateItem())
-                            {
-                                ColorCodedLogLine(
-                                    text = logLines[index].line,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    delimiters = delimiters,
-                                    themeForColorCoding = theme,
-                                    defaultColor = themeColors.onBackground,
-                                    softWrap = shouldWrapText,
-                                )
-                            }
+                    { index ->
+                        Row(modifier = Modifier.animateItem())
+                        {
+                            ColorCodedLogLine(
+                                text = logLines[index].line,
+                                modifier = Modifier.fillMaxWidth(),
+                                delimiters = delimiters,
+                                themeForColorCoding = theme,
+                                defaultColor = themeColors.onBackground,
+                                softWrap = shouldWrapText,
+                            )
                         }
                     }
-
-                    VerticalScrollbar(
-                        modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-                        adapter = rememberScrollbarAdapter(lazyListState)
-                    )
                 }
             }
 
