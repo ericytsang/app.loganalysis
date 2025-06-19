@@ -6,10 +6,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
 import com.github.ericytsang.domain.objects.Theme
 import kotlin.random.Random
-import kotlin.text.iterator
 
 @Composable
 fun ColorCodedLogLine(
@@ -35,6 +36,7 @@ fun ColorCodedLogLine(
         modifier = modifier,
         color = defaultColor,
         softWrap = softWrap,
+        style = TextStyle(fontFamily = FontFamily.Monospace),
     )
 }
 
