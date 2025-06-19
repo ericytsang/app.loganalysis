@@ -29,7 +29,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.LogFileListViewModel
@@ -55,7 +54,6 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun LogViewerRoot(
-    window:ComposeWindow,
     themeColors:Colors,
     rootChildWindowManager:ChildWindowManager,
     logFileListViewModelFactory:()->LogFileListViewModel,

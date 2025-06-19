@@ -34,7 +34,7 @@ fun ProjectBrowserWindow(
         { themeColors ->
             ProjectBrowser(
                 themeColors = themeColors,
-                viewModelFactory = { ProjectBrowserViewModelImpl() },
+                viewModelFactory = { ProjectBrowserViewModel.create() },
                 rootChildWindowManager = rootChildWindowManager,
             )
         }

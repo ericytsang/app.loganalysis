@@ -40,7 +40,6 @@ fun LogViewerRootWindow(
         fillMaxBackground()
         { themeColors ->
             LogViewerRoot(
-                window = window,
                 themeColors = themeColors,
                 rootChildWindowManager = rootChildWindowManager,
                 logFileListViewModelFactory = { LogFileListViewModelImpl(configurationId) },
