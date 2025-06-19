@@ -26,7 +26,6 @@ data class FilePath(
 {
     companion object
     {
-        fun File.toFilePath(): FilePath = FilePath(absolutePath)
         fun FilePath.toFile(): File = File(filePath)
     }
 }
@@ -68,7 +67,6 @@ data class ConfigurationUpdateSequence(
     companion object
     {
         val max = ConfigurationUpdateSequence(Long.MAX_VALUE)
-        val min = ConfigurationUpdateSequence(Long.MIN_VALUE)
     }
 }
 

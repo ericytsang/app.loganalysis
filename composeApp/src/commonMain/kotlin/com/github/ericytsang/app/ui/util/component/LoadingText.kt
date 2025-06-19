@@ -35,7 +35,7 @@ fun LoadingText(
 
 class LoadingTextViewModel(
     uiScope: ImmutableCoroutineScope,
-    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance
+    kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance
 ):KotlinDependencyProvider by kotlinDependencyProvider
 {
     private val animationFrameFlow = MutableStateFlow(0)

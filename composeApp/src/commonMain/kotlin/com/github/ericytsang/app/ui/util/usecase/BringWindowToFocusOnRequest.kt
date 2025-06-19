@@ -11,7 +11,7 @@ class BringWindowToFocusOnRequest(
     uiScope:ImmutableCoroutineScope,
     private val window:ComposeWindow,
     private val controller:ChildWindowManagerController,
-    private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
+    private val kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
 ) : KotlinDependencyProvider by kotlinDependencyProvider
 {
     init

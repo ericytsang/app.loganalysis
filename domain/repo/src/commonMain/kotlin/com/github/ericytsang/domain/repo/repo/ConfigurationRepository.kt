@@ -5,7 +5,6 @@ import com.github.ericytsang.domain.objects.Configuration
 import com.github.ericytsang.domain.objects.ConfigurationId
 import com.github.ericytsang.domain.objects.ConfigurationName
 import com.github.ericytsang.domain.objects.ConfigurationUpdateSequence
-import com.github.ericytsang.domain.repo.repo.SuspendIterator.Companion.asSuspendIterator
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import com.github.ericytsang.service.sqlite.ProjectEntity
 import com.github.ericytsang.service.sqlite.dbfactory.DatabaseService

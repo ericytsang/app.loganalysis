@@ -36,7 +36,7 @@ fun ClickableSurface(
     val contentColor by colors.contentColor(enabled)
     Surface(
         onClick = onClick,
-        modifier = modifier.semantics { role = Role.Companion.Button },
+        modifier = modifier.semantics { role = Role.Button },
         enabled = enabled,
         shape = shape,
         color = colors.backgroundColor(enabled).value,

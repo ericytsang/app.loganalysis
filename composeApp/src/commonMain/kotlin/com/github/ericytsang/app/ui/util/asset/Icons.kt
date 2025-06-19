@@ -7,7 +7,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.outline_delete_24
 import kotlinproject.composeapp.generated.resources.outline_files_24
-import kotlinproject.composeapp.generated.resources.outline_match_case_24
 import kotlinproject.composeapp.generated.resources.outline_playlist_add_24
 import kotlinproject.composeapp.generated.resources.outline_playlist_remove_24
 import kotlinproject.composeapp.generated.resources.outline_settings_24
@@ -20,19 +19,6 @@ fun IconWrapText(color:Color)
     Image(
         painter = painterResource(Res.drawable.outline_wrap_text_24),
         contentDescription = "Wrap text",
-        colorFilter = ColorFilter.lighting(
-            multiply = color,
-            add = color,
-        )
-    )
-}
-
-@Composable
-fun IconMatchCase(color:Color)
-{
-    Image(
-        painter = painterResource(Res.drawable.outline_match_case_24),
-        contentDescription = "Match case",
         colorFilter = ColorFilter.lighting(
             multiply = color,
             add = color,
