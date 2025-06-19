@@ -9,6 +9,7 @@ import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.FilterRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
+import com.github.ericytsang.kotlin.newChildScope
 import com.github.ericytsang.logcatfilterparser.LeafNode
 import com.github.ericytsang.logcatfilterparser.LogcatFilterParser
 import com.github.ericytsang.logcatfilterparser.Node
@@ -16,12 +17,17 @@ import com.github.ericytsang.logcatfilterparser.NotNode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import java.io.File
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LogViewerViewModel(
@@ -39,7 +45,7 @@ class LogViewerViewModel(
 
     // region concatenated files
 
-    val concatenatedFiles:StateFlow<List<File>> get() = _concatenatedFiles
+    val concatenatedFilesFlow:StateFlow<List<File>> get() = _concatenatedFiles
     private val _concatenatedFiles = MutableStateFlow(emptyList<File>())
 
     fun setConcatenatedFiles(files:List<File>)
@@ -102,11 +108,19 @@ class LogViewerViewModel(
 
     // region log lines
 
-    private val fileLines:Flow<List<FileLine>> = concatenatedFiles
+    private val unorderedFileLinesFlow:Flow<Map<File,List<FileLine>>> = concatenatedFilesFlow
+        .distinctUntilChangedBy { files -> files.map { it.absolutePath }.toSet() }
         .map { files ->
             files
-                .map { file -> FileLines(file,file.readLines().withIndex().toList()) }
-                .flatMap { fileLines ->
+                .associateWith { file ->
+                    println("Reading file: ${file.absolutePath}")
+                    FileLines(
+                        file = file,
+                        lines = file.readLines().withIndex().toList(),
+                    )
+                }
+                .mapValues { mapEntry ->
+                    val fileLines = mapEntry.value
                     fileLines.lines.map { line ->
                         val key = FileLineKey(
                             file = fileLines.file,
@@ -119,7 +133,16 @@ class LogViewerViewModel(
                     }
                 }
         }
-        .conflate()
+        .shareIn(
+            scope = applicationScope.newChildScope(dispatchers.io),
+            started = SharingStarted.WhileSubscribed(5.seconds),
+            replay = 1,
+        )
+
+    private val orderedFileLines:Flow<List<FileLine>> = combine(concatenatedFilesFlow,unorderedFileLinesFlow)
+    { concatenatedFiles,unorderedFileLines ->
+        concatenatedFiles.flatMap { file -> unorderedFileLines[file] ?: emptyList() }
+    }.conflate()
 
     data class FileLines(
         val file:File,
@@ -138,7 +161,7 @@ class LogViewerViewModel(
 
     fun getLogLinesFlow():Flow<List<FileLine>> =
         combine(
-            fileLines,
+            orderedFileLines,
             activeFilters,
             ::applyFilterToLogLines,
         ).flowOn(dispatchers.io)
