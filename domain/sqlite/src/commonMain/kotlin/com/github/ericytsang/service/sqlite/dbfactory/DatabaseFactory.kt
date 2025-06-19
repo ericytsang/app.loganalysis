@@ -52,7 +52,7 @@ internal class DatabaseFactoryCreateNewInstanceImpl:DatabaseFactory
     {
         val driver = driverFactory.createDriver(appPackageName)
         configureDatabase(driver)
-        val database = SqlDelightDatabase.Companion(driver)
+        val database = SqlDelightDatabase(driver)
         return database
     }
 
