@@ -189,18 +189,8 @@ fun LogViewerRoot(
             )
             {
                 LazyColumnWithScrollbar(
-                    modifier = Modifier.onKeyEvent()
-                    { keyEvent ->
-
-                        // for macOS, the meta key is the command key, and for Windows/Linux, it is the control key
-                        modifierState = ModifierState(
-                            isMultiSelectModifierPressed = keyEvent.isMultiSelectPressed(),
-                            isRangeSelectModifierPressed = keyEvent.isShiftPressed,
-                        )
-
-                        // don't consume the event. we just want to track the modifier state, so we can use it when handling clicks
-                        false
-                    }
+                    modifier = Modifier
+                        .captureModifierState { newState -> modifierState = newState }
                 )
                 {
                     // put an item at top so that if new items are added to the top, the scroll will stick to the top.
@@ -382,6 +372,27 @@ fun LogViewerRoot(
 
         // endregion
     }
+}
+
+fun Modifier.captureModifierState(
+    onModifierStateChange:(ModifierState)->Unit,
+):Modifier = onKeyEvent()
+{ keyEvent ->
+
+    // for macOS, the meta key is the command key, and for Windows/Linux, it is the control key
+    val isMultiSelectModifierPressed = keyEvent.isMultiSelectPressed()
+    val isRangeSelectModifierPressed = keyEvent.isShiftPressed
+
+    // use callback to update the modifier state
+    onModifierStateChange(
+        ModifierState(
+            isMultiSelectModifierPressed = isMultiSelectModifierPressed,
+            isRangeSelectModifierPressed = isRangeSelectModifierPressed,
+        )
+    )
+
+    // don't consume the event. we just want to track the modifier state, so we can use it when handling clicks
+    false
 }
 
 fun KeyEvent.isMultiSelectPressed():Boolean =
