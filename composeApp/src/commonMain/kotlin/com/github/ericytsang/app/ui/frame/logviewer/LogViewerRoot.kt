@@ -2,7 +2,10 @@
 
 package com.github.ericytsang.app.ui.frame.logviewer
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +20,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Colors
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -31,6 +35,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.LogFileListViewModel
@@ -168,32 +177,95 @@ fun LogViewerRoot(
 
             val logLines by logViewerViewModel.getLogLinesFlow().collectAsState(emptyList())
 
+            // Selection state
+            var selectedItems by remember { mutableStateOf<SelectedItems<LogViewerViewModel.FileLineKey>>(SelectedItems.IncludeSelected(emptySet())) }
+            var lastClickedIndex by remember { mutableStateOf<Int?>(null) }
+            var modifierState by remember { mutableStateOf(ModifierState(false,false)) }
+
             Surface(
                 modifier = Modifier.weight(1f,fill = true),
                 shape = MaterialTheme.shapes.small,
                 border = ButtonDefaults.outlinedBorder,
             )
             {
-                LazyColumnWithScrollbar()
+                LazyColumnWithScrollbar(
+                    modifier = Modifier.onKeyEvent()
+                    { keyEvent ->
+
+                        // for macOS, the meta key is the command key, and for Windows/Linux, it is the control key
+                        modifierState = ModifierState(
+                            isMultiSelectModifierPressed = keyEvent.isMultiSelectPressed(),
+                            isRangeSelectModifierPressed = keyEvent.isShiftPressed,
+                        )
+
+                        // don't consume the event. we just want to track the modifier state, so we can use it when handling clicks
+                        false
+                    }
+                )
                 {
                     // put an item at top so that if new items are added to the top, the scroll will stick to the top.
                     // without this, when we re-order the top log line, the scroll would move to where the log line is
                     // being re-ordered to.
-                    item {
-                        Spacer(Modifier.size(1.dp))
-                    }
+                    item(
+                        key = "top-spacer",
+                        content = { Spacer(Modifier.size(1.dp)) }
+                    )
 
                     // show log lines
                     items(
-                        key = { index -> logLines[index].key },
+                        key = { index -> "log line item ${logLines[index].key}" },
                         count = logLines.size,
                     )
                     { index ->
-                        Row(modifier = Modifier.animateItem())
+                        val item = logLines[index]
+                        val isSelected = selectedItems.isSelected(item.key)
+                        val backgroundColor = if (isSelected) themeColors.primary.copy(alpha = ContentAlpha.medium) else themeColors.surface
+                        Box(
+                            modifier = Modifier
+                                .animateItem()
+                                .background(backgroundColor)
+                                .clickable()
+                                {
+                                    when
+                                    {
+                                        // shift+click: select range, keep others
+                                        modifierState.isRangeSelectModifierPressed ->
+                                        {
+                                            val from = lastClickedIndex ?: index
+                                            val range = if (from <= index) from..index else index..from
+                                            val indices = range.toSet()
+                                            val itemKeys = indices.map { index -> logLines[index].key }.toSet()
+                                            selectedItems = if (modifierState.isMultiSelectModifierPressed)
+                                            {
+                                                // shift+ctrl/cmd+click: add range to selection
+                                                itemKeys.fold(selectedItems) { acc,itemKey -> acc.add(itemKey) }
+                                            }
+                                            else
+                                            {
+                                                // shift+click: select only range
+                                                SelectedItems.IncludeSelected(itemKeys)
+                                            }
+                                        }
+
+                                        // ctrl/cmd+click: toggle
+                                        modifierState.isMultiSelectModifierPressed ->
+                                        {
+                                            selectedItems = selectedItems.toggle(item.key)
+                                        }
+
+                                        // normal click: select only this
+                                        else ->
+                                        {
+                                            selectedItems = SelectedItems.IncludeSelected(setOf(item.key))
+                                        }
+                                    }
+                                    lastClickedIndex = index
+                                },
+                        )
                         {
                             ColorCodedLogLine(
-                                text = logLines[index].line,
-                                modifier = Modifier.fillMaxWidth(),
+                                text = item.line,
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = Dimens.mttPadding),
                                 delimiters = delimiters,
                                 themeForColorCoding = theme,
                                 defaultColor = themeColors.onBackground,
@@ -311,3 +383,20 @@ fun LogViewerRoot(
         // endregion
     }
 }
+
+fun KeyEvent.isMultiSelectPressed():Boolean =
+    if (System.getProperty("os.name").contains("Mac",ignoreCase = true))
+    {
+        // Use Command (Meta) key
+        isMetaPressed
+    }
+    else
+    {
+        // Use Control key
+        isCtrlPressed
+    }
+
+data class ModifierState(
+    val isMultiSelectModifierPressed:Boolean = false,
+    val isRangeSelectModifierPressed:Boolean = false,
+)
