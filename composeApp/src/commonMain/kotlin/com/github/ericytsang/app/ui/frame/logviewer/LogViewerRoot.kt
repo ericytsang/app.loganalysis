@@ -59,13 +59,7 @@ import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import kotlinx.coroutines.CoroutineScope
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
-// clicking on a log line will select the clicked log line, while also deselecting all other log lines.
-
 // click+dragging on a log line will select all log lines between the last clicked log line and the clicked log line, while also deselecting all other log lines.
-
-// ctrl+clicking on a log line will toggle the selection of the clicked log line, while also keeping the other already-selected log lines selected.
-
-// shift+clicking on a log line will select all log lines between the last clicked log line and the clicked log line, while also keeping the other already-selected log lines selected.
 
 @Composable
 fun LogViewerRoot(
