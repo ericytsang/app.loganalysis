@@ -7,6 +7,10 @@ plugins {
 kotlin {
     jvm()
 
+    compilerOptions {
+        freeCompilerArgs.add("-Xwhen-guards")
+    }
+
     sourceSets.commonMain.dependencies {
 
         implementation(projects.lib.kotlin)

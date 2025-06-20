@@ -35,10 +35,10 @@ sealed class SelectedItems<T>
     /**
      * selected no items except for the ones in a set of included items.
      */
-    data class IncludeSelected<T>(val includedItems:Set<T>):SelectedItems<T>()
+    data class IncludeSelected<T>(val includedItems:Set<T> = emptySet()):SelectedItems<T>()
 
     /**
      * selected all items except for the ones in a set of excluded items.
      */
-    data class ExcludeSelected<T>(val excludedItems:Set<T>):SelectedItems<T>()
+    data class ExcludeSelected<T>(val excludedItems:Set<T> = emptySet()):SelectedItems<T>()
 }

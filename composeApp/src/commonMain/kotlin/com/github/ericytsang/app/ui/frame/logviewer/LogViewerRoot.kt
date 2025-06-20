@@ -35,6 +35,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.LogFileListViewModel
@@ -124,9 +126,12 @@ fun LogViewerRoot(
             val logLines by logViewerViewModel.getLogLinesFlow().collectAsState(emptyList())
 
             // Selection state
-            var selectedItems by remember { mutableStateOf<SelectedItems<LogViewerViewModel.FileLineKey>>(SelectedItems.IncludeSelected(emptySet())) }
+            var selectedItems by remember { mutableStateOf<SelectedItems<LogViewerViewModel.FileLineKey>>(SelectedItems.IncludeSelected()) }
             var lastClickedIndex by remember { mutableStateOf<Int?>(null) }
             var modifierState by remember { mutableStateOf(ModifierState(false,false)) }
+
+            // get clipboard manager
+            val clipboardManager = LocalClipboardManager.current
 
             Surface(
                 modifier = Modifier.weight(1f,fill = true),
@@ -137,6 +142,22 @@ fun LogViewerRoot(
                 LazyColumnWithScrollbar(
                     modifier = Modifier
                         .captureModifierState { newState -> modifierState = newState }
+                        .handleKeyCombinations(
+                            onSelectAll = { selectedItems = SelectedItems.ExcludeSelected(); true },
+                            onDeselectAll = { selectedItems = SelectedItems.IncludeSelected(); true },
+                            onCopySelection =
+                            {
+                                val textToCopy = logLines
+                                    .filter { selectedItems.isSelected(it.key) }
+                                    .joinToString("\n") { it.line }
+                                clipboardManager.setText(buildAnnotatedString { append(textToCopy) })
+                                true
+                            },
+                            // onExpandSelectionUp = { logViewerViewModel.expandSelectionUp() },
+                            // onExpandSelectionDown = { logViewerViewModel.expandSelectionDown() },
+                            // onMoveFocusUp = { logViewerViewModel.moveFocusUp() },
+                            // onMoveFocusDown = { logViewerViewModel.moveFocusDown() },
+                        )
                 )
                 {
                     // put an item at top so that if new items are added to the top, the scroll will stick to the top.
@@ -154,7 +175,7 @@ fun LogViewerRoot(
                     )
                     { index ->
                         val item = logLines[index]
-                        val isSelected = selectedItems.isSelected(item.key)
+                        val isSelected by derivedStateOf { selectedItems.isSelected(item.key) }
                         val backgroundColor = if (isSelected) themeColors.primary.copy(alpha = ContentAlpha.medium) else themeColors.surface
                         Box(
                             modifier = Modifier
@@ -165,13 +186,13 @@ fun LogViewerRoot(
                                     when
                                     {
                                         // shift+click: select range, keep others
-                                        modifierState.isRangeSelectModifierPressed ->
+                                        modifierState.isShiftPressed ->
                                         {
                                             val from = lastClickedIndex ?: index
                                             val range = if (from <= index) from..index else index..from
                                             val indices = range.toSet()
                                             val itemKeys = indices.map { index -> logLines[index].key }.toSet()
-                                            selectedItems = if (modifierState.isMultiSelectModifierPressed)
+                                            selectedItems = if (modifierState.isOsAgnosticCtrlPressed)
                                             {
                                                 // shift+ctrl/cmd+click: add range to selection
                                                 itemKeys.fold(selectedItems) { acc,itemKey -> acc.add(itemKey) }
@@ -184,7 +205,7 @@ fun LogViewerRoot(
                                         }
 
                                         // ctrl/cmd+click: toggle
-                                        modifierState.isMultiSelectModifierPressed ->
+                                        modifierState.isOsAgnosticCtrlPressed ->
                                         {
                                             selectedItems = selectedItems.toggle(item.key)
                                         }
