@@ -207,16 +207,23 @@ fun LogViewerRoot(
                                         // ctrl/cmd+click: toggle
                                         modifierState.isOsAgnosticCtrlPressed ->
                                         {
-                                            selectedItems = selectedItems.toggle(item.key)
+                                            // toggle the selection of this item
+                                            val newSelectedItems = selectedItems.toggle(item.key)
+
+                                            // if the item is selected, then update the last clicked index; reset otherwise
+                                            lastClickedIndex = if (item.key in newSelectedItems) index else null
+
+                                            // update the selected items
+                                            selectedItems = newSelectedItems
                                         }
 
                                         // normal click: select only this
                                         else ->
                                         {
                                             selectedItems = SelectedItems.IncludeSelected(setOf(item.key))
+                                            lastClickedIndex = index
                                         }
                                     }
-                                    lastClickedIndex = index
                                 },
                         )
                         {
