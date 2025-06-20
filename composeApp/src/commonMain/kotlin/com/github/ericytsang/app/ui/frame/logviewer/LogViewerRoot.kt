@@ -35,11 +35,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.isCtrlPressed
-import androidx.compose.ui.input.key.isMetaPressed
-import androidx.compose.ui.input.key.isShiftPressed
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.frame.workingfileseteditor.LogFileListViewModel
@@ -63,49 +58,6 @@ import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import kotlinx.coroutines.CoroutineScope
 import sh.calvin.reorderable.rememberReorderableLazyListState
-
-/**
- * sealed class representing a set of selected items.
- * there are 2 implementations:
- * - one representing "selected all items except for the ones in a set of excluded items"
- * - another representing "selected no items except for the ones in a set of included items"
- */
-sealed class SelectedItems<T>
-{
-    fun isSelected(item:T):Boolean = when (this)
-    {
-        is IncludeSelected -> item in includedItems
-        is ExcludeSelected -> item !in excludedItems
-    }
-
-    fun add(item:T):SelectedItems<T> = when (this)
-    {
-        is IncludeSelected -> IncludeSelected(includedItems + item)
-        is ExcludeSelected -> ExcludeSelected(excludedItems - item)
-    }
-
-    fun remove(item:T):SelectedItems<T> = when (this)
-    {
-        is IncludeSelected -> IncludeSelected(includedItems - item)
-        is ExcludeSelected -> ExcludeSelected(excludedItems + item)
-    }
-
-    fun toggle(item:T):SelectedItems<T> = when (isSelected(item))
-    {
-        true -> remove(item)
-        false -> add(item)
-    }
-
-    /**
-     * selected no items except for the ones in a set of included items.
-     */
-    data class IncludeSelected<T>(val includedItems:Set<T>):SelectedItems<T>()
-
-    /**
-     * selected all items except for the ones in a set of excluded items.
-     */
-    data class ExcludeSelected<T>(val excludedItems:Set<T>):SelectedItems<T>()
-}
 
 // clicking on a log line will select the clicked log line, while also deselecting all other log lines.
 
@@ -373,41 +325,3 @@ fun LogViewerRoot(
         // endregion
     }
 }
-
-fun Modifier.captureModifierState(
-    onModifierStateChange:(ModifierState)->Unit,
-):Modifier = onKeyEvent()
-{ keyEvent ->
-
-    // for macOS, the meta key is the command key, and for Windows/Linux, it is the control key
-    val isMultiSelectModifierPressed = keyEvent.isMultiSelectPressed()
-    val isRangeSelectModifierPressed = keyEvent.isShiftPressed
-
-    // use callback to update the modifier state
-    onModifierStateChange(
-        ModifierState(
-            isMultiSelectModifierPressed = isMultiSelectModifierPressed,
-            isRangeSelectModifierPressed = isRangeSelectModifierPressed,
-        )
-    )
-
-    // don't consume the event. we just want to track the modifier state, so we can use it when handling clicks
-    false
-}
-
-fun KeyEvent.isMultiSelectPressed():Boolean =
-    if (System.getProperty("os.name").contains("Mac",ignoreCase = true))
-    {
-        // Use Command (Meta) key
-        isMetaPressed
-    }
-    else
-    {
-        // Use Control key
-        isCtrlPressed
-    }
-
-data class ModifierState(
-    val isMultiSelectModifierPressed:Boolean = false,
-    val isRangeSelectModifierPressed:Boolean = false,
-)
