@@ -8,6 +8,8 @@ package com.github.ericytsang.app.ui.frame.logviewer
  */
 sealed class SelectedItems<T>
 {
+    operator fun contains(item:T):Boolean = isSelected(item)
+
     fun isSelected(item:T):Boolean = when (this)
     {
         is IncludeSelected -> item in includedItems
@@ -26,7 +28,7 @@ sealed class SelectedItems<T>
         is ExcludeSelected -> ExcludeSelected(excludedItems + item)
     }
 
-    fun toggle(item:T):SelectedItems<T> = when (isSelected(item))
+    fun toggle(item:T):SelectedItems<T> = when (item in this)
     {
         true -> remove(item)
         false -> add(item)

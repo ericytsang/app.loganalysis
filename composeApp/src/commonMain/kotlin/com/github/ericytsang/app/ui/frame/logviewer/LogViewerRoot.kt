@@ -148,7 +148,7 @@ fun LogViewerRoot(
                             onCopySelection =
                             {
                                 val textToCopy = logLines
-                                    .filter { selectedItems.isSelected(it.key) }
+                                    .filter { it.key in selectedItems }
                                     .joinToString("\n") { it.line }
                                 clipboardManager.setText(buildAnnotatedString { append(textToCopy) })
                                 true
@@ -175,7 +175,7 @@ fun LogViewerRoot(
                     )
                     { index ->
                         val item = logLines[index]
-                        val isSelected by derivedStateOf { selectedItems.isSelected(item.key) }
+                        val isSelected by derivedStateOf { item.key in selectedItems }
                         val backgroundColor = if (isSelected) themeColors.primary.copy(alpha = ContentAlpha.medium) else themeColors.surface
                         Box(
                             modifier = Modifier
