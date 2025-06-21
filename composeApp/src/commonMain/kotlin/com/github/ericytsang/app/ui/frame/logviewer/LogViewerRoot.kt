@@ -35,7 +35,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
@@ -178,10 +182,12 @@ fun LogViewerRoot(
                         val item = logLines[index]
                         val isSelected by derivedStateOf { item.key in selectedItems }
                         val backgroundColor = if (isSelected) themeColors.primary.copy(alpha = ContentAlpha.medium) else themeColors.surface
+                        val focusRequester = remember { FocusRequester() }
                         Box(
                             modifier = Modifier
                                 .animateItem()
                                 .background(backgroundColor)
+                                .focusRequester(focusRequester)
                                 .clickable()
                                 {
                                     when
@@ -225,6 +231,7 @@ fun LogViewerRoot(
                                             lastClickedIndex = index
                                         }
                                     }
+                                    focusRequester.requestFocus()
                                 },
                         )
                         {
