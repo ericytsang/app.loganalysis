@@ -3,12 +3,14 @@ package com.github.ericytsang.app.ui.frame.logviewer
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isAltPressed
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 
 fun Modifier.captureModifierState(
     onModifierStateChange:(ModifierState)->Unit,
@@ -70,6 +72,12 @@ fun Modifier.handleKeyCombinations(
     onMoveFocusDown:()->Boolean = { false },
 
 ) = onKeyEvent { keyEvent ->
+
+    // only act on key down
+    if (keyEvent.type != KeyEventType.KeyDown)
+        return@onKeyEvent false
+
+    // detect and handle key combinations
     val modifierState = keyEvent.getModifierState()
     val onlyOsAgnosticCtrlPressed = modifierState == ModifierState(isOsAgnosticCtrlPressed = true)
     val onlyShiftPressed = modifierState == ModifierState(isShiftPressed = true)

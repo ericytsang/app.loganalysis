@@ -130,8 +130,9 @@ fun LogViewerRoot(
             var lastClickedIndex by remember { mutableStateOf<Int?>(null) }
             var modifierState by remember { mutableStateOf(ModifierState(false,false)) }
 
-            // get clipboard manager
+            // get managers
             val clipboardManager = LocalClipboardManager.current
+            val focusManager = LocalFocusManager.current
 
             Surface(
                 modifier = Modifier.weight(1f,fill = true),
@@ -155,8 +156,8 @@ fun LogViewerRoot(
                             },
                             // onExpandSelectionUp = { logViewerViewModel.expandSelectionUp() },
                             // onExpandSelectionDown = { logViewerViewModel.expandSelectionDown() },
-                            // onMoveFocusUp = { logViewerViewModel.moveFocusUp() },
-                            // onMoveFocusDown = { logViewerViewModel.moveFocusDown() },
+                            onMoveFocusUp = { focusManager.moveFocus(FocusDirection.Up) },
+                            onMoveFocusDown = { focusManager.moveFocus(FocusDirection.Down) },
                         )
                 )
                 {
