@@ -200,19 +200,13 @@ class SelectedItemsViewModelImpl<T> : SelectedItemsViewModel<T>
     {
         is Selected ->
         {
-            val conditions = mutableListOf(
-                { it:T -> it == startOfRangeSelectionState.itemKey },
-                { it:T -> it == endOfRangeItemKey },
-            )
-            fun isAnyRemainingConditionTrue(item:T):Boolean
-            {
-                val result = conditions.find { condition -> condition(item) } ?: return false
-                conditions -= result
-                return true
-            }
+            val indexA = sequence.indexOf(startOfRangeSelectionState.itemKey)
+            val indexB = sequence.indexOf(endOfRangeItemKey)
+            val minIndex = minOf(indexA, indexB)
+            val maxIndex = maxOf(indexA, indexB)
             sequence
-                .dropWhile { !isAnyRemainingConditionTrue(it) }
-                .takeWhile { !isAnyRemainingConditionTrue(it) }
+                .drop(minIndex)
+                .take(maxIndex - minIndex + 1)
         }
         is ImplicitFirstItem -> sequence
             .takeWhile { it != endOfRangeItemKey }
