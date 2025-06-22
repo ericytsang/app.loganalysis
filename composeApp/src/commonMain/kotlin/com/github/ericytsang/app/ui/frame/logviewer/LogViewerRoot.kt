@@ -237,7 +237,9 @@ fun LogViewerRoot(
                         {
                             ColorCodedLogLine(
                                 text = item.line,
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = Dimens.mttPadding),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = Dimens.mttPadding),
                                 delimiters = delimiters,
                                 themeForColorCoding = theme,
                                 defaultColor = themeColors.onBackground,
