@@ -158,8 +158,6 @@ fun LogViewerRoot(
                                 clipboardManager.setText(buildAnnotatedString { append(textToCopy) })
                                 true
                             },
-                            // onExpandSelectionUp = { logViewerViewModel.expandSelectionUp() },
-                            // onExpandSelectionDown = { logViewerViewModel.expandSelectionDown() },
                             onMoveFocusUp = { focusManager.moveFocus(FocusDirection.Up) },
                             onMoveFocusDown = { focusManager.moveFocus(FocusDirection.Down) },
                         )
