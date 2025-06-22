@@ -249,7 +249,7 @@ fun LogViewerRoot(
                         val focusRequester = remember { FocusRequester() }
                         Box(
                             modifier = Modifier
-                                .animateItem() // i want to enable these animations, but uh, it causes some portion of the log line to start flashing, and I think it is a bug in compose, so I am disabling them for now.
+                                //.animateItem() // i want to enable these animations, but uh, it causes some portion of the log line to start flashing, and I think it is a bug in compose, so I am disabling them for now.
                                 .background(backgroundColor)
                                 .focusRequester(focusRequester)
                                 .clickable()
