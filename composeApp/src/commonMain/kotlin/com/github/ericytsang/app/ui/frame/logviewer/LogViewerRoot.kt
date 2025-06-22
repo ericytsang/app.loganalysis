@@ -130,7 +130,7 @@ fun LogViewerRoot(
             val logLines by logViewerViewModel.getLogLinesFlow().collectAsState(emptyList())
 
             // Selection state
-            var selectedItems by remember { mutableStateOf<SelectedItems<LogViewerViewModel.FileLineKey>>(SelectedItems.IncludeSelected()) }
+            var selectedItems by remember { mutableStateOf<SelectedItems<LogViewerViewModel.FileLineKey>>(IncludeSelected()) }
             var lastClickedIndex by remember { mutableStateOf<Int?>(null) }
             var modifierState by remember { mutableStateOf(ModifierState(false,false)) }
 
@@ -148,8 +148,8 @@ fun LogViewerRoot(
                     modifier = Modifier
                         .captureModifierState { newState -> modifierState = newState }
                         .handleKeyCombinations(
-                            onSelectAll = { selectedItems = SelectedItems.ExcludeSelected(); true },
-                            onDeselectAll = { selectedItems = SelectedItems.IncludeSelected(); true },
+                            onSelectAll = { selectedItems = ExcludeSelected(); true },
+                            onDeselectAll = { selectedItems = IncludeSelected(); true },
                             onCopySelection =
                             {
                                 val textToCopy = logLines
@@ -205,7 +205,7 @@ fun LogViewerRoot(
                                             else
                                             {
                                                 // shift+click: select only range
-                                                SelectedItems.IncludeSelected(itemKeys)
+                                                IncludeSelected(itemKeys)
                                             }
                                         }
 
@@ -225,7 +225,7 @@ fun LogViewerRoot(
                                         // normal click: select only this
                                         else ->
                                         {
-                                            selectedItems = SelectedItems.IncludeSelected(setOf(item.key))
+                                            selectedItems = IncludeSelected(setOf(item.key))
                                             lastClickedIndex = index
                                         }
                                     }
