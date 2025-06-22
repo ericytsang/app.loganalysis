@@ -1,9 +1,10 @@
-@file:OptIn(ExperimentalMaterialApi::class)
+@file:OptIn(ExperimentalMaterialApi::class,ExperimentalComposeUiApi::class)
 
 package com.github.ericytsang.app.ui.frame.logviewer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -34,10 +36,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.buildAnnotatedString
@@ -73,6 +78,7 @@ fun LogViewerRoot(
     rootChildWindowManager:ChildWindowManager,
     logFileListViewModelFactory:()->LogFileListViewModel,
     filterSetViewModelFactory:(FilterType)->FilterSetViewModel,
+    selectedItemsViewModelFactory:()->SelectedItemsViewModel<LogViewerViewModel.FileLineKey>,
     workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel,
     logViewerViewModelFactory:()->LogViewerViewModel,
     reorderSidebarItemViewModelFactory:()->ReorderSidebarItemViewModel,
@@ -96,6 +102,8 @@ fun LogViewerRoot(
     logViewerViewModel.setConcatenatedFiles(workingFileSet.files.map { it.filePath.toFile() })
 
     val shouldWrapText by viewModel.getWordWrapFlow().collectAsState(false)
+
+    val selectedItemsViewModel = remember { selectedItemsViewModelFactory() }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(Dimens.mttPadding),
@@ -128,9 +136,11 @@ fun LogViewerRoot(
             // region log viewer
 
             val logLines by logViewerViewModel.getLogLinesFlow().collectAsState(emptyList())
+            val lazyListState = rememberLazyListState()
+            var draggingMousePosition by remember { mutableStateOf<Offset>(Offset(0f,0f)) }
 
             // Selection state
-            var selectedItems by remember { mutableStateOf<SelectedItems<LogViewerViewModel.FileLineKey>>(IncludeSelected()) }
+            val selectedItems by selectedItemsViewModel.selectedItemsFlow.collectAsState(IncludeSelected())
             var lastClickedIndex by remember { mutableStateOf<Int?>(null) }
             var modifierState by remember { mutableStateOf(ModifierState(false,false)) }
 
@@ -148,8 +158,8 @@ fun LogViewerRoot(
                     modifier = Modifier
                         .captureModifierState { newState -> modifierState = newState }
                         .handleKeyCombinations(
-                            onSelectAll = { selectedItems = ExcludeSelected(); true },
-                            onDeselectAll = { selectedItems = IncludeSelected(); true },
+                            onSelectAll = { selectedItemsViewModel.selectAllItems(); true },
+                            onDeselectAll = { selectedItemsViewModel.deselectAllItems(); true },
                             onCopySelection =
                             {
                                 val textToCopy = logLines
@@ -161,19 +171,80 @@ fun LogViewerRoot(
                             onMoveFocusUp = { focusManager.moveFocus(FocusDirection.Up) },
                             onMoveFocusDown = { focusManager.moveFocus(FocusDirection.Down) },
                         )
+                        .pointerInput("LogViewerRoot/logviewer/pointerInput")
+                        {
+                            detectDragGestures(
+                                onDragStart = { offset ->
+
+                                    // find the item at the mouse position
+                                    val mousePosition = offset.y.toInt()
+                                    val withIndex = lazyListState.layoutInfo.visibleItemsInfo
+                                        .find { mousePosition in it.getOccupiedSpace() }
+                                        ?.toDataClass()
+
+                                    // get the item's key
+                                    val key = withIndex?.key as LogViewerLazyListItemKey? ?: return@detectDragGestures
+                                    val logLineItemKey = when (key)
+                                    {
+                                        is LogViewerLazyListItemKey.TopItem -> return@detectDragGestures
+                                        is LogViewerLazyListItemKey.LogLineItem -> key
+                                    }
+
+                                    // start the dragging gesture
+                                    selectedItemsViewModel.beginDragToSelect(
+                                        keyOfItemAtDragStart = logLineItemKey.fileLineKey,
+                                        selectionModifier = if (modifierState.isOsAgnosticCtrlPressed)
+                                        {
+                                            SelectedItemsViewModel.SelectionModifier.ADD_TO_SELECTION
+                                        }
+                                        else
+                                        {
+                                            SelectedItemsViewModel.SelectionModifier.REPLACE_SELECTION
+                                        },
+                                    )
+                                },
+                                onDrag = { change, dragAmount ->
+
+                                    // find the item at the mouse position
+                                    val mousePosition = change.position.y.toInt()
+                                    val withIndex = lazyListState.layoutInfo.visibleItemsInfo
+                                        .find { mousePosition in it.getOccupiedSpace() }
+                                        ?.toDataClass()
+
+                                    // get the item's key
+                                    val key = withIndex?.key as LogViewerLazyListItemKey? ?: return@detectDragGestures
+                                    val logLineItemKey = when (key)
+                                    {
+                                        is LogViewerLazyListItemKey.TopItem -> return@detectDragGestures
+                                        is LogViewerLazyListItemKey.LogLineItem -> key
+                                    }
+
+                                    // update the dragging gesture selection state
+                                    selectedItemsViewModel.updateDragToSelect(
+                                        list = logLines,
+                                        selector = { it.key },
+                                        keyOfItemAtPointer = logLineItemKey.fileLineKey,
+                                    )
+                                },
+                                onDragEnd = {
+                                    selectedItemsViewModel.endDragToSelect()
+                                },
+                            )
+                        },
+                    lazyListState = lazyListState,
                 )
                 {
                     // put an item at top so that if new items are added to the top, the scroll will stick to the top.
                     // without this, when we re-order the top log line, the scroll would move to where the log line is
                     // being re-ordered to.
                     item(
-                        key = "top-spacer",
+                        key = LogViewerLazyListItemKey.TopItem(),
                         content = { Spacer(Modifier.size(1.dp)) }
                     )
 
                     // show log lines
                     items(
-                        key = { index -> "log line item ${logLines[index].key}" },
+                        key = { index -> LogViewerLazyListItemKey.LogLineItem(logLines[index].key) },
                         count = logLines.size,
                     )
                     { index ->
@@ -191,43 +262,26 @@ fun LogViewerRoot(
                                     when
                                     {
                                         // shift+click: select range, keep others
-                                        modifierState.isShiftPressed ->
-                                        {
-                                            val from = lastClickedIndex ?: index
-                                            val range = if (from <= index) from..index else index..from
-                                            val indices = range.toSet()
-                                            val itemKeys = indices.map { index -> logLines[index].key }.toSet()
-                                            selectedItems = if (modifierState.isOsAgnosticCtrlPressed)
+                                        modifierState.isShiftPressed -> selectedItemsViewModel.selectRange(
+                                            list = logLines,
+                                            selector = { it.key },
+                                            keyOfItemAtEndOfRange = item.key,
+                                            selectionModifier = if (modifierState.isOsAgnosticCtrlPressed)
                                             {
-                                                // shift+ctrl/cmd+click: add range to selection
-                                                itemKeys.fold(selectedItems) { acc,itemKey -> acc.add(itemKey) }
+                                                SelectedItemsViewModel.SelectionModifier.ADD_TO_SELECTION
                                             }
                                             else
                                             {
-                                                // shift+click: select only range
-                                                IncludeSelected(itemKeys)
-                                            }
-                                        }
+                                                SelectedItemsViewModel.SelectionModifier.REPLACE_SELECTION
+                                            },
+                                        )
 
                                         // ctrl/cmd+click: toggle
                                         modifierState.isOsAgnosticCtrlPressed ->
-                                        {
-                                            // toggle the selection of this item
-                                            val newSelectedItems = selectedItems.toggle(item.key)
-
-                                            // if the item is selected, then update the last clicked index; reset otherwise
-                                            lastClickedIndex = if (item.key in newSelectedItems) index else null
-
-                                            // update the selected items
-                                            selectedItems = newSelectedItems
-                                        }
+                                            selectedItemsViewModel.toggleItemSelection(item.key)
 
                                         // normal click: select only this
-                                        else ->
-                                        {
-                                            selectedItems = IncludeSelected(setOf(item.key))
-                                            lastClickedIndex = index
-                                        }
+                                        else -> selectedItemsViewModel.selectItem(item.key)
                                     }
                                     focusRequester.requestFocus()
                                 },
@@ -354,4 +408,38 @@ fun LogViewerRoot(
 
         // endregion
     }
+}
+
+fun LazyListItemInfo.getOccupiedSpace():IntRange
+{
+    return offset..(offset+size)
+}
+
+fun LazyListItemInfo.toDataClass() = LazyListItemInfoDataClass(
+    index = index,
+    offset = offset,
+    size = size,
+    key = key,
+)
+
+data class LazyListItemInfoDataClass(
+    /** [LazyListItemInfo.index] */
+    val index:Int,
+    /** [LazyListItemInfo.offset] */
+    val offset:Int,
+    /** [LazyListItemInfo.size] */
+    val size:Int,
+    /** [LazyListItemInfo.key] */
+    val key:Any,
+)
+
+sealed interface LogViewerLazyListItemKey
+{
+    data class TopItem(
+        val unit:Unit = Unit,
+    ):LogViewerLazyListItemKey
+
+    data class LogLineItem(
+        val fileLineKey:LogViewerViewModel.FileLineKey,
+    ):LogViewerLazyListItemKey
 }

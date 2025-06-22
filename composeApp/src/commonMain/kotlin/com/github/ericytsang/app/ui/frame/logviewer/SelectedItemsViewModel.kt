@@ -70,15 +70,8 @@ interface SelectedItemsViewModel<T>
 
     /**
      * call when the user ends a drag gesture.
-     * @param list the list of items to select from.
-     * @param selector a function that maps an item to its key.
-     * @param keyOfItemAtDragEnd the key of the item at the end of the drag gesture.
      */
-    fun <E> endDragToSelect(
-        list:List<E>,
-        selector:(E)->T,
-        keyOfItemAtDragEnd:T,
-    )
+    fun endDragToSelect()
 
     enum class SelectionModifier
     {
@@ -187,17 +180,12 @@ class SelectedItemsViewModelImpl<T> : SelectedItemsViewModel<T>
         _selectedByActiveDragGesture.value = IncludeSelected(itemsSelectedByDragGesture.toSet())
     }
 
-    override fun <E> endDragToSelect(
-        list:List<E>,
-        selector:(E)->T,
-        keyOfItemAtDragEnd:T,
-    )
+    /**
+     * commit the selection made by the drag gesture.
+     */
+    override fun endDragToSelect()
     {
-        val itemsSelectedByDragGesture = getItemsInSelectedRange(
-            sequence = list.asSequence().map(selector),
-            startOfRangeSelectionState = startOfRangeSelection.value,
-            endOfRangeItemKey = keyOfItemAtDragEnd,
-        )
+        val itemsSelectedByDragGesture = _selectedByActiveDragGesture.value.includedItems
         _selectedItemsFlow.update { oldValue ->
             itemsSelectedByDragGesture.fold(oldValue) { acc, itemKey -> acc + itemKey }
         }
@@ -210,9 +198,22 @@ class SelectedItemsViewModelImpl<T> : SelectedItemsViewModel<T>
         endOfRangeItemKey:T,
     ):Sequence<T> = when (startOfRangeSelectionState)
     {
-        is Selected -> sequence
-            .dropWhile { it != startOfRangeSelectionState.itemKey }
-            .takeWhile { it != endOfRangeItemKey }
+        is Selected ->
+        {
+            val conditions = mutableListOf(
+                { it:T -> it == startOfRangeSelectionState.itemKey },
+                { it:T -> it == endOfRangeItemKey },
+            )
+            fun isAnyRemainingConditionTrue(item:T):Boolean
+            {
+                val result = conditions.find { condition -> condition(item) } ?: return false
+                conditions -= result
+                return true
+            }
+            sequence
+                .dropWhile { !isAnyRemainingConditionTrue(it) }
+                .takeWhile { !isAnyRemainingConditionTrue(it) }
+        }
         is ImplicitFirstItem -> sequence
             .takeWhile { it != endOfRangeItemKey }
     }

@@ -47,6 +47,7 @@ fun LogViewerRootWindow(
                 workingFileSetEditorViewModelFactory = { WorkingFileSetEditorViewModel.create(configurationId) },
                 logViewerViewModelFactory = { LogViewerViewModel.create(configurationId) },
                 reorderSidebarItemViewModelFactory = { ReorderSidebarItemViewModel.create(configurationId) },
+                selectedItemsViewModelFactory = { SelectedItemsViewModelImpl() },
             )
         }
     }
