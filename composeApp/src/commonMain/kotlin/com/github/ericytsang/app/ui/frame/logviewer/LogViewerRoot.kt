@@ -70,8 +70,6 @@ import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import kotlinx.coroutines.CoroutineScope
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
-// click+dragging on a log line will select all log lines between the last clicked log line and the clicked log line, while also deselecting all other log lines.
-
 @Composable
 fun LogViewerRoot(
     themeColors:Colors,
@@ -137,11 +135,9 @@ fun LogViewerRoot(
 
             val logLines by logViewerViewModel.getLogLinesFlow().collectAsState(emptyList())
             val lazyListState = rememberLazyListState()
-            var draggingMousePosition by remember { mutableStateOf<Offset>(Offset(0f,0f)) }
 
             // Selection state
             val selectedItems by selectedItemsViewModel.selectedItemsFlow.collectAsState(IncludeSelected())
-            var lastClickedIndex by remember { mutableStateOf<Int?>(null) }
             var modifierState by remember { mutableStateOf(ModifierState(false,false)) }
 
             // get managers
