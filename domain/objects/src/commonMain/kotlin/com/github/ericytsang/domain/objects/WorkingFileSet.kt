@@ -26,6 +26,7 @@ data class FilePath(
 {
     companion object
     {
+        fun File.toFilePath(): FilePath = FilePath(filePath = absolutePath)
         fun FilePath.toFile(): File = File(filePath)
     }
 }

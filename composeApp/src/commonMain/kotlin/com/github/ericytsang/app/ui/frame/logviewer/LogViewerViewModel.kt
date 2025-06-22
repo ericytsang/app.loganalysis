@@ -3,11 +3,14 @@ package com.github.ericytsang.app.ui.frame.logviewer
 import com.github.ericytsang.app.util.LogcatFilterEvaluator
 import com.github.ericytsang.app.util.LogcatFilterEvaluatorImpl
 import com.github.ericytsang.domain.objects.ConfigurationId
+import com.github.ericytsang.domain.objects.FilePath
+import com.github.ericytsang.domain.objects.FilePath.Companion.toFilePath
 import com.github.ericytsang.domain.objects.FilterInterpretationMode
 import com.github.ericytsang.domain.objects.FilterModel
 import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.FilterRepository
+import com.github.ericytsang.kotlin.ImmutableCoroutineScope
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import com.github.ericytsang.kotlin.newChildScope
 import com.github.ericytsang.logcatfilterparser.LeafNode
@@ -31,6 +34,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LogViewerViewModel(
+    uiScope:ImmutableCoroutineScope,
     private val logcatFilterParser:LogcatFilterParser,
     private val logcatFilterEvaluator:LogcatFilterEvaluator,
     configurationId:ConfigurationId,
@@ -115,7 +119,7 @@ class LogViewerViewModel(
                 .associateWith { file ->
                     println("Reading file: ${file.absolutePath}")
                     FileLines(
-                        file = file,
+                        filePath = file.toFilePath(),
                         lines = file.readLines().withIndex().toList(),
                     )
                 }
@@ -123,7 +127,7 @@ class LogViewerViewModel(
                     val fileLines = mapEntry.value
                     fileLines.lines.map { line ->
                         val key = FileLineKey(
-                            file = fileLines.file,
+                            filePath = fileLines.filePath,
                             lineNumberInFile = line.index + 1,
                         )
                         FileLine(
@@ -134,7 +138,7 @@ class LogViewerViewModel(
                 }
         }
         .shareIn(
-            scope = applicationScope.newChildScope(dispatchers.io),
+            scope = uiScope.newChildScope(dispatchers.io),
             started = SharingStarted.WhileSubscribed(5.seconds),
             replay = 1,
         )
@@ -145,7 +149,7 @@ class LogViewerViewModel(
     }.conflate()
 
     data class FileLines(
-        val file:File,
+        val filePath:FilePath,
         val lines:List<IndexedValue<String>>,
     )
 
@@ -155,16 +159,19 @@ class LogViewerViewModel(
     )
 
     data class FileLineKey(
-        val file:File,
+        val filePath:FilePath,
         val lineNumberInFile:Int,
     )
 
-    fun getLogLinesFlow():Flow<List<FileLine>> =
-        combine(
-            orderedFileLines,
-            activeFilters,
-            ::applyFilterToLogLines,
-        ).flowOn(dispatchers.io)
+    val logLinesFlow:Flow<List<FileLine>> = combine(
+        orderedFileLines,
+        activeFilters,
+        ::applyFilterToLogLines,
+    ).shareIn(
+        scope = uiScope.newChildScope(dispatchers.io),
+        started = SharingStarted.WhileSubscribed(5.seconds),
+        replay = 1,
+    )
 
     private fun applyFilterToLogLines(
         logLines:List<FileLine>,
@@ -183,11 +190,13 @@ class LogViewerViewModel(
     companion object
     {
         fun create(
+            uiScope:ImmutableCoroutineScope,
             configurationId:ConfigurationId,
             kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
             logcatFilterParser:LogcatFilterParser = LogcatFilterParser(),
             logcatFilterEvaluator:LogcatFilterEvaluator = LogcatFilterEvaluatorImpl(),
         ):LogViewerViewModel = LogViewerViewModel(
+            uiScope = uiScope,
             kotlinDependencyProvider = kotlinDependencyProvider,
             logcatFilterParser = logcatFilterParser,
             logcatFilterEvaluator = logcatFilterEvaluator,

@@ -41,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalFocusManager
@@ -133,7 +132,7 @@ fun LogViewerRoot(
         {
             // region log viewer
 
-            val logLines by logViewerViewModel.getLogLinesFlow().collectAsState(emptyList())
+            val logLines by logViewerViewModel.logLinesFlow.collectAsState(emptyList())
             val lazyListState = rememberLazyListState()
 
             // Selection state
@@ -250,7 +249,7 @@ fun LogViewerRoot(
                         val focusRequester = remember { FocusRequester() }
                         Box(
                             modifier = Modifier
-                                .animateItem()
+                                .animateItem() // i want to enable these animations, but uh, it causes some portion of the log line to start flashing, and I think it is a bug in compose, so I am disabling them for now.
                                 .background(backgroundColor)
                                 .focusRequester(focusRequester)
                                 .clickable()
