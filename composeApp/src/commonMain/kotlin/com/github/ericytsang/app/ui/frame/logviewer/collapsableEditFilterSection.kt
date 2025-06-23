@@ -27,8 +27,6 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,6 +43,10 @@ import com.github.ericytsang.app.ui.util.component.DoubleClickButton
 import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterInterpretationMode
 import com.github.ericytsang.domain.objects.FilterType
+import kotlinproject.composeapp.generated.resources.Res
+import kotlinproject.composeapp.generated.resources.outline_drag_handle_24
+import kotlinproject.composeapp.generated.resources.outline_files_24
+import org.jetbrains.compose.resources.painterResource
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
@@ -289,7 +291,7 @@ private fun ReorderableCollectionItemScope.filterHeader(
         )
         {
             Icon(
-                imageVector = Icons.Default.Menu,
+                painter = painterResource(Res.drawable.outline_drag_handle_24),
                 contentDescription = "Drag to reorder",
                 tint = themeColors.onSurface,
             )

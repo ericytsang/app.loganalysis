@@ -16,8 +16,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -34,9 +32,12 @@ import com.github.ericytsang.domain.objects.FilePath
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.WorkingFileSetRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
+import kotlinproject.composeapp.generated.resources.Res
+import kotlinproject.composeapp.generated.resources.outline_drag_handle_24
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.map
+import org.jetbrains.compose.resources.painterResource
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
 
@@ -224,7 +225,7 @@ fun LazyListScope.collapsableEditWorkingFilesSection(
                             )
                             {
                                 Icon(
-                                    imageVector = Icons.Default.Menu,
+                                    painter = painterResource(Res.drawable.outline_drag_handle_24),
                                     contentDescription = "Drag to reorder",
                                     tint = themeColors.onSurface,
                                 )
