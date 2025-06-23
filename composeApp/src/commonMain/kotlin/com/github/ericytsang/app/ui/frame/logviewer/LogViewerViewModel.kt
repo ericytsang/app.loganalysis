@@ -1,5 +1,7 @@
 package com.github.ericytsang.app.ui.frame.logviewer
 
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
 import com.github.ericytsang.app.util.LogcatFilterEvaluator
 import com.github.ericytsang.app.util.LogcatFilterEvaluatorImpl
 import com.github.ericytsang.domain.objects.ConfigurationId
@@ -29,12 +31,13 @@ import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
+import java.awt.datatransfer.StringSelection
 import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LogViewerViewModel(
-    uiScope:ImmutableCoroutineScope,
+    private val uiScope:ImmutableCoroutineScope,
     private val logcatFilterParser:LogcatFilterParser,
     private val logcatFilterEvaluator:LogcatFilterEvaluator,
     configurationId:ConfigurationId,
@@ -42,11 +45,6 @@ class LogViewerViewModel(
     filterRepository:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
 ):KotlinDependencyProvider by kotlinDependencyProvider
 {
-    init
-    {
-        println("LogViewerViewModel created")
-    }
-
     // region concatenated files
 
     val concatenatedFilesFlow:StateFlow<List<File>> get() = _concatenatedFiles
@@ -181,6 +179,27 @@ class LogViewerViewModel(
             logcatFilterEvaluator.isMatch(
                 logLine = logLine.line,
                 logcatFilter = filter,
+            )
+        }
+    }
+
+    // endregion
+
+    // region copy selected text to clipboard
+
+    fun copySelectedTextToClipboard(
+        logLines:List<FileLine>,
+        selectedItems:SelectedItems<FileLineKey>,
+        clipboardManager:Clipboard,
+    )
+    {
+        uiScope.launch(dispatchers.io)
+        {
+            val textToCopy = logLines
+                .filter { it.key in selectedItems }
+                .joinToString("\n") { it.line }
+            clipboardManager.setClipEntry(
+                ClipEntry(StringSelection(textToCopy))
             )
         }
     }

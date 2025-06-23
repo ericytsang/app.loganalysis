@@ -42,9 +42,8 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.util.ChildWindowManager
@@ -137,7 +136,7 @@ fun LogViewerRoot(
             var modifierState by remember { mutableStateOf(ModifierState(false,false)) }
 
             // get managers
-            val clipboardManager = LocalClipboardManager.current
+            val clipboardManager = LocalClipboard.current
             val focusManager = LocalFocusManager.current
 
             Surface(
@@ -154,10 +153,11 @@ fun LogViewerRoot(
                             onDeselectAll = { selectedItemsViewModel.deselectAllItems(); true },
                             onCopySelection =
                             {
-                                val textToCopy = logLines
-                                    .filter { it.key in selectedItems }
-                                    .joinToString("\n") { it.line }
-                                clipboardManager.setText(buildAnnotatedString { append(textToCopy) })
+                                logViewerViewModel.copySelectedTextToClipboard(
+                                    logLines = logLines,
+                                    selectedItems = selectedItems,
+                                    clipboardManager = clipboardManager,
+                                )
                                 true
                             },
                             onMoveFocusUp = { focusManager.moveFocus(FocusDirection.Up) },
