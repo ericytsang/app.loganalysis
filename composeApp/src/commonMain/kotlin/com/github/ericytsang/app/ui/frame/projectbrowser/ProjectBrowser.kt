@@ -1,13 +1,16 @@
 package com.github.ericytsang.app.ui.frame.projectbrowser
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Colors
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -16,7 +19,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontStyle
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.util.component.CommonWindowHeader
 import com.github.ericytsang.app.ui.util.ChildWindowManager
@@ -54,12 +59,31 @@ fun ProjectBrowser(
 
         // project list
         Surface(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f, fill = true),
             shape = MaterialTheme.shapes.small,
             border = ButtonDefaults.outlinedBorder,
         )
         {
-            LazyColumn {
+            // if there are no items, show empty state
+            if (items.isEmpty())
+            {
+                val secondaryTextColor = themeColors.onBackground.copy(alpha = ContentAlpha.medium)
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                )
+                {
+                    Text(
+                        text = "No projects",
+                        fontStyle = FontStyle.Italic,
+                        color = secondaryTextColor,
+                    )
+                }
+            }
+
+            // otherwise, show the list of items
+            else LazyColumn {
                 items(
                     count = items.size,
                     key = { index ->
@@ -78,7 +102,7 @@ fun ProjectBrowser(
                         Modifier.padding(bottom = Dimens.mttPadding).padding(horizontal = Dimens.mttPadding)
                     ProjectListItem(
                         item = items[index],
-                        modifier = modifier,
+                        modifier = modifier.animateItem(),
                         projectBrowserViewModel = viewModel,
                         viewModelFactory = { scope,projectItem ->
                             ProjectListItemViewModelImpl(
