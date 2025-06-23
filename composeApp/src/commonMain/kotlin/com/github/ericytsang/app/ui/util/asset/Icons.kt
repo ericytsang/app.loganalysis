@@ -8,6 +8,7 @@ import kotlinproject.composeapp.generated.resources.outline_delete_24
 import kotlinproject.composeapp.generated.resources.outline_drag_handle_24
 import kotlinproject.composeapp.generated.resources.outline_files_24
 import kotlinproject.composeapp.generated.resources.outline_keyboard_arrow_up_24
+import kotlinproject.composeapp.generated.resources.outline_more_vert_24
 import kotlinproject.composeapp.generated.resources.outline_playlist_add_24
 import kotlinproject.composeapp.generated.resources.outline_playlist_remove_24
 import kotlinproject.composeapp.generated.resources.outline_settings_24
@@ -90,6 +91,16 @@ fun IconCollapseSection(color:Color)
     Icon(
         painter = painterResource(Res.drawable.outline_keyboard_arrow_up_24),
         contentDescription = "Collapse section",
+        tint = color,
+    )
+}
+
+@Composable
+fun IconMoreOptions(color:Color)
+{
+    Icon(
+        painter = painterResource(Res.drawable.outline_more_vert_24),
+        contentDescription = "More options",
         tint = color,
     )
 }

@@ -17,6 +17,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
@@ -26,6 +27,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.util.asset.IconDragHandle
+import com.github.ericytsang.app.ui.util.asset.IconMoreOptions
+import com.github.ericytsang.app.ui.util.component.DoubleClickButton
 import com.github.ericytsang.domain.objects.ConfigurationId
 import com.github.ericytsang.domain.objects.FilePath
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
@@ -210,7 +213,11 @@ fun LazyListScope.collapsableEditWorkingFilesSection(
                     Surface(elevation = elevation)
                     {
                         Row(
-                            modifier = Modifier.fillMaxWidth().background(themeColors.background),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(themeColors.background)
+                                .padding(Dimens.mttPadding),
+                            verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
                         )
                         {
@@ -225,13 +232,22 @@ fun LazyListScope.collapsableEditWorkingFilesSection(
 
                             // file path text
                             Text(
-                                modifier = Modifier.fillMaxWidth().padding(Dimens.mttPadding),
+                                modifier = Modifier.weight(1f, fill = true),
                                 // if the texts have a common prefix, then make the common prefix portion the secondary text color
                                 text = buildAnnotatedString {
                                     withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
                                         append(itemViewModel.filePath.filePath.removePrefix(commonPrefix))
                                     }
                                 }
+                            )
+
+                            // delete button
+                            DoubleClickButton(
+                                onDoubleClick = { itemViewModel.requestDelete() },
+                                idleButtonColors = ButtonDefaults.buttonColors(themeColors.surface),
+                                idleContent = { IconMoreOptions(themeColors.onSurface) },
+                                clickedOnceButtonColors = ButtonDefaults.buttonColors(themeColors.error),
+                                clickedOnceContent = { Text("Delete") },
                             )
                         }
                     }
