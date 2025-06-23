@@ -16,8 +16,8 @@ interface NewProjectWizardViewModel
 {
     val selectedFiles:Flow<List<SelectedFile>>
     fun addFiles(newFiles:List<SelectedFile>)
-    fun moveFilesToPosition(files:List<SelectedFile>,position:Int)
-    fun removeFiles(files:List<SelectedFile>)
+    suspend fun moveFilesToPosition(fromIndex:Int,toIndex:Int)
+    fun removeFiles(file:SelectedFile)
 
     /**
      * this is a request from the UI to the view model to create a new configuration
@@ -79,33 +79,26 @@ private class NewProjectWizardViewModelImpl(
         }
     }
 
-    override fun moveFilesToPosition(files:List<SelectedFile>,position:Int)
+    override suspend fun moveFilesToPosition(fromIndex:Int,toIndex:Int)
     {
         applicationScope.launch(dispatchers.io)
         {
             _selectedFiles.update()
             { selectedFiles ->
-
-                // note the indices so that later, we can find the position of where the files should be moved to
-                val indexedFiles = selectedFiles.withIndex()
-
-                // remove files that are being moved
-                val filesRemoved = indexedFiles.filter { it.value !in files }
-
-                // separate the files that are before and after the position
-                val (before, after) = filesRemoved.partition { it.index < position }
-
-                // create a new list with the files moved to the specified position
-                before.map { it.value } + files + after.map { it.value }
+                val fileToMove = selectedFiles[fromIndex]
+                val updatedList = selectedFiles.toMutableList()
+                updatedList.removeAt(fromIndex)
+                updatedList.add(toIndex, fileToMove)
+                updatedList
             }
         }
     }
 
-    override fun removeFiles(files:List<SelectedFile>)
+    override fun removeFiles(file:SelectedFile)
     {
         applicationScope.launch(dispatchers.io)
         {
-            _selectedFiles.update { selectedFiles -> selectedFiles.filter { it !in files } }
+            _selectedFiles.update { selectedFiles -> selectedFiles.filter { it != file } }
         }
     }
 

@@ -18,9 +18,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.ui.util.component.EmptyState
-import com.github.ericytsang.app.ui.util.component.CommonWindowHeader
 import com.github.ericytsang.app.ui.util.ChildWindowManager
+import com.github.ericytsang.app.ui.util.component.CommonWindowHeader
+import com.github.ericytsang.app.ui.util.component.EmptyState
 import com.github.ericytsang.app.ui.util.openNewProjectWizard
 import com.github.ericytsang.domain.objects.ConfigurationUpdateSequence
 import kotlinx.coroutines.CoroutineScope
