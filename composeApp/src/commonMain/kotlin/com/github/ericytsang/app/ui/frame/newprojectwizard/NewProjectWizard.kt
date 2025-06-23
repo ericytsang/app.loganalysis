@@ -93,7 +93,8 @@ fun NewProjectWizard(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
+                )
+                {
                     Text(
                         text = "No files selected",
                         fontStyle = FontStyle.Italic,
