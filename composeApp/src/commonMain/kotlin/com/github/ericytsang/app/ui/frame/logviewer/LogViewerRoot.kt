@@ -47,7 +47,6 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.ui.frame.newprojectwizard.SelectedFile
 import com.github.ericytsang.app.ui.util.ChildWindowManager
 import com.github.ericytsang.app.ui.util.asset.IconEditFileList
 import com.github.ericytsang.app.ui.util.asset.IconExcludeFilter
