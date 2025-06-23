@@ -4,11 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.window.Window
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.LogFileListViewModelImpl
 import com.github.ericytsang.app.ui.util.usecase.BringWindowToFocusOnRequest
 import com.github.ericytsang.app.ui.util.ChildWindowManager
 import com.github.ericytsang.app.ui.util.ChildWindowManagerController
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.WorkingFileSetEditorViewModel
 import com.github.ericytsang.app.ui.util.component.fillMaxBackground
 import com.github.ericytsang.domain.objects.ConfigurationId
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope.Companion.asImmutableCoroutineScope

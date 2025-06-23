@@ -38,14 +38,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.ui.frame.workingfileseteditor.collapsableSectionHeader
 import com.github.ericytsang.app.ui.util.component.DoubleClickButton
 import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterInterpretationMode
 import com.github.ericytsang.domain.objects.FilterType
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.outline_drag_handle_24
-import kotlinproject.composeapp.generated.resources.outline_files_24
 import org.jetbrains.compose.resources.painterResource
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem

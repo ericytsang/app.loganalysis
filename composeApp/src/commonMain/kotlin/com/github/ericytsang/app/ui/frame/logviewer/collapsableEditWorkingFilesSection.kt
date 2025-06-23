@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.frame.workingfileseteditor
+package com.github.ericytsang.app.ui.frame.logviewer
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
@@ -26,7 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.ui.frame.logviewer.ReorderableSidebarItemKey
 import com.github.ericytsang.domain.objects.ConfigurationId
 import com.github.ericytsang.domain.objects.FilePath
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
@@ -92,7 +91,7 @@ fun LazyListScope.collapsableEditWorkingFilesSection(
     lazyColumnItemKeyPrefix:String,
 
     /**
-     * [sh.calvin.reorderable.ReorderableLazyListState] to be used when creating reorderable items.
+     * [ReorderableLazyListState] to be used when creating reorderable items.
      * this is used to allow drag-and-drop reordering of the filters.
      */
     reorderableLazyListState:ReorderableLazyListState,
@@ -129,7 +128,7 @@ fun LazyListScope.collapsableEditWorkingFilesSection(
 
     /**
      * list of filters to be displayed in the filter builder panel.
-     * each filter is represented by a [com.github.ericytsang.app.ui.frame.logviewer.FilterViewModel].
+     * each filter is represented by a [FilterViewModel].
      */
     itemViewModels:List<LogFileViewModel>,
 

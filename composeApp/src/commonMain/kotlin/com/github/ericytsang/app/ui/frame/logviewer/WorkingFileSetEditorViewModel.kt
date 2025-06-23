@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.frame.workingfileseteditor
+package com.github.ericytsang.app.ui.frame.logviewer
 
 import com.github.ericytsang.domain.objects.ConfigurationId
 import com.github.ericytsang.domain.objects.WorkingFileSet
@@ -18,8 +18,8 @@ interface WorkingFileSetEditorViewModel
     {
         fun create(
             configurationId:ConfigurationId,
-            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
-            workingFileSetRepository:WorkingFileSetRepository = RepositoryDependencyProvider.instance.workingFileSetRepository,
+            kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.Companion.instance,
+            workingFileSetRepository:WorkingFileSetRepository = RepositoryDependencyProvider.Companion.instance.workingFileSetRepository,
         ):WorkingFileSetEditorViewModel = WorkingFileSetEditorViewModelImpl(
             configurationId = configurationId,
             kotlinDependencyProvider = kotlinDependencyProvider,
@@ -46,6 +46,3 @@ private class WorkingFileSetEditorViewModelImpl(
         }
     }
 }
-
-
-

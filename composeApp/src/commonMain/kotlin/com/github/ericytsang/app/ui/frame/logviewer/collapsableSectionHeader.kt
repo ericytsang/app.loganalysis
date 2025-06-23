@@ -1,4 +1,4 @@
-package com.github.ericytsang.app.ui.frame.workingfileseteditor
+package com.github.ericytsang.app.ui.frame.logviewer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.github.ericytsang.app.model.Dimens
-import com.github.ericytsang.app.ui.frame.logviewer.ReorderableSidebarItemKey
 import com.github.ericytsang.app.ui.util.component.ToggleButton
 
 @ExperimentalMaterialApi
