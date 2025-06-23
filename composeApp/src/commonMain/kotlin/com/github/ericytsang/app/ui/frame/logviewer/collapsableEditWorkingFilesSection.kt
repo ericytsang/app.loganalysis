@@ -196,60 +196,61 @@ fun LazyListScope.collapsableEditWorkingFilesSection(
         }
 
         // show each file path as a reorderable item
-        for (itemViewModel in itemViewModels)
-        {
-            val itemKey = ReorderableSidebarItemKey.LogFileItem(itemViewModel.filePath)
-            item(key = itemKey)
-            {
-                ReorderableItem(
-                    key = itemKey,
-                    state = reorderableLazyListState,
-                )
-                { isDragging ->
+        items(
+            count = itemViewModels.size,
+            key = { index -> ReorderableSidebarItemKey.LogFileItem(itemViewModels[index].filePath) },
+        )
+        { index ->
+            val itemViewModel = itemViewModels[index]
+            ReorderableItem(
+                key = itemKey,
+                state = reorderableLazyListState,
+            )
+            { isDragging ->
 
-                    // increase elevation during dragging
-                    val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
+                // increase elevation during dragging
+                val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
 
-                    Surface(elevation = elevation)
+                Surface(elevation = elevation)
+                {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(themeColors.background)
+                            .padding(Dimens.mttPadding),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
+                    )
                     {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(themeColors.background)
-                                .padding(Dimens.mttPadding),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(Dimens.mttPadding),
+                        // drag-and-drop handle
+                        IconButton(
+                            modifier = Modifier.draggableHandle(),
+                            onClick = {},
                         )
                         {
-                            // drag-and-drop handle
-                            IconButton(
-                                modifier = Modifier.draggableHandle(),
-                                onClick = {},
-                            )
-                            {
-                                IconDragHandle(themeColors.onSurface)
-                            }
-
-                            // file path text
-                            Text(
-                                modifier = Modifier.weight(1f, fill = true),
-                                // if the texts have a common prefix, then make the common prefix portion the secondary text color
-                                text = buildAnnotatedString {
-                                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                        append(itemViewModel.filePath.filePath.removePrefix(commonPrefix))
-                                    }
-                                }
-                            )
-
-                            // delete button
-                            DoubleClickButton(
-                                onDoubleClick = { itemViewModel.requestDelete() },
-                                idleButtonColors = ButtonDefaults.buttonColors(themeColors.surface),
-                                idleContent = { IconMoreOptions(themeColors.onSurface) },
-                                clickedOnceButtonColors = ButtonDefaults.buttonColors(themeColors.error),
-                                clickedOnceContent = { Text("Delete") },
-                            )
+                            IconDragHandle(themeColors.onSurface)
                         }
+
+                        // file path text
+                        Text(
+                            modifier = Modifier.weight(1f, fill = true),
+                            // if the texts have a common prefix, then make the common prefix portion the secondary text color
+                            text = buildAnnotatedString {
+                                withStyle(SpanStyle(fontWeight = FontWeight.Bold))
+                                {
+                                    append(itemViewModel.filePath.filePath.removePrefix(commonPrefix))
+                                }
+                            }
+                        )
+
+                        // delete button
+                        DoubleClickButton(
+                            onDoubleClick = { itemViewModel.requestDelete() },
+                            idleButtonColors = ButtonDefaults.buttonColors(themeColors.surface),
+                            idleContent = { IconMoreOptions(themeColors.onSurface) },
+                            clickedOnceButtonColors = ButtonDefaults.buttonColors(themeColors.error),
+                            clickedOnceContent = { Text("Delete") },
+                        )
                     }
                 }
             }
