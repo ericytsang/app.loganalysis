@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -46,6 +47,7 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
+import com.github.ericytsang.app.ui.frame.newprojectwizard.SelectedFile
 import com.github.ericytsang.app.ui.util.ChildWindowManager
 import com.github.ericytsang.app.ui.util.asset.IconEditFileList
 import com.github.ericytsang.app.ui.util.asset.IconExcludeFilter
@@ -55,6 +57,7 @@ import com.github.ericytsang.app.ui.util.component.ColorCodedLogLine
 import com.github.ericytsang.app.ui.util.component.CommonWindowHeader
 import com.github.ericytsang.app.ui.util.component.LazyColumnWithScrollbar
 import com.github.ericytsang.app.ui.util.component.ToggleButton
+import com.github.ericytsang.app.ui.util.openMultiFilePicker
 import com.github.ericytsang.app.ui.util.openNewProjectWizard
 import com.github.ericytsang.app.ui.util.openProjectBrowser
 import com.github.ericytsang.domain.objects.FilePath.Companion.toFile
@@ -67,6 +70,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun LogViewerRoot(
+    window:ComposeWindow,
     themeColors:Colors,
     rootChildWindowManager:ChildWindowManager,
     logFileListViewModelFactory:()->LogFileListViewModel,
@@ -358,7 +362,13 @@ fun LogViewerRoot(
                         shouldShowSectionHeader = isSidebarExpanded,
                         isSectionExpanded = showEditFileListPanel,
                         requestToggleSectionExpanded = { showEditFileListPanel = !showEditFileListPanel },
-                        requestAddNewWorkingFile = { },
+                        requestAddNewWorkingFile =
+                        {
+                            openMultiFilePicker(window)
+                            { selectedFiles ->
+                                workingFileSetEditorViewModel.addFiles(selectedFiles)
+                            }
+                        },
                     )
 
                     // exclude filters

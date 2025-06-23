@@ -202,6 +202,7 @@ fun LazyListScope.collapsableEditWorkingFilesSection(
         )
         { index ->
             val itemViewModel = itemViewModels[index]
+            val itemKey = ReorderableSidebarItemKey.LogFileItem(itemViewModel.filePath)
             ReorderableItem(
                 key = itemKey,
                 state = reorderableLazyListState,

@@ -80,8 +80,11 @@ internal class WorkingFileSetRepositoryImpl(
                 .executeAsList()
             val maxOrderIndex = logFilesForConfiguration
                 .maxOfOrNull { it.order_index } ?: 0L
+            val existingFilePaths = logFilesForConfiguration
+                .map { logFile -> logFile.file_path }
+                .toSet()
             val firstOrderIndexToUse = maxOrderIndex+1L
-            newFiles.forEachIndexed { index,file ->
+            newFiles.filter { it.absolutePath !in existingFilePaths }.forEachIndexed { index,file ->
                 queries.insertLogFile(
                     config_id = configurationId.id,
                     file_path = file.absolutePath,
