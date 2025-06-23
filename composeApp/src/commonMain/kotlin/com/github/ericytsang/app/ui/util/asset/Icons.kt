@@ -1,9 +1,8 @@
 package com.github.ericytsang.app.ui.util.asset
 
-import androidx.compose.foundation.Image
+import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.outline_delete_24
 import kotlinproject.composeapp.generated.resources.outline_files_24
@@ -16,77 +15,59 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun IconWrapText(color:Color)
 {
-    Image(
+    Icon(
         painter = painterResource(Res.drawable.outline_wrap_text_24),
         contentDescription = "Wrap text",
-        colorFilter = ColorFilter.lighting(
-            multiply = color,
-            add = color,
-        )
+        tint = color,
     )
 }
 
 @Composable
 fun IconSettings(color:Color)
 {
-    Image(
+    Icon(
         painter = painterResource(Res.drawable.outline_settings_24),
         contentDescription = "Settings",
-        colorFilter = ColorFilter.lighting(
-            multiply = color,
-            add = color,
-        )
+        tint = color,
     )
 }
 
 @Composable
 fun IconDelete(color:Color)
 {
-    Image(
+    Icon(
         painter = painterResource(Res.drawable.outline_delete_24),
         contentDescription = "Delete",
-        colorFilter = ColorFilter.lighting(
-            multiply = color,
-            add = color,
-        )
+        tint = color,
     )
 }
 
 @Composable
 fun IconEditFileList(color:Color)
 {
-    Image(
+    Icon(
         painter = painterResource(Res.drawable.outline_files_24),
         contentDescription = "Edit File List",
-        colorFilter = ColorFilter.lighting(
-            multiply = color,
-            add = color,
-        )
+        tint = color,
     )
 }
 
 @Composable
 fun IconIncludeFilter(color:Color)
 {
-    Image(
+    Icon(
         painter = painterResource(Res.drawable.outline_playlist_add_24),
         contentDescription = "Include Filter",
-        colorFilter = ColorFilter.lighting(
-            multiply = color,
-            add = color,
-        )
+        tint = color,
     )
 }
 
 @Composable
 fun IconExcludeFilter(color:Color)
 {
-    Image(
+    Icon(
         painter = painterResource(Res.drawable.outline_playlist_remove_24),
         contentDescription = "Exclude Filter",
-        colorFilter = ColorFilter.lighting(
-            multiply = color,
-            add = color,
-        )
+        tint = color,
     )
 }
