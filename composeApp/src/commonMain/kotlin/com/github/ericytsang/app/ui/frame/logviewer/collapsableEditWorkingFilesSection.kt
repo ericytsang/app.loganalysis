@@ -223,11 +223,7 @@ fun LazyListScope.collapsableEditWorkingFilesSection(
                                 onClick = {},
                             )
                             {
-                                Icon(
-                                    painter = painterResource(Res.drawable.outline_drag_handle_24),
-                                    contentDescription = "Drag to reorder",
-                                    tint = themeColors.onSurface,
-                                )
+                                IconDragHandle(themeColors.onSurface)
                             }
 
                             // file path text

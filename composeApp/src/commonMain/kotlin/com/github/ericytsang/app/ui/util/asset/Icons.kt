@@ -71,3 +71,13 @@ fun IconExcludeFilter(color:Color)
         tint = color,
     )
 }
+
+@Composable
+fun IconDragHandle(color:Color)
+{
+    Icon(
+        painter = painterResource(Res.drawable.outline_drag_handle_24),
+        contentDescription = "Drag to reorder",
+        tint = color,
+    )
+}
