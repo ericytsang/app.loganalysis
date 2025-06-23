@@ -244,9 +244,9 @@ fun LogViewerRoot(
                     )
                     { index ->
                         val item = logLines[index]
-                        val isSelected by derivedStateOf { item.key in selectedItems }
+                        val isSelected = item.key in selectedItems
                         val backgroundColor = if (isSelected) themeColors.primary.copy(alpha = ContentAlpha.medium) else themeColors.surface
-                        val focusRequester = remember { FocusRequester() }
+                        val focusRequester = FocusRequester()
                         Box(
                             modifier = Modifier
                                 //.animateItem() // i want to enable these animations, but uh, it causes some portion of the log line to start flashing, and I think it is a bug in compose, so I am disabling them for now.
