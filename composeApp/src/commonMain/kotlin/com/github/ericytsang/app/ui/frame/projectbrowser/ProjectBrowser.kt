@@ -1,16 +1,13 @@
 package com.github.ericytsang.app.ui.frame.projectbrowser
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Colors
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -19,10 +16,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
 import com.github.ericytsang.app.model.Dimens
+import com.github.ericytsang.app.ui.util.component.EmptyState
 import com.github.ericytsang.app.ui.util.component.CommonWindowHeader
 import com.github.ericytsang.app.ui.util.ChildWindowManager
 import com.github.ericytsang.app.ui.util.openNewProjectWizard
@@ -67,19 +63,10 @@ fun ProjectBrowser(
             // if there are no items, show empty state
             if (items.isEmpty())
             {
-                val secondaryTextColor = themeColors.onBackground.copy(alpha = ContentAlpha.medium)
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                EmptyState(
+                    themeColors = themeColors,
+                    text = "No projects",
                 )
-                {
-                    Text(
-                        text = "No projects",
-                        fontStyle = FontStyle.Italic,
-                        color = secondaryTextColor,
-                    )
-                }
             }
 
             // otherwise, show the list of items

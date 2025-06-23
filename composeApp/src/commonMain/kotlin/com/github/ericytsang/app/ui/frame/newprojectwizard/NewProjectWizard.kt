@@ -24,10 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import com.github.ericytsang.app.model.Dimens
+import com.github.ericytsang.app.ui.util.component.EmptyState
 import com.github.ericytsang.app.ui.util.component.CommonWindowHeader
 import com.github.ericytsang.app.ui.util.ChildWindowManager
 import com.github.ericytsang.app.ui.util.ChildWindowManagerController
@@ -89,18 +89,10 @@ fun NewProjectWizard(
         {
             if (selectedFiles.isEmpty())
             {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                EmptyState(
+                    themeColors = themeColors,
+                    text = "No files selected",
                 )
-                {
-                    Text(
-                        text = "No files selected",
-                        fontStyle = FontStyle.Italic,
-                        color = secondaryTextColor,
-                    )
-                }
             }
             else
             {
