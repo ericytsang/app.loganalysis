@@ -5,7 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import kotlinproject.composeapp.generated.resources.Res
 import kotlinproject.composeapp.generated.resources.outline_delete_24
+import kotlinproject.composeapp.generated.resources.outline_drag_handle_24
 import kotlinproject.composeapp.generated.resources.outline_files_24
+import kotlinproject.composeapp.generated.resources.outline_keyboard_arrow_up_24
 import kotlinproject.composeapp.generated.resources.outline_playlist_add_24
 import kotlinproject.composeapp.generated.resources.outline_playlist_remove_24
 import kotlinproject.composeapp.generated.resources.outline_settings_24
@@ -78,6 +80,16 @@ fun IconDragHandle(color:Color)
     Icon(
         painter = painterResource(Res.drawable.outline_drag_handle_24),
         contentDescription = "Drag to reorder",
+        tint = color,
+    )
+}
+
+@Composable
+fun IconCollapseSection(color:Color)
+{
+    Icon(
+        painter = painterResource(Res.drawable.outline_keyboard_arrow_up_24),
+        contentDescription = "Collapse section",
         tint = color,
     )
 }

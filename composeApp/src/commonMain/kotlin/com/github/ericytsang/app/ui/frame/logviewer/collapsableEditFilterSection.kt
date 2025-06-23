@@ -6,10 +6,12 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,7 +20,6 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Colors
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
@@ -38,13 +39,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
+import com.github.ericytsang.app.ui.util.asset.IconCollapseSection
+import com.github.ericytsang.app.ui.util.asset.IconDragHandle
 import com.github.ericytsang.app.ui.util.component.DoubleClickButton
 import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterInterpretationMode
 import com.github.ericytsang.domain.objects.FilterType
-import kotlinproject.composeapp.generated.resources.Res
-import kotlinproject.composeapp.generated.resources.outline_drag_handle_24
-import org.jetbrains.compose.resources.painterResource
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
@@ -113,7 +113,7 @@ fun LazyListScope.collapsableEditFilterSection(
      * callback when the text field gets focus.
      * this is intended to be used by the host to update [expandedFilterId].
      */
-    requestFilterExpansion:(FilterId)->Unit,
+    requestFilterExpansion:(FilterId?)->Unit,
 
     /**
      * callback to request adding a new filter.
@@ -175,7 +175,7 @@ fun LazyListScope.collapsableEditFilterSection(
             reorderableLazyListState = reorderableLazyListState,
             filterViewModels = filterItemViewModels,
             expandedItem = expandedFilterId,
-            onTextFieldGotFocus = requestFilterExpansion,
+            onChangeExpandedItem = requestFilterExpansion,
         )
     }
 }
@@ -224,7 +224,7 @@ fun LazyListScope.filterBuilderPanel(
      * callback when the text field gets focus.
      * this is intended to be used by the host to update [expandedItem].
      */
-    onTextFieldGotFocus:(FilterId)->Unit,
+    onChangeExpandedItem:(FilterId?)->Unit,
 )
 {
     for (filterViewModel in filterViewModels)
@@ -251,13 +251,17 @@ fun LazyListScope.filterBuilderPanel(
                         filterHeader(
                             themeColors = themeColors,
                             filterViewModel = filterViewModel,
-                            onTextFieldGotFocus = onTextFieldGotFocus,
+                            onTextFieldGotFocus = onChangeExpandedItem,
                         )
 
                         // show the additional settings for this filter if it is expanded ([expandedItem])
                         AnimatedVisibility(filterViewModel.filterId == expandedItem)
                         {
-                            filterProperties(filterViewModel,themeColors)
+                            filterProperties(
+                                filterViewModel = filterViewModel,
+                                themeColors = themeColors,
+                                onCollapseSection = { onChangeExpandedItem(null) },
+                            )
                         }
                     }
                 }
@@ -331,12 +335,19 @@ private fun ReorderableCollectionItemScope.filterHeader(
  * 1. checkbox for case sensitivity
  * 2. radio buttons for filter type
  * 3. delete button
+ * 4. collapse section button
  */
 @Composable
 @ExperimentalMaterialApi
 private fun filterProperties(
     filterViewModel:FilterViewModel,
     themeColors:Colors,
+
+    /**
+     * callback to request collapsing the section.
+     * this is intended to be used by the host to update the expanded state of the section.
+     */
+    onCollapseSection:()->Unit,
 )
 {
     Column()
@@ -377,11 +388,13 @@ private fun filterProperties(
                 modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
                 shape = MaterialTheme.shapes.small,
                 onClick = onClick,
-            ) {
+            )
+            {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                ) {
+                )
+                {
                     RadioButton(
                         selected = filterTypeFlow == filterType,
                         onClick = onClick,
@@ -403,6 +416,23 @@ private fun filterProperties(
             clickedOnceButtonColors = ButtonDefaults.buttonColors(themeColors.error),
             clickedOnceContent = { Text("Really delete filter?") },
         )
+
+        // collapse section button
+        Surface(
+            modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
+            shape = MaterialTheme.shapes.small,
+            onClick = onCollapseSection,
+        )
+        {
+            Row(
+                modifier = Modifier.fillMaxWidth().heightIn(Dimens.mttPadding),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            )
+            {
+                IconCollapseSection(themeColors.onSurface)
+            }
+        }
     }
 }
 
