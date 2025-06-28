@@ -159,7 +159,7 @@ class LogViewerViewModel(
         concatenatedFiles.flatMap { file -> unorderedFileLines[file] ?: emptyList() }
     }.flowOn(dispatchers.default).conflate()
 
-    data class FileLines(
+    private data class FileLines(
         val filePath:FilePath,
         val lines:List<IndexedValue<String>>,
     )
