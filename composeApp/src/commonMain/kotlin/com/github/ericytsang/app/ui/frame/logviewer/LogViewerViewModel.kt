@@ -59,14 +59,15 @@ class LogViewerViewModel(
 
     // region get activated sidebar filters
 
-    private val activeFilters:Flow<List<Node>> = filterRepository
+    private val activeFilters:Flow<Map<FilterType, List<Node>>> = filterRepository
         .selectActiveFiltersForConfig(configurationId)
         .map { list -> list.filter { it.filterString.isNotEmpty() } }
         .map { list -> list.mapNotNull { toFilterNode(it) } }
+        .map { stillNeedToFolds -> stillNeedToFolds.groupBy({ it.filterType },{ it.filterNode }) }
         .flowOn(dispatchers.io)
         .conflate()
 
-    private fun toFilterNode(filterModel:FilterModel):Node?
+    private fun toFilterNode(filterModel:FilterModel):FilterModelWithNode?
     {
         val filterNode = when (filterModel.filterInterpretationMode)
         {
@@ -100,11 +101,22 @@ class LogViewerViewModel(
             filterNode == null -> null
             else -> when (filterModel.filterType)
             {
-                FilterType.INCLUDE -> filterNode
-                FilterType.EXCLUDE -> NotNode(filterNode)
+                FilterType.INCLUDE -> FilterModelWithNode(
+                    filterType = filterModel.filterType,
+                    filterNode = filterNode,
+                )
+                FilterType.EXCLUDE -> FilterModelWithNode(
+                    filterType = filterModel.filterType,
+                    filterNode = NotNode(filterNode),
+                )
             }
         }
     }
+
+    data class FilterModelWithNode(
+        val filterType:FilterType,
+        val filterNode:Node,
+    )
 
     // endregion
 
@@ -135,6 +147,7 @@ class LogViewerViewModel(
                     }
                 }
         }
+        .flowOn(dispatchers.io)
         .shareIn(
             scope = uiScope.newChildScope(dispatchers.io),
             started = SharingStarted.WhileSubscribed(5.seconds),
@@ -144,7 +157,7 @@ class LogViewerViewModel(
     private val orderedFileLines:Flow<List<FileLine>> = combine(concatenatedFilesFlow,unorderedFileLinesFlow)
     { concatenatedFiles,unorderedFileLines ->
         concatenatedFiles.flatMap { file -> unorderedFileLines[file] ?: emptyList() }
-    }.conflate()
+    }.flowOn(dispatchers.default).conflate()
 
     data class FileLines(
         val filePath:FilePath,
@@ -165,7 +178,7 @@ class LogViewerViewModel(
         orderedFileLines,
         activeFilters,
         ::applyFilterToLogLines,
-    ).shareIn(
+    ).flowOn(dispatchers.default).shareIn(
         scope = uiScope.newChildScope(dispatchers.io),
         started = SharingStarted.WhileSubscribed(5.seconds),
         replay = 1,
@@ -173,13 +186,16 @@ class LogViewerViewModel(
 
     private fun applyFilterToLogLines(
         logLines:List<FileLine>,
-        activeFilters:List<Node>,
+        activeFilters:Map<FilterType, List<Node>>,
     ):List<FileLine> = logLines.filter { logLine ->
-        activeFilters.all { filter ->
-            logcatFilterEvaluator.isMatch(
-                logLine = logLine.line,
-                logcatFilter = filter,
-            )
+        FilterType.entries.all { filterType ->
+            when (filterType)
+            {
+                FilterType.INCLUDE -> (activeFilters[filterType] ?: return@filter true)
+                    .any { filter -> logcatFilterEvaluator.isMatch(logLine.line,filter) }
+                FilterType.EXCLUDE -> (activeFilters[filterType] ?: emptyList())
+                    .all { filter -> logcatFilterEvaluator.isMatch(logLine.line,filter) }
+            }
         }
     }
 
