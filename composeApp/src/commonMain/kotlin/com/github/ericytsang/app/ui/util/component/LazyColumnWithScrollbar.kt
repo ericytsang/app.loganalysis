@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 @Composable
 fun LazyColumnWithScrollbar(
     modifier:Modifier = Modifier,
+    enableHorizontalScroll:Boolean,
     lazyListState:LazyListState = rememberLazyListState(),
     horizontalScrollState:ScrollState = rememberScrollState(),
     content:LazyListScope.()->Unit,
@@ -27,8 +28,10 @@ fun LazyColumnWithScrollbar(
         modifier = modifier,
     )
     {
+        val modifier = if (enableHorizontalScroll) Modifier.horizontalScroll(horizontalScrollState) else Modifier
+
         LazyColumn(
-            modifier = Modifier.horizontalScroll(horizontalScrollState),
+            modifier = modifier.matchParentSize(),
             state = lazyListState,
             content = content,
         )
@@ -38,9 +41,12 @@ fun LazyColumnWithScrollbar(
             adapter = rememberScrollbarAdapter(lazyListState)
         )
 
-        HorizontalScrollbar(
-            modifier = Modifier.align(Alignment.BottomStart),
-            adapter = rememberScrollbarAdapter(horizontalScrollState)
-        )
+        if (enableHorizontalScroll)
+        {
+            HorizontalScrollbar(
+                modifier = Modifier.align(Alignment.BottomStart),
+                adapter = rememberScrollbarAdapter(horizontalScrollState)
+            )
+        }
     }
 }

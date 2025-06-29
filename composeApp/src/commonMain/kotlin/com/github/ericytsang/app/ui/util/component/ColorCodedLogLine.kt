@@ -1,5 +1,8 @@
 package com.github.ericytsang.app.ui.util.component
 
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -9,12 +12,22 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
 import com.github.ericytsang.domain.objects.Theme
 import kotlin.random.Random
 
 @Composable
 fun ColorCodedLogLine(
+
+    /**
+     * text to display for user to see
+     */
     text:String,
+
+    /**
+     * text to display in a separate, zero-height, non-focusable text view to force the layout to at least be this width
+     */
+    invisibleText:String,
     defaultColor:Color,
     themeForColorCoding:Theme,
     delimiters:String,
@@ -22,22 +35,34 @@ fun ColorCodedLogLine(
     modifier:Modifier = Modifier,
 )
 {
-    val logLineString = buildColorCodedLogLine(
-        logLine = text,
-        delimiters = delimiters,
-        isDarkTheme = when (themeForColorCoding)
-        {
-            Theme.LIGHT -> false
-            Theme.DARK -> true
-        },
-    )
-    Text(
-        text = logLineString,
+    Box(
         modifier = modifier,
-        color = defaultColor,
-        softWrap = softWrap,
-        style = TextStyle(fontFamily = FontFamily.Monospace),
     )
+    {
+        if (!softWrap)
+        {
+            Text(
+                modifier = Modifier.height(0.dp).focusable(false),
+                text = invisibleText,
+                style = TextStyle(fontFamily = FontFamily.Monospace),
+            )
+        }
+        val logLineString = buildColorCodedLogLine(
+            logLine = text,
+            delimiters = delimiters,
+            isDarkTheme = when (themeForColorCoding)
+            {
+                Theme.LIGHT -> false
+                Theme.DARK -> true
+            },
+        )
+        Text(
+            text = logLineString,
+            color = defaultColor,
+            softWrap = softWrap,
+            style = TextStyle(fontFamily = FontFamily.Monospace),
+        )
+    }
 }
 
 

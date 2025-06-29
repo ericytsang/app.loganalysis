@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -66,6 +65,27 @@ import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
 import kotlinx.coroutines.CoroutineScope
 import sh.calvin.reorderable.rememberReorderableLazyListState
+
+/**
+ * controls whether the UI should wrap text horizontally or scroll horizontally.
+ */
+sealed class HorizontalMode
+{
+
+    data object WordWrap:HorizontalMode()
+
+    /**
+     * [longestLineLength] is used to determine the width of the horizontal scrollbar.
+     * all list items are also forced to have the same width, as the longest line.
+     * because when the line width is "fillMaxWidth", since it is inside a parent that has a horizontal scrollbar,
+     * then the max width is i suppose infinite, and then it will end up just making the width of the item only wrap the
+     * content.
+     */
+    data class Scroll(
+        /** used to determine the width of the horizontal scrollbar */
+        val longestLineLength:Int = 0,
+    ):HorizontalMode()
+}
 
 @Composable
 fun LogViewerRoot(
@@ -133,10 +153,20 @@ fun LogViewerRoot(
 
             val logLinesState by logViewerViewModel.logLinesFlow.collectAsState(LogViewerViewModel.LogLinesState())
             val lazyListState = rememberLazyListState()
+            val horizontalMode = if (shouldWrapText)
+            {
+                HorizontalMode.WordWrap
+            }
+            else
+            {
+                // calculate the longest line length for horizontal scrolling
+                val longestLineLength = logLinesState.logLines.maxOfOrNull { it.line.length } ?: 0
+                HorizontalMode.Scroll(longestLineLength)
+            }
 
             // Selection state
             val selectedItems by selectedItemsViewModel.selectedItemsFlow.collectAsState(IncludeSelected())
-            var modifierState by remember { mutableStateOf(ModifierState(false,false)) }
+            var modifierState by remember { mutableStateOf(ModifierState()) }
 
             // get managers
             val clipboardManager = LocalClipboard.current
@@ -149,7 +179,13 @@ fun LogViewerRoot(
             )
             {
                 LazyColumnWithScrollbar(
+                    enableHorizontalScroll = when (horizontalMode)
+                    {
+                        is HorizontalMode.WordWrap -> false
+                        is HorizontalMode.Scroll -> true
+                    },
                     modifier = Modifier
+                        .fillMaxSize()
                         .captureModifierState { newState -> modifierState = newState }
                         .handleKeyCombinations(
                             onSelectAll = { selectedItemsViewModel.selectAllItems(); true },
@@ -247,9 +283,17 @@ fun LogViewerRoot(
                         val isSelected = item.key in selectedItems
                         val backgroundColor = if (isSelected) themeColors.primary.copy(alpha = ContentAlpha.medium) else themeColors.surface
                         val focusRequester = remember { FocusRequester() }
-                        Box(
+                        ColorCodedLogLine(
+                            text = item.line,
+                            invisibleText = when (horizontalMode)
+                            {
+                                is HorizontalMode.WordWrap -> ""
+                                is HorizontalMode.Scroll -> (1..horizontalMode.longestLineLength).joinToString("") { " " }
+                            },
                             modifier = Modifier
                                 //.animateItem() // i want to enable these animations, but uh, it causes some portion of the log line to start flashing, and I think it is a bug in compose, so I am disabling them for now.
+                                .padding(horizontal = Dimens.mttPadding)
+                                .fillParentMaxWidth()
                                 .background(backgroundColor)
                                 .focusRequester(focusRequester)
                                 .clickable()
@@ -280,19 +324,11 @@ fun LogViewerRoot(
                                     }
                                     focusRequester.requestFocus()
                                 },
+                            delimiters = delimiters,
+                            themeForColorCoding = theme,
+                            defaultColor = themeColors.onBackground,
+                            softWrap = shouldWrapText,
                         )
-                        {
-                            ColorCodedLogLine(
-                                text = item.line,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = Dimens.mttPadding),
-                                delimiters = delimiters,
-                                themeForColorCoding = theme,
-                                defaultColor = themeColors.onBackground,
-                                softWrap = shouldWrapText,
-                            )
-                        }
                     }
                 }
             }
