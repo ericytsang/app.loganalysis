@@ -203,7 +203,7 @@ class LogViewerViewModel(
         FilterType.entries.all { filterType ->
             when (filterType)
             {
-                FilterType.INCLUDE -> (activeFilters[filterType] ?: return@filter true)
+                FilterType.INCLUDE -> (activeFilters[filterType] ?: return@all true)
                     .any { filter -> logcatFilterEvaluator.isMatch(logLine.line,filter) }
                 FilterType.EXCLUDE -> (activeFilters[filterType] ?: emptyList())
                     .all { filter -> logcatFilterEvaluator.isMatch(logLine.line,filter) }
