@@ -174,15 +174,27 @@ class LogViewerViewModel(
         val lineNumberInFile:Int,
     )
 
-    val logLinesFlow:Flow<List<FileLine>> = combine(
+    val logLinesFlow:Flow<LogLinesState> = combine(
         orderedFileLines,
         activeFilters,
-        ::applyFilterToLogLines,
+        ::toLogLineState,
     ).flowOn(dispatchers.default).shareIn(
         scope = uiScope.newChildScope(dispatchers.io),
         started = SharingStarted.WhileSubscribed(5.seconds),
         replay = 1,
     )
+
+    private fun toLogLineState(
+        logLines:List<FileLine>,
+        activeFilters:Map<FilterType, List<Node>>,
+    ):LogLinesState
+    {
+        val filteredLines = applyFilterToLogLines(logLines, activeFilters)
+        return LogLinesState(
+            logLines = filteredLines,
+            longestLineLength = filteredLines.maxOfOrNull { it.line.length } ?: 0,
+        )
+    }
 
     private fun applyFilterToLogLines(
         logLines:List<FileLine>,
@@ -198,6 +210,19 @@ class LogViewerViewModel(
             }
         }
     }
+
+    data class LogLinesState(
+
+        /**
+         * used by UI to display these lines on the UI.
+         */
+        val logLines:List<FileLine> = emptyList(),
+
+        /**
+         * used by UI to compute horizontal scrolling and max list item width.
+         */
+        val longestLineLength:Int = 0,
+    )
 
     // endregion
 

@@ -131,7 +131,7 @@ fun LogViewerRoot(
         {
             // region log viewer
 
-            val logLines by logViewerViewModel.logLinesFlow.collectAsState(emptyList())
+            val logLinesState by logViewerViewModel.logLinesFlow.collectAsState(LogViewerViewModel.LogLinesState())
             val lazyListState = rememberLazyListState()
 
             // Selection state
@@ -157,7 +157,7 @@ fun LogViewerRoot(
                             onCopySelection =
                             {
                                 logViewerViewModel.copySelectedTextToClipboard(
-                                    logLines = logLines,
+                                    logLines = logLinesState.logLines,
                                     selectedItems = selectedItems,
                                     clipboardManager = clipboardManager,
                                 )
@@ -216,7 +216,7 @@ fun LogViewerRoot(
 
                                     // update the dragging gesture selection state
                                     selectedItemsViewModel.updateDragToSelect(
-                                        list = logLines,
+                                        list = logLinesState.logLines,
                                         selector = { it.key },
                                         keyOfItemAtPointer = logLineItemKey.fileLineKey,
                                     )
@@ -239,11 +239,11 @@ fun LogViewerRoot(
 
                     // show log lines
                     items(
-                        key = { index -> LogViewerLazyListItemKey.LogLineItem(logLines[index].key) },
-                        count = logLines.size,
+                        key = { index -> LogViewerLazyListItemKey.LogLineItem(logLinesState.logLines[index].key) },
+                        count = logLinesState.logLines.size,
                     )
                     { index ->
-                        val item = logLines[index]
+                        val item = logLinesState.logLines[index]
                         val isSelected = item.key in selectedItems
                         val backgroundColor = if (isSelected) themeColors.primary.copy(alpha = ContentAlpha.medium) else themeColors.surface
                         val focusRequester = remember { FocusRequester() }
@@ -258,7 +258,7 @@ fun LogViewerRoot(
                                     {
                                         // shift+click: select range, keep others
                                         modifierState.isShiftPressed -> selectedItemsViewModel.selectRange(
-                                            list = logLines,
+                                            list = logLinesState.logLines,
                                             selector = { it.key },
                                             keyOfItemAtEndOfRange = item.key,
                                             selectionModifier = if (modifierState.isOsAgnosticCtrlPressed)
