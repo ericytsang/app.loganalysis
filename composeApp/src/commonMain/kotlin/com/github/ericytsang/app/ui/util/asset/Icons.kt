@@ -3,16 +3,16 @@ package com.github.ericytsang.app.ui.util.asset
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import kotlinproject.composeapp.generated.resources.Res
-import kotlinproject.composeapp.generated.resources.outline_delete_24
-import kotlinproject.composeapp.generated.resources.outline_drag_handle_24
-import kotlinproject.composeapp.generated.resources.outline_files_24
-import kotlinproject.composeapp.generated.resources.outline_keyboard_arrow_up_24
-import kotlinproject.composeapp.generated.resources.outline_more_vert_24
-import kotlinproject.composeapp.generated.resources.outline_playlist_add_24
-import kotlinproject.composeapp.generated.resources.outline_playlist_remove_24
-import kotlinproject.composeapp.generated.resources.outline_settings_24
-import kotlinproject.composeapp.generated.resources.outline_wrap_text_24
+import app_loganalysis.composeapp.generated.resources.Res
+import app_loganalysis.composeapp.generated.resources.outline_delete_24
+import app_loganalysis.composeapp.generated.resources.outline_drag_handle_24
+import app_loganalysis.composeapp.generated.resources.outline_files_24
+import app_loganalysis.composeapp.generated.resources.outline_keyboard_arrow_up_24
+import app_loganalysis.composeapp.generated.resources.outline_more_vert_24
+import app_loganalysis.composeapp.generated.resources.outline_playlist_add_24
+import app_loganalysis.composeapp.generated.resources.outline_playlist_remove_24
+import app_loganalysis.composeapp.generated.resources.outline_settings_24
+import app_loganalysis.composeapp.generated.resources.outline_wrap_text_24
 import org.jetbrains.compose.resources.painterResource
 
 @Composable

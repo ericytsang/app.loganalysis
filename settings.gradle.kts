@@ -1,4 +1,4 @@
-rootProject.name = "KotlinProject"
+rootProject.name = "app-loganalysis"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
