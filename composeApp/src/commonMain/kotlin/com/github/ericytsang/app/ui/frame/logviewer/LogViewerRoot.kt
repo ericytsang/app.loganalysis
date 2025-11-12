@@ -82,7 +82,10 @@ sealed class HorizontalMode
      * content.
      */
     data class Scroll(
-        /** used to determine the width of the horizontal scrollbar */
+        /**
+         * used to determine the width of the horizontal scrollbar - since using fixed-width font,
+         * this is enough; no need to save the exact text of the longest line.
+         */
         val longestLineLength:Int = 0,
     ):HorizontalMode()
 }
