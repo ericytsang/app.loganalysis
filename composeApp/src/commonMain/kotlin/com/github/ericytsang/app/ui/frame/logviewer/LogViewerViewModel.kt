@@ -219,12 +219,7 @@ class LogViewerViewModel(
         val shouldInclude = includeFilters.any { filter -> logcatFilterEvaluator.isMatch(logLine.line,filter) }
         val isNotExcluded = excludeFilters.all { filter -> logcatFilterEvaluator.isMatch(logLine.line,filter) }
 
-        when
-        {
-            includeFilters.isEmpty() -> isBookmarked || isNotExcluded
-            excludeFilters.isEmpty() -> isBookmarked || shouldInclude
-            else -> isBookmarked || (shouldInclude && isNotExcluded)
-        }
+        isBookmarked || ((includeFilters.isEmpty() || shouldInclude) && (excludeFilters.isEmpty() || isNotExcluded))
     }
 
     data class LogLinesState(
