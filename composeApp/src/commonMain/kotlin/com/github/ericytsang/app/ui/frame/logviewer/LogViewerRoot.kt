@@ -330,7 +330,8 @@ fun LogViewerRoot(
                                         else -> selectedItemsViewModel.selectItem(item.key)
                                     }
                                     focusRequester.requestFocus()
-                                },
+                                }
+                                .padding(horizontal = Dimens.mttPadding),
                             delimiters = delimiters,
                             themeForColorCoding = theme,
                             defaultColor = themeColors.onBackground,
