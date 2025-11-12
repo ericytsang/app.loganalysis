@@ -158,14 +158,10 @@ fun LogViewerRoot(
 
             val logLinesState by logViewerViewModel.logLinesFlow.collectAsState(LogViewerViewModel.LogLinesState())
             val lazyListState = rememberLazyListState()
-            // okay, i want to get my thoughts out right now.
-            // there are 2 modes: word wrap enabled or disabled
-            // when word wrap is enabled, there is some minor issue with padding at start of the line.
             val horizontalMode = if (shouldWrapText)
             {
                 HorizontalMode.WordWrap
             }
-            // when word wrap is disabled, there is an issue that the line width is not err filling up the entire width of the panel... the line width is only as wide as the longest visible item
             else
             {
                 // calculate the longest line length for horizontal scrolling - we should "coerce at least" this with the width of the parent as well...
@@ -198,7 +194,6 @@ fun LogViewerRoot(
                     },
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(color = androidx.compose.ui.graphics.Color.Red)
                         .onSizeChanged { size -> lazyColumnWidth = size.width }
                         .captureModifierState { newState -> modifierState = newState }
                         .handleKeyCombinations(
