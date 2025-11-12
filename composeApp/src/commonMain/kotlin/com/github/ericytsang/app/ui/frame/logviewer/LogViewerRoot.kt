@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -42,6 +43,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -175,6 +177,9 @@ fun LogViewerRoot(
             val selectedItems by selectedItemsViewModel.selectedItemsFlow.collectAsState(IncludeSelected())
             var modifierState by remember { mutableStateOf(ModifierState()) }
 
+            // track the width of the LazyColumnWithScrollbar, so we can set the min width of a log line to match this
+            var lazyColumnWidth by remember { mutableStateOf(0) }
+
             // get managers
             val clipboardManager = LocalClipboard.current
             val focusManager = LocalFocusManager.current
@@ -194,6 +199,7 @@ fun LogViewerRoot(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(color = androidx.compose.ui.graphics.Color.Red)
+                        .onSizeChanged { size -> lazyColumnWidth = size.width }
                         .captureModifierState { newState -> modifierState = newState }
                         .handleKeyCombinations(
                             onSelectAll = { selectedItemsViewModel.selectAllItems(); true },
@@ -301,6 +307,7 @@ fun LogViewerRoot(
                             modifier = Modifier
                                 .animateItem() // i want to enable these animations, but uh, it causes some portion of the log line to start flashing, and I think it is a bug in compose, so I am disabling them for now.
                                 .fillParentMaxWidth()
+                                .widthIn(min = lazyColumnWidth.dp)
                                 .background(backgroundColor)
                                 .focusRequester(focusRequester)
                                 .clickable()
