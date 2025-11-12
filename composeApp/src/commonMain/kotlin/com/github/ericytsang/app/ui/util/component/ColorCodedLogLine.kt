@@ -3,6 +3,7 @@ package com.github.ericytsang.app.ui.util.component
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -13,6 +14,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.domain.objects.Theme
 import kotlin.random.Random
 
@@ -36,7 +38,8 @@ fun ColorCodedLogLine(
 )
 {
     Box(
-        modifier = modifier,
+        modifier = modifier
+            .padding(horizontal = Dimens.mttPadding),
     )
     {
         Text(
