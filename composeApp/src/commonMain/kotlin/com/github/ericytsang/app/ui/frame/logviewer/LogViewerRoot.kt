@@ -347,13 +347,11 @@ fun LogViewerRoot(
 
             // region filter helpers and working file set editor
 
-            var showEditFileListPanel by remember { mutableStateOf(false) }
-            var showExcludeFilterPanel by remember { mutableStateOf(false) }
-            var showIncludeFilterPanel by remember { mutableStateOf(false) }
+            var expandedPanels by remember { mutableStateOf(setOf<String>()) }
 
             var filterIdOfSelectedFilterEditorPanel by remember { mutableStateOf<FilterId?>(null) }
 
-            val isSidebarExpanded by derivedStateOf { showEditFileListPanel || showExcludeFilterPanel || showIncludeFilterPanel }
+            val isSidebarExpanded by derivedStateOf { expandedPanels.isNotEmpty() }
 
             val columnWidth by derivedStateOf { if (isSidebarExpanded) 400.dp else Dimens.mttPadding*3+Dimens.mttSize }
 
@@ -397,16 +395,17 @@ fun LogViewerRoot(
                     }
 
                     // reorderable list of working files
+                    val showEditFileListPanel = "showEditFileListPanel"
                     collapsableEditWorkingFilesSection(
                         themeColors = themeColors,
-                        lazyColumnItemKeyPrefix = "showEditFileListPanel",
+                        lazyColumnItemKeyPrefix = showEditFileListPanel,
                         reorderableLazyListState = reorderableLazyListStateForLazyListOfIncludeFilters,
                         sectionIcon = { contentColor -> IconEditFileList(contentColor) },
                         itemViewModels = workingFileItemViewModels,
                         sectionTitle = "Edit file list",
                         shouldShowSectionHeader = isSidebarExpanded,
-                        isSectionExpanded = showEditFileListPanel,
-                        requestToggleSectionExpanded = { showEditFileListPanel = !showEditFileListPanel },
+                        isSectionExpanded = showEditFileListPanel in expandedPanels,
+                        requestToggleSectionExpanded = { expandedPanels = toggle(showEditFileListPanel,expandedPanels) },
                         requestAddNewWorkingFile =
                         {
                             openMultiFilePicker(window)
@@ -417,16 +416,17 @@ fun LogViewerRoot(
                     )
 
                     // exclude filters
+                    val showExcludeFilterPanel = "showExcludeFilterPanel"
                     collapsableEditFilterSection(
                         themeColors = themeColors,
-                        lazyColumnItemKeyPrefix = "showExcludeFilterPanel",
+                        lazyColumnItemKeyPrefix = showExcludeFilterPanel,
                         reorderableLazyListState = reorderableLazyListStateForLazyListOfIncludeFilters,
                         sectionIcon = { contentColor -> IconExcludeFilter(contentColor) },
                         filterItemViewModels = excludeFilterItemViewModels,
                         sectionTitle = "Exclude filters",
                         shouldShowSectionHeader = isSidebarExpanded,
-                        isSectionExpanded = showExcludeFilterPanel,
-                        requestToggleSectionExpanded = { showExcludeFilterPanel = !showExcludeFilterPanel },
+                        isSectionExpanded = showExcludeFilterPanel in expandedPanels,
+                        requestToggleSectionExpanded = { expandedPanels = toggle(showExcludeFilterPanel,expandedPanels) },
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = excludeFilterSetViewModel::addFilter,
@@ -434,16 +434,17 @@ fun LogViewerRoot(
                     )
 
                     // include filters
+                    val showIncludeFilterPanel = "showIncludeFilterPanel"
                     collapsableEditFilterSection(
                         themeColors = themeColors,
-                        lazyColumnItemKeyPrefix = "showIncludeFilterPanel",
+                        lazyColumnItemKeyPrefix = showIncludeFilterPanel,
                         reorderableLazyListState = reorderableLazyListStateForLazyListOfIncludeFilters,
                         sectionIcon = { contentColor -> IconIncludeFilter(contentColor) },
                         filterItemViewModels = includeFilterItemViewModels,
                         sectionTitle = "Include filters",
                         shouldShowSectionHeader = isSidebarExpanded,
-                        isSectionExpanded = showIncludeFilterPanel,
-                        requestToggleSectionExpanded = { showIncludeFilterPanel = !showIncludeFilterPanel },
+                        isSectionExpanded = showIncludeFilterPanel in expandedPanels,
+                        requestToggleSectionExpanded = { expandedPanels = toggle(showIncludeFilterPanel,expandedPanels) },
                         expandedFilterId = filterIdOfSelectedFilterEditorPanel,
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = includeFilterSetViewModel::addFilter,
@@ -455,6 +456,18 @@ fun LogViewerRoot(
 
         // endregion
     }
+}
+
+private fun toggle(
+    item:String,
+    set:Set<String>,
+):Set<String> = if (item in set)
+{
+    set - item
+}
+else
+{
+    set + item
 }
 
 fun LazyListItemInfo.getOccupiedSpace():IntRange
