@@ -294,8 +294,8 @@ fun LogViewerRoot(
                                 is HorizontalMode.Scroll -> (1..horizontalMode.longestLineLength).joinToString("") { " " }
                             },
                             modifier = Modifier
-                                //.animateItem() // i want to enable these animations, but uh, it causes some portion of the log line to start flashing, and I think it is a bug in compose, so I am disabling them for now.
                                 .padding(horizontal = Dimens.mttPadding)
+                                .animateItem() // i want to enable these animations, but uh, it causes some portion of the log line to start flashing, and I think it is a bug in compose, so I am disabling them for now.
                                 .fillParentMaxWidth()
                                 .background(backgroundColor)
                                 .focusRequester(focusRequester)
