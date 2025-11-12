@@ -12,6 +12,7 @@ import app_loganalysis.composeapp.generated.resources.outline_keyboard_arrow_up_
 import app_loganalysis.composeapp.generated.resources.outline_more_vert_24
 import app_loganalysis.composeapp.generated.resources.outline_remove_24
 import app_loganalysis.composeapp.generated.resources.outline_settings_24
+import app_loganalysis.composeapp.generated.resources.outline_star_24
 import app_loganalysis.composeapp.generated.resources.outline_wrap_text_24
 import org.jetbrains.compose.resources.painterResource
 
@@ -70,6 +71,16 @@ fun IconExcludeFilter(color:Color)
 {
     Icon(
         painter = painterResource(Res.drawable.outline_remove_24),
+        contentDescription = "Exclude Filter",
+        tint = color,
+    )
+}
+
+@Composable
+fun IconBookmarkFilter(color:Color)
+{
+    Icon(
+        painter = painterResource(Res.drawable.outline_star_24),
         contentDescription = "Exclude Filter",
         tint = color,
     )

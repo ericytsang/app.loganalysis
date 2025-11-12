@@ -90,6 +90,7 @@ enum class FilterType
 {
     INCLUDE,
     EXCLUDE,
+    BOOKMARK,
 }
 
 enum class FilterInterpretationMode

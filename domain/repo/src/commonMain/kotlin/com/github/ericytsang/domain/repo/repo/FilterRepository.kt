@@ -478,6 +478,7 @@ internal class FilterRepositoryImpl(
         {
             FilterType.INCLUDE -> 0L
             FilterType.EXCLUDE -> 1L
+            FilterType.BOOKMARK -> 2L
         }
 
         private fun FilterEntity.toDomainModel() = FilterModel(

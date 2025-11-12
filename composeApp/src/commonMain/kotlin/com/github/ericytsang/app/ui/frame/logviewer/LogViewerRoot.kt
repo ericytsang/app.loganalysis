@@ -49,6 +49,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.github.ericytsang.app.model.Dimens
 import com.github.ericytsang.app.ui.util.ChildWindowManager
+import com.github.ericytsang.app.ui.util.asset.IconBookmarkFilter
 import com.github.ericytsang.app.ui.util.asset.IconEditFileList
 import com.github.ericytsang.app.ui.util.asset.IconExcludeFilter
 import com.github.ericytsang.app.ui.util.asset.IconIncludeFilter
@@ -111,6 +112,7 @@ fun LogViewerRoot(
     val logFileListViewModel = remember { logFileListViewModelFactory() }
     val includeFilterSetViewModel = remember { filterSetViewModelFactory(FilterType.INCLUDE) }
     val excludeFilterSetViewModel = remember { filterSetViewModelFactory(FilterType.EXCLUDE) }
+    val bookmarkSetViewModel = remember { filterSetViewModelFactory(FilterType.BOOKMARK) }
     val logViewerViewModel = remember { logViewerViewModelFactory() }
     val reorderSidebarItemViewModel = remember { reorderSidebarItemViewModelFactory() }
     val workingFileSetEditorViewModel = remember { workingFileSetEditorViewModelFactory() }
@@ -362,7 +364,7 @@ fun LogViewerRoot(
             )
             {
                 val stateForLazyListOfIncludeFilters = rememberLazyListState()
-                val reorderableLazyListStateForLazyListOfIncludeFilters = rememberReorderableLazyListState(stateForLazyListOfIncludeFilters)
+                val reorderableLazyListStateForFilters = rememberReorderableLazyListState(stateForLazyListOfIncludeFilters)
                 { from,to ->
                     // fyi, the key is of type ReorderableSidebarItemKey, which is a sealed interface
                     println("reorder from ${from.key} to ${to.key}")
@@ -373,6 +375,7 @@ fun LogViewerRoot(
                 val workingFileItemViewModels by logFileListViewModel.itemViewModels.collectAsState(emptyList())
                 val excludeFilterItemViewModels by excludeFilterSetViewModel.filters.collectAsState(emptyList())
                 val includeFilterItemViewModels by includeFilterSetViewModel.filters.collectAsState(emptyList())
+                val bookmarkItemViewModels by bookmarkSetViewModel.filters.collectAsState(emptyList())
                 LazyColumn(
                     modifier = Modifier
                         .width(columnWidth)
@@ -399,7 +402,7 @@ fun LogViewerRoot(
                     collapsableEditWorkingFilesSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = showEditFileListPanel,
-                        reorderableLazyListState = reorderableLazyListStateForLazyListOfIncludeFilters,
+                        reorderableLazyListState = reorderableLazyListStateForFilters,
                         sectionIcon = { contentColor -> IconEditFileList(contentColor) },
                         itemViewModels = workingFileItemViewModels,
                         sectionTitle = "Edit file list",
@@ -420,7 +423,7 @@ fun LogViewerRoot(
                     collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = showExcludeFilterPanel,
-                        reorderableLazyListState = reorderableLazyListStateForLazyListOfIncludeFilters,
+                        reorderableLazyListState = reorderableLazyListStateForFilters,
                         sectionIcon = { contentColor -> IconExcludeFilter(contentColor) },
                         filterItemViewModels = excludeFilterItemViewModels,
                         sectionTitle = "Exclude filters",
@@ -438,7 +441,7 @@ fun LogViewerRoot(
                     collapsableEditFilterSection(
                         themeColors = themeColors,
                         lazyColumnItemKeyPrefix = showIncludeFilterPanel,
-                        reorderableLazyListState = reorderableLazyListStateForLazyListOfIncludeFilters,
+                        reorderableLazyListState = reorderableLazyListStateForFilters,
                         sectionIcon = { contentColor -> IconIncludeFilter(contentColor) },
                         filterItemViewModels = includeFilterItemViewModels,
                         sectionTitle = "Include filters",
@@ -449,6 +452,24 @@ fun LogViewerRoot(
                         requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
                         requestAddNewFilter = includeFilterSetViewModel::addFilter,
                         filterType = FilterType.INCLUDE,
+                    )
+
+                    // bookmarked lines
+                    val showBookmarksPanel = "showBookmarksPanel"
+                    collapsableEditFilterSection(
+                        themeColors = themeColors,
+                        lazyColumnItemKeyPrefix = showBookmarksPanel,
+                        reorderableLazyListState = reorderableLazyListStateForFilters,
+                        sectionIcon = { contentColor -> IconBookmarkFilter(contentColor) },
+                        filterItemViewModels = bookmarkItemViewModels,
+                        sectionTitle = "Bookmarks",
+                        shouldShowSectionHeader = isSidebarExpanded,
+                        isSectionExpanded = showBookmarksPanel in expandedPanels,
+                        requestToggleSectionExpanded = { expandedPanels = toggle(showBookmarksPanel,expandedPanels) },
+                        expandedFilterId = filterIdOfSelectedFilterEditorPanel,
+                        requestFilterExpansion = { filterId -> filterIdOfSelectedFilterEditorPanel = filterId },
+                        requestAddNewFilter = includeFilterSetViewModel::addFilter,
+                        filterType = FilterType.BOOKMARK,
                     )
                 }
             }

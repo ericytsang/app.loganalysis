@@ -101,7 +101,7 @@ class LogViewerViewModel(
             filterNode == null -> null
             else -> when (filterModel.filterType)
             {
-                FilterType.INCLUDE -> FilterModelWithNode(
+                FilterType.INCLUDE,FilterType.BOOKMARK -> FilterModelWithNode(
                     filterType = filterModel.filterType,
                     filterNode = filterNode,
                 )
@@ -200,14 +200,30 @@ class LogViewerViewModel(
         logLines:List<FileLine>,
         activeFilters:Map<FilterType, List<Node>>,
     ):List<FileLine> = logLines.filter { logLine ->
-        FilterType.entries.all { filterType ->
+
+        // this is a reminder to make sure you added logic for each one
+        FilterType.entries.forEach { filterType ->
             when (filterType)
             {
-                FilterType.INCLUDE -> (activeFilters[filterType] ?: return@all true)
-                    .any { filter -> logcatFilterEvaluator.isMatch(logLine.line,filter) }
-                FilterType.EXCLUDE -> (activeFilters[filterType] ?: emptyList())
-                    .all { filter -> logcatFilterEvaluator.isMatch(logLine.line,filter) }
+                FilterType.BOOKMARK,
+                FilterType.INCLUDE,
+                FilterType.EXCLUDE -> Unit
             }
+        }
+
+        val bookmarkFilters = activeFilters[FilterType.BOOKMARK].orEmpty()
+        val includeFilters = activeFilters[FilterType.INCLUDE].orEmpty()
+        val excludeFilters = activeFilters[FilterType.EXCLUDE].orEmpty()
+
+        val isBookmarked = bookmarkFilters.any { filter -> logcatFilterEvaluator.isMatch(logLine.line,filter) }
+        val shouldInclude = includeFilters.any { filter -> logcatFilterEvaluator.isMatch(logLine.line,filter) }
+        val isNotExcluded = excludeFilters.all { filter -> logcatFilterEvaluator.isMatch(logLine.line,filter) }
+
+        when
+        {
+            includeFilters.isEmpty() -> isBookmarked || isNotExcluded
+            excludeFilters.isEmpty() -> isBookmarked || shouldInclude
+            else -> isBookmarked || (shouldInclude && isNotExcluded)
         }
     }
 
