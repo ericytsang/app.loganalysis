@@ -201,7 +201,7 @@ class LogViewerViewModel(
         activeFilters:Map<FilterType, List<Node>>,
     ):List<FileLine> = logLines.filter { logLine ->
 
-        // this is a reminder to make sure you added logic for each one
+        // this is a reminder to make sure you added appropriate logic for each filter type in this code block
         FilterType.entries.forEach { filterType ->
             when (filterType)
             {
