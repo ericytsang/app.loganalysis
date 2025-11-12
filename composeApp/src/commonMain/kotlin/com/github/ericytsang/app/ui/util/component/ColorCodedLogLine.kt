@@ -39,14 +39,11 @@ fun ColorCodedLogLine(
         modifier = modifier,
     )
     {
-        if (!softWrap)
-        {
-            Text(
-                modifier = Modifier.height(0.dp).focusable(false),
-                text = invisibleText,
-                style = TextStyle(fontFamily = FontFamily.Monospace),
-            )
-        }
+        Text(
+            modifier = Modifier.height(0.dp).focusable(false),
+            text = invisibleText,
+            style = TextStyle(fontFamily = FontFamily.Monospace),
+        )
         val logLineString = buildColorCodedLogLine(
             logLine = text,
             delimiters = delimiters,
