@@ -162,7 +162,7 @@ fun LogViewerRoot(
             }
             else
             {
-                // calculate the longest line length for horizontal scrolling
+                // calculate the longest line length for horizontal scrolling - we should "coerce at least" this with the width of the parent as well...
                 val longestLineLength = logLinesState.logLines.maxOfOrNull { it.line.length } ?: 0
                 HorizontalMode.Scroll(longestLineLength)
             }
