@@ -20,6 +20,7 @@ interface FilterRepository
     suspend fun insertFilterAtTop(
         configurationId:ConfigurationId,
         filterString:String,
+        tagString:String,
         isCaseSensitive:Boolean,
         filterInterpretationMode:FilterInterpretationMode,
         filterType:FilterType,
@@ -29,6 +30,7 @@ interface FilterRepository
     suspend fun insertFilter(
         configurationId:ConfigurationId,
         filterString:String,
+        tagString:String,
         isCaseSensitive:Boolean,
         filterInterpretationMode:FilterInterpretationMode,
         filterType:FilterType,
@@ -72,6 +74,11 @@ interface FilterRepository
         newFilterString:String,
     )
 
+    suspend fun updateTagString(
+        filterId:FilterId,
+        newTagString:String,
+    )
+
     suspend fun updateIsCaseSensitive(
         filterId:FilterId,
         isCaseSensitive:Boolean,
@@ -102,6 +109,7 @@ internal class FilterRepositoryImpl(
     override suspend fun insertFilterAtTop(
         configurationId:ConfigurationId,
         filterString:String,
+        tagString:String,
         isCaseSensitive:Boolean,
         filterInterpretationMode:FilterInterpretationMode,
         filterType:FilterType,
@@ -122,6 +130,7 @@ internal class FilterRepositoryImpl(
             queries.insertFilter(
                 config_id = configurationId.id,
                 filter_string = filterString,
+                tag_string = tagString,
                 is_case_sensitive = isCaseSensitive.toSqLiteLong(),
                 filter_interpretation_mode = filterInterpretationMode.toSqLiteText(),
                 is_exclude_filter = filterType.toSqLiteLong(),
@@ -135,6 +144,7 @@ internal class FilterRepositoryImpl(
     override suspend fun insertFilter(
         configurationId:ConfigurationId,
         filterString:String,
+        tagString:String,
         isCaseSensitive:Boolean,
         filterInterpretationMode:FilterInterpretationMode,
         filterType:FilterType,
@@ -147,6 +157,7 @@ internal class FilterRepositoryImpl(
             queries.insertFilter(
                 config_id = configurationId.id,
                 filter_string = filterString,
+                tag_string = tagString,
                 is_case_sensitive = isCaseSensitive.toSqLiteLong(),
                 filter_interpretation_mode = filterInterpretationMode.toSqLiteText(),
                 is_exclude_filter = filterType.toSqLiteLong(),
@@ -386,6 +397,20 @@ internal class FilterRepositoryImpl(
             queries.updateFilterString(
                 id = filterId.id,
                 filter_string = newFilterString,
+            )
+        }
+    }
+
+    override suspend fun updateTagString(
+        filterId:FilterId,
+        newTagString:String,
+    ) = withContext<Unit>(dispatchers.io)
+    {
+        transaction()
+        {
+            queries.updateTagString(
+                id = filterId.id,
+                tag_string = newTagString,
             )
         }
     }

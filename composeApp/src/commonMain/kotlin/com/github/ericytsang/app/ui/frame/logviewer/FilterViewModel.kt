@@ -12,11 +12,13 @@ interface FilterViewModel
     val filterId:FilterId
 
     val filterStringFlow:Flow<String>
+    val tagStringFlow:Flow<String>
     val isCaseSensitiveFlow:Flow<Boolean>
     val isEnabledFlow:Flow<Boolean>
     val filterInterpretationModeFlow:Flow<FilterInterpretationMode>
 
     fun setFilterString(newValue:String)
+    fun setTagString(newValue:String)
     fun setCaseSensitive(newValue:Boolean)
     fun setEnabled(newValue:Boolean)
     fun setFilterType(newValue:FilterInterpretationMode)
@@ -48,6 +50,18 @@ class FilterViewModelImpl(
     override fun setFilterString(newValue:String)
     {
         _filterStringFlow.value = newValue
+    }
+
+    private val _tagStringFlow = PersistedValue(
+        initialValue = initialFilterString,
+        updatePersistedValue = { newValue -> filterRepository.updateTagString(filterId, newValue) },
+    )
+
+    override val tagStringFlow:Flow<String> get() = _tagStringFlow.valueFlow
+
+    override fun setTagString(newValue:String)
+    {
+        _tagStringFlow.value = newValue
     }
 
     private val _isCaseSensitiveFlow = PersistedValue(

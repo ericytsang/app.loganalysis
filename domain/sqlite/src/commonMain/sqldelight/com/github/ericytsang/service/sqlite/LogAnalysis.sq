@@ -37,6 +37,9 @@ CREATE TABLE FilterEntity (
   -- the filter string that is used to match log lines
   filter_string TEXT NOT NULL,
 
+  -- the tag string that is shown beside matching log lines for easy scanning
+  tag_string TEXT NOT NULL,
+
   -- whether the filter string is case sensitive or not
   is_case_sensitive INTEGER NOT NULL,
 
@@ -185,8 +188,8 @@ WHERE config_id = ? AND file_path = ?;
 -- region filters
 
 insertFilter:
-INSERT INTO FilterEntity (config_id, is_exclude_filter, order_index, filter_string, is_case_sensitive, filter_interpretation_mode, is_active)
-VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO FilterEntity (config_id, is_exclude_filter, order_index, filter_string, tag_string, is_case_sensitive, filter_interpretation_mode, is_active)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 selectAllFiltersForConfig:
 SELECT * FROM FilterEntity
@@ -240,6 +243,11 @@ WHERE id = ?;
 updateFilterString:
 UPDATE FilterEntity
 SET filter_string = ?
+WHERE id = ?;
+
+updateTagString:
+UPDATE FilterEntity
+SET tag_string = ?
 WHERE id = ?;
 
 updateIsCaseSensitive:

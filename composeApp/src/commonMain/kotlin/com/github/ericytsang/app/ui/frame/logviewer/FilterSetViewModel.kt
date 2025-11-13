@@ -64,6 +64,7 @@ class FilterTypeFilterSetViewModelFactory(
             filterRepo.insertFilterAtTop(
                 configurationId = configurationId,
                 filterString = "",
+                tagString = "",
                 isCaseSensitive = false,
                 filterInterpretationMode = FilterInterpretationMode.STRING_LITERAL,
                 filterType = filterType,
