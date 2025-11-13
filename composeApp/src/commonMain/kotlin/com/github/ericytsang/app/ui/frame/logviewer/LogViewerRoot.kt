@@ -521,16 +521,15 @@ private fun subscribeToCommandChannelAndHandleCommands(
     lazyListState:LazyListState,
 )
 {
-    println("subscribeToCommandChannelAndHandleCommands")
-    val scrollToFirstLineCommand by commandChannel.receiveAsFlow().collectAsState(null)
-    val scrollToFirstLineCommandValue = when (val command = scrollToFirstLineCommand)
+    val command = commandChannel.receiveAsFlow().collectAsState(null).value
+    val scrollToFirstLineMatchingFilterCommand = when (command)
     {
         null -> return
         is LogViewerRootCommand.ScrollToFirstLineMatchingFilter -> command
     }
-    val filterModel by filterRepository.selectFilterById(scrollToFirstLineCommandValue.filterId).collectAsState(null)
-    val filterModelValue = filterModel ?: return
-    val filterNode = filterNodeFactory.toFilterNode(filterModelValue) ?: run()
+    val filterModelFlow = filterRepository.selectFilterById(scrollToFirstLineMatchingFilterCommand.filterId)
+    val filterModel = filterModelFlow.collectAsState(null).value ?: return
+    val filterNode = filterNodeFactory.toFilterNode(filterModel) ?: run()
     {
         return println("failed to parse filter")
     }
@@ -545,7 +544,9 @@ private fun subscribeToCommandChannelAndHandleCommands(
 
     uiScope.launch()
     {
-        lazyListState.animateScrollToItem(indexOfFirst+1)
+        val lineNumber = indexOfFirst+1
+        println("jumped to line #$lineNumber")
+        lazyListState.animateScrollToItem(lineNumber)
     }
 }
 
