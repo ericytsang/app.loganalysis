@@ -64,6 +64,7 @@ import com.github.ericytsang.app.ui.util.openNewProjectWizard
 import com.github.ericytsang.app.ui.util.openProjectBrowser
 import com.github.ericytsang.app.util.LogcatFilterEvaluator
 import com.github.ericytsang.app.util.LogcatFilterEvaluatorImpl
+import com.github.ericytsang.domain.objects.ConfigurationId
 import com.github.ericytsang.domain.objects.FilePath.Companion.toFile
 import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterType
@@ -113,6 +114,7 @@ fun LogViewerRoot(
     window:ComposeWindow,
     themeColors:Colors,
     rootChildWindowManager:ChildWindowManager,
+    configurationId:ConfigurationId,
     logFileListViewModelFactory:()->LogFileListViewModel,
     filterSetViewModelFactory:(FilterType)->FilterSetViewModel,
     selectedItemsViewModelFactory:()->SelectedItemsViewModel<LogViewerViewModel.FileLineKey>,
@@ -207,6 +209,9 @@ fun LogViewerRoot(
                 logcatFilterEvaluator = logcatFilterEvaluator,
                 lazyListState = lazyListState,
             )
+
+            // get all filters
+            val allFilters = filterRepository.selectFiltersForConfig(configurationId).collectAsState(emptyList()).value
 
             // get managers
             val clipboardManager = LocalClipboard.current
@@ -363,10 +368,28 @@ fun LogViewerRoot(
                         )
                         {
                             // show the tags associated with the filters that match this log line - even for filters that are not enabled
+                            val relatedTags = allFilters
+                                .filter { it.tagString.isNotBlank() }
+                                .filter { filterModel ->
+                                    val filterNode = filterNodeFactory.toFilterNode(filterModel)?.filterNode ?: return@filter false
+                                    logcatFilterEvaluator.isMatch(item.line, filterNode)
+                                }
+                                .map { it.tagString }
+                                .toSet()
+                            ColorCodedLogLine(
+                                text = relatedTags.joinToString(),
+                                modifier = Modifier,
+                                invisibleText = "",
+                                delimiters = "",
+                                themeForColorCoding = theme,
+                                defaultColor = themeColors.onBackground,
+                                softWrap = false,
+                            )
 
                             // show the log line
                             ColorCodedLogLine(
                                 text = item.line,
+                                modifier = Modifier.weight(1f),
                                 invisibleText = when (horizontalMode)
                                 {
                                     is HorizontalMode.WordWrap -> ""
