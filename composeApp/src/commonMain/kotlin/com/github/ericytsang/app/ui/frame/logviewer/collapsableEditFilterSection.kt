@@ -353,12 +353,14 @@ private fun filterProperties(
 {
     Column()
     {
+        val modifier = Modifier.padding(start = Dimens.mttSize, end = Dimens.mttPadding).fillMaxWidth()
+
 
         // checkbox for case sensitivity
         val isCaseSensitive by filterViewModel.isCaseSensitiveFlow.collectAsState(false)
         val toggleCaseSensitivity = { filterViewModel.setCaseSensitive(!isCaseSensitive) }
         Surface(
-            modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
+            modifier = modifier,
             shape = MaterialTheme.shapes.small,
             onClick = toggleCaseSensitivity,
         )
@@ -380,13 +382,13 @@ private fun filterProperties(
         Spacer(modifier = Modifier.size(Dimens.mttPadding))
 
         // radio buttons for filter type
-        Text("Filter type",modifier = Modifier.padding(start = Dimens.mttSize))
+        Text("Filter type",modifier = modifier)
         val filterTypeFlow by filterViewModel.filterInterpretationModeFlow.collectAsState(null)
         for (filterType in FilterInterpretationMode.entries)
         {
             val onClick = { filterViewModel.setFilterType(filterType) }
             Surface(
-                modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
+                modifier = modifier,
                 shape = MaterialTheme.shapes.small,
                 onClick = onClick,
             )
@@ -410,7 +412,7 @@ private fun filterProperties(
 
         // jump to first line button - when clicked, app will scroll to the 1st line that matches this filter
         Button(
-            modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
+            modifier = modifier,
             onClick = { filterViewModel.requestJumpToLine() },
             colors = ButtonDefaults.buttonColors(themeColors.surface),
             content = { Text("Jump to 1st line") },
@@ -418,7 +420,7 @@ private fun filterProperties(
 
         // delete button
         DoubleClickButton(
-            modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
+            modifier = modifier,
             onDoubleClick = { filterViewModel.requestDelete() },
             idleButtonColors = ButtonDefaults.buttonColors(themeColors.error),
             idleContent = { Text("Delete filter") },
@@ -428,7 +430,7 @@ private fun filterProperties(
 
         // collapse section button
         Surface(
-            modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
+            modifier = modifier,
             shape = MaterialTheme.shapes.small,
             onClick = onCollapseSection,
         )
