@@ -75,6 +75,7 @@ data class FilterModel(
     val id:FilterId,
     val configurationId:ConfigurationId,
     val filterString:String,
+    val tagString:String,
     val isCaseSensitive:Boolean,
     val filterInterpretationMode:FilterInterpretationMode,
     val filterType:FilterType,

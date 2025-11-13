@@ -510,6 +510,7 @@ internal class FilterRepositoryImpl(
             id = FilterId(id),
             configurationId = ConfigurationId(config_id),
             filterString = filter_string,
+            tagString = tag_string,
             isCaseSensitive = is_case_sensitive.toBoolean(),
             filterInterpretationMode = filter_interpretation_mode.toFilterInterpretationMode(),
             filterType = is_exclude_filter.toFilterType(),

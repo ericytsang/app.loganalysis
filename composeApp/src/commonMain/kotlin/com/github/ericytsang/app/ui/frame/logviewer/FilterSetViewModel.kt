@@ -43,6 +43,7 @@ class FilterTypeFilterSetViewModelFactory(
                     FilterViewModelImpl(
                         filterId = row.id,
                         initialFilterString = row.filterString,
+                        initialTagString = row.tagString,
                         initialIsCaseSensitive = row.isCaseSensitive,
                         initialIsEnabled = row.isActive,
                         initialFilterInterpretationMode = row.filterInterpretationMode,

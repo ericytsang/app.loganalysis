@@ -321,6 +321,7 @@ private fun ReorderableCollectionItemScope.filterHeader(
         // text field for filter string
         TextField(
             value = filterViewModel.filterStringFlow.collectAsState("").value,
+            label = { Text("Filter") },
             interactionSource = textFieldInteractionSource,
             onValueChange = { newValue -> filterViewModel.setFilterString(newValue) },
             modifier = Modifier.weight(1f,fill = true).padding(end = Dimens.mttPadding),
@@ -355,6 +356,22 @@ private fun filterProperties(
     {
         val modifier = Modifier.padding(start = Dimens.mttSize, end = Dimens.mttPadding).fillMaxWidth()
 
+        // spacing
+        Spacer(modifier = Modifier.size(Dimens.mttPadding))
+
+        // a text field for user to view/edit the tag that is associated with this filter
+        TextField(
+            value = filterViewModel.tagStringFlow.collectAsState("").value,
+            label = { Text("Tag") },
+            onValueChange = { newValue -> filterViewModel.setTagString(newValue) },
+            modifier = modifier,
+            colors = TextFieldDefaults.textFieldColors(
+                textColor = themeColors.onBackground,
+            ),
+        )
+
+        // spacing
+        Spacer(modifier = Modifier.size(Dimens.mttPadding))
 
         // checkbox for case sensitivity
         val isCaseSensitive by filterViewModel.isCaseSensitiveFlow.collectAsState(false)

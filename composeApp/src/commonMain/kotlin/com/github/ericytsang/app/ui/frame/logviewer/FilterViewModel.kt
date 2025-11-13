@@ -29,6 +29,7 @@ interface FilterViewModel
 class FilterViewModelImpl(
     override val filterId:FilterId,
     initialFilterString:String,
+    initialTagString:String,
     initialIsCaseSensitive:Boolean,
     initialIsEnabled:Boolean,
     initialFilterInterpretationMode:FilterInterpretationMode,
@@ -53,7 +54,7 @@ class FilterViewModelImpl(
     }
 
     private val _tagStringFlow = PersistedValue(
-        initialValue = initialFilterString,
+        initialValue = initialTagString,
         updatePersistedValue = { newValue -> filterRepository.updateTagString(filterId, newValue) },
     )
 
