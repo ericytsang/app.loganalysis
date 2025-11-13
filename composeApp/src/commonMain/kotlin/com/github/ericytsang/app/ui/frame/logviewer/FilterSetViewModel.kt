@@ -8,6 +8,7 @@ import com.github.ericytsang.domain.repo.repo.FilterRepository
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import com.github.ericytsang.kotlin.shareIn
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.WhileSubscribed
@@ -26,6 +27,7 @@ interface FilterSetViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
 class FilterTypeFilterSetViewModelFactory(
     private val configurationId:ConfigurationId,
+    private val commandChannel:SendChannel<LogViewerRootCommand>,
     private val filterRepo:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
     kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
 ):KotlinDependencyProvider by kotlinDependencyProvider
@@ -45,6 +47,7 @@ class FilterTypeFilterSetViewModelFactory(
                         initialIsEnabled = row.isActive,
                         initialFilterInterpretationMode = row.filterInterpretationMode,
                         onRequestDelete = { filterId -> applicationScope.launch(dispatchers.io) { filterRepo.delete(row.id) } },
+                        onRequestJumpToLine = { filterId -> commandChannel.trySend(LogViewerRootCommand.ScrollToFirstLineMatchingFilter(filterId)) },
                     )
                 }
             }

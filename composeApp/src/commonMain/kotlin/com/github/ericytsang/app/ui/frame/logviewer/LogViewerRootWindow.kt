@@ -10,6 +10,7 @@ import com.github.ericytsang.app.ui.util.ChildWindowManagerController
 import com.github.ericytsang.app.ui.util.component.fillMaxBackground
 import com.github.ericytsang.domain.objects.ConfigurationId
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope.Companion.asImmutableCoroutineScope
+import kotlinx.coroutines.channels.Channel
 
 @Composable
 fun LogViewerRootWindow(
@@ -19,7 +20,13 @@ fun LogViewerRootWindow(
 )
 {
     val coroutineScope = rememberCoroutineScope().asImmutableCoroutineScope()
-    val filterTypeFilterSetViewModelFactory = remember { FilterTypeFilterSetViewModelFactory(configurationId) }
+    val commandChannel = remember { Channel<LogViewerRootCommand>(Channel.CONFLATED) }
+    val filterTypeFilterSetViewModelFactory = remember {
+        FilterTypeFilterSetViewModelFactory(
+            configurationId = configurationId,
+            commandChannel = commandChannel,
+        )
+    }
 
     Window(
         onCloseRequest = { controller.removeSelf() },
@@ -47,6 +54,7 @@ fun LogViewerRootWindow(
                 logViewerViewModelFactory = { LogViewerViewModel.create(coroutineScope, configurationId) },
                 reorderSidebarItemViewModelFactory = { ReorderSidebarItemViewModel.create(configurationId) },
                 selectedItemsViewModelFactory = { SelectedItemsViewModelImpl() },
+                commandChannel = commandChannel,
             )
         }
     }

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Colors
@@ -406,6 +407,14 @@ private fun filterProperties(
 
         // spacing
         Spacer(modifier = Modifier.size(Dimens.mttPadding))
+
+        // jump to first line button - when clicked, app will scroll to the 1st line that matches this filter
+        Button(
+            modifier = Modifier.fillMaxWidth().padding(start = Dimens.mttSize),
+            onClick = { filterViewModel.requestJumpToLine() },
+            colors = ButtonDefaults.buttonColors(themeColors.surface),
+            content = { Text("Jump to 1st line") },
+        )
 
         // delete button
         DoubleClickButton(

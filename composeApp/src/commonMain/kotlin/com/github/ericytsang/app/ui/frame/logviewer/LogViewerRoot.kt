@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListItemInfo
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -61,12 +62,20 @@ import com.github.ericytsang.app.ui.util.component.ToggleButton
 import com.github.ericytsang.app.ui.util.openMultiFilePicker
 import com.github.ericytsang.app.ui.util.openNewProjectWizard
 import com.github.ericytsang.app.ui.util.openProjectBrowser
+import com.github.ericytsang.app.util.LogcatFilterEvaluator
+import com.github.ericytsang.app.util.LogcatFilterEvaluatorImpl
 import com.github.ericytsang.domain.objects.FilePath.Companion.toFile
 import com.github.ericytsang.domain.objects.FilterId
 import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.objects.Theme
 import com.github.ericytsang.domain.objects.WorkingFileSetEmpty
+import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
+import com.github.ericytsang.domain.repo.repo.FilterRepository
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 /**
@@ -93,6 +102,12 @@ sealed class HorizontalMode
     ):HorizontalMode()
 }
 
+sealed class LogViewerRootCommand
+{
+    data class ScrollToFirstLineMatchingFilter(val filterId:FilterId):LogViewerRootCommand()
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun LogViewerRoot(
     window:ComposeWindow,
@@ -104,6 +119,10 @@ fun LogViewerRoot(
     workingFileSetEditorViewModelFactory:()->WorkingFileSetEditorViewModel,
     logViewerViewModelFactory:()->LogViewerViewModel,
     reorderSidebarItemViewModelFactory:()->ReorderSidebarItemViewModel,
+    commandChannel:ReceiveChannel<LogViewerRootCommand>,
+    logcatFilterEvaluator:LogcatFilterEvaluator = LogcatFilterEvaluatorImpl(),
+    filterNodeFactory:FilterNodeFactory = FilterNodeFactory.create(),
+    filterRepository:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
     viewModelFactory:(CoroutineScope)->LogViewerRootViewModel = { uiScope -> LogViewerRootViewModel.create(uiScope) },
 )
 {
@@ -177,6 +196,17 @@ fun LogViewerRoot(
 
             // track the width of the LazyColumnWithScrollbar, so we can set the min width of a log line to match this
             var lazyColumnWidth by remember { mutableStateOf(0) }
+
+            // consume commands - handle commands for scrolling to a log line
+            subscribeToCommandChannelAndHandleCommands(
+                uiScope = uiScope,
+                commandChannel = commandChannel,
+                filterRepository = filterRepository,
+                filterNodeFactory = filterNodeFactory,
+                logLinesState = logLinesState,
+                logcatFilterEvaluator = logcatFilterEvaluator,
+                lazyListState = lazyListState,
+            )
 
             // get managers
             val clipboardManager = LocalClipboard.current
@@ -476,6 +506,46 @@ fun LogViewerRoot(
         }
 
         // endregion
+    }
+}
+
+@Composable
+@OptIn(ExperimentalCoroutinesApi::class)
+private fun subscribeToCommandChannelAndHandleCommands(
+    uiScope:CoroutineScope,
+    commandChannel:ReceiveChannel<LogViewerRootCommand>,
+    filterRepository:FilterRepository,
+    filterNodeFactory:FilterNodeFactory,
+    logLinesState:LogViewerViewModel.LogLinesState,
+    logcatFilterEvaluator:LogcatFilterEvaluator,
+    lazyListState:LazyListState,
+)
+{
+    println("subscribeToCommandChannelAndHandleCommands")
+    val scrollToFirstLineCommand by commandChannel.receiveAsFlow().collectAsState(null)
+    val scrollToFirstLineCommandValue = when (val command = scrollToFirstLineCommand)
+    {
+        null -> return
+        is LogViewerRootCommand.ScrollToFirstLineMatchingFilter -> command
+    }
+    val filterModel by filterRepository.selectFilterById(scrollToFirstLineCommandValue.filterId).collectAsState(null)
+    val filterModelValue = filterModel ?: return
+    val filterNode = filterNodeFactory.toFilterNode(filterModelValue) ?: run()
+    {
+        return println("failed to parse filter")
+    }
+    val indexOfFirst = logLinesState.logLines.indexOfFirst()
+    {
+        logcatFilterEvaluator.isMatch(logLine = it.line,logcatFilter = filterNode.filterNode)
+    }
+    if (indexOfFirst !in logLinesState.logLines.indices)
+    {
+        return println("failed to find log line in shown lines (indexOfFirst = $indexOfFirst, filterModel = $filterModel, command = $scrollToFirstLineCommand)")
+    }
+
+    uiScope.launch()
+    {
+        lazyListState.animateScrollToItem(indexOfFirst+1)
     }
 }
 

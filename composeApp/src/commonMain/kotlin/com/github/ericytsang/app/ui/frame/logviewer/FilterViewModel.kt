@@ -21,6 +21,7 @@ interface FilterViewModel
     fun setEnabled(newValue:Boolean)
     fun setFilterType(newValue:FilterInterpretationMode)
     fun requestDelete()
+    fun requestJumpToLine()
 }
 
 class FilterViewModelImpl(
@@ -30,6 +31,7 @@ class FilterViewModelImpl(
     initialIsEnabled:Boolean,
     initialFilterInterpretationMode:FilterInterpretationMode,
     private val onRequestDelete:(FilterId)->Unit,
+    private val onRequestJumpToLine:(FilterId)->Unit,
     filterRepository:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
     kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
 ):FilterViewModel,
@@ -87,5 +89,10 @@ class FilterViewModelImpl(
     override fun requestDelete()
     {
         onRequestDelete(filterId)
+    }
+
+    override fun requestJumpToLine()
+    {
+        onRequestJumpToLine(filterId)
     }
 }

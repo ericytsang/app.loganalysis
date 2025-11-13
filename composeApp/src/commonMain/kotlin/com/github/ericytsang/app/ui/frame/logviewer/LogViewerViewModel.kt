@@ -7,18 +7,13 @@ import com.github.ericytsang.app.util.LogcatFilterEvaluatorImpl
 import com.github.ericytsang.domain.objects.ConfigurationId
 import com.github.ericytsang.domain.objects.FilePath
 import com.github.ericytsang.domain.objects.FilePath.Companion.toFilePath
-import com.github.ericytsang.domain.objects.FilterInterpretationMode
-import com.github.ericytsang.domain.objects.FilterModel
 import com.github.ericytsang.domain.objects.FilterType
 import com.github.ericytsang.domain.repo.dependencyinjection.RepositoryDependencyProvider
 import com.github.ericytsang.domain.repo.repo.FilterRepository
 import com.github.ericytsang.kotlin.ImmutableCoroutineScope
 import com.github.ericytsang.kotlin.KotlinDependencyProvider
 import com.github.ericytsang.kotlin.newChildScope
-import com.github.ericytsang.logcatfilterparser.LeafNode
-import com.github.ericytsang.logcatfilterparser.LogcatFilterParser
 import com.github.ericytsang.logcatfilterparser.Node
-import com.github.ericytsang.logcatfilterparser.NotNode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,8 +33,8 @@ import kotlin.time.Duration.Companion.seconds
 @OptIn(ExperimentalCoroutinesApi::class)
 class LogViewerViewModel(
     private val uiScope:ImmutableCoroutineScope,
-    private val logcatFilterParser:LogcatFilterParser,
     private val logcatFilterEvaluator:LogcatFilterEvaluator,
+    private val filterNodeFactory:FilterNodeFactory,
     configurationId:ConfigurationId,
     kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
     filterRepository:FilterRepository = RepositoryDependencyProvider.instance.filterRepository,
@@ -62,61 +57,10 @@ class LogViewerViewModel(
     private val activeFilters:Flow<Map<FilterType, List<Node>>> = filterRepository
         .selectActiveFiltersForConfig(configurationId)
         .map { list -> list.filter { it.filterString.isNotEmpty() } }
-        .map { list -> list.mapNotNull { toFilterNode(it) } }
+        .map { list -> list.mapNotNull { filterModel -> filterNodeFactory.toFilterNode(filterModel) } }
         .map { stillNeedToFolds -> stillNeedToFolds.groupBy({ it.filterType },{ it.filterNode }) }
         .flowOn(dispatchers.io)
         .conflate()
-
-    private fun toFilterNode(filterModel:FilterModel):FilterModelWithNode?
-    {
-        val filterNode = when (filterModel.filterInterpretationMode)
-        {
-            FilterInterpretationMode.STRING_LITERAL -> LeafNode(
-                key = "",
-                value = filterModel.filterString,
-                regex = false,
-                caseSensitive = filterModel.isCaseSensitive,
-            )
-            FilterInterpretationMode.REGULAR_EXPRESSION -> LeafNode(
-                key = "",
-                value = filterModel.filterString,
-                regex = true,
-                caseSensitive = filterModel.isCaseSensitive,
-            )
-            FilterInterpretationMode.LOGCAT_FILTER -> try
-            {
-                logcatFilterParser.parse(
-                    input = filterModel.filterString,
-                    forceIsCaseSensitive = filterModel.isCaseSensitive,
-                )
-            }
-            catch (e:Exception)
-            {
-                println("Error parsing logcat filter: ${filterModel.filterString}, error: ${e.message}")
-                null
-            }
-        }
-        return when
-        {
-            filterNode == null -> null
-            else -> when (filterModel.filterType)
-            {
-                FilterType.INCLUDE,FilterType.BOOKMARK -> FilterModelWithNode(
-                    filterType = filterModel.filterType,
-                    filterNode = filterNode,
-                )
-                FilterType.EXCLUDE -> FilterModelWithNode(
-                    filterType = filterModel.filterType,
-                    filterNode = NotNode(filterNode),
-                )
-            }
-        }
-    }
-
-    data class FilterModelWithNode(
-        val filterType:FilterType,
-        val filterNode:Node,
-    )
 
     // endregion
 
@@ -264,14 +208,14 @@ class LogViewerViewModel(
             uiScope:ImmutableCoroutineScope,
             configurationId:ConfigurationId,
             kotlinDependencyProvider:KotlinDependencyProvider = KotlinDependencyProvider.instance,
-            logcatFilterParser:LogcatFilterParser = LogcatFilterParser(),
             logcatFilterEvaluator:LogcatFilterEvaluator = LogcatFilterEvaluatorImpl(),
         ):LogViewerViewModel = LogViewerViewModel(
             uiScope = uiScope,
             kotlinDependencyProvider = kotlinDependencyProvider,
-            logcatFilterParser = logcatFilterParser,
             logcatFilterEvaluator = logcatFilterEvaluator,
             configurationId = configurationId,
+            filterNodeFactory = FilterNodeFactory.create(),
         )
     }
 }
+
