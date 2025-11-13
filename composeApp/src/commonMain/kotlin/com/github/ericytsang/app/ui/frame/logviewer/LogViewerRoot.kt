@@ -362,6 +362,8 @@ fun LogViewerRoot(
                                 .padding(horizontal = Dimens.mttPadding),
                         )
                         {
+                            // show the tags associated with the filters that match this log line - even for filters that are not enabled
+
                             // show the log line
                             ColorCodedLogLine(
                                 text = item.line,
