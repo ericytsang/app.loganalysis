@@ -324,13 +324,7 @@ fun LogViewerRoot(
                         val isSelected = item.key in selectedItems
                         val backgroundColor = if (isSelected) themeColors.primary.copy(alpha = ContentAlpha.medium) else themeColors.surface
                         val focusRequester = remember { FocusRequester() }
-                        ColorCodedLogLine(
-                            text = item.line,
-                            invisibleText = when (horizontalMode)
-                            {
-                                is HorizontalMode.WordWrap -> ""
-                                is HorizontalMode.Scroll -> (1..horizontalMode.longestLineLength).joinToString("") { " " }
-                            },
+                        Row(
                             modifier = Modifier
                                 .animateItem() // i want to enable these animations, but uh, it causes some portion of the log line to start flashing, and I think it is a bug in compose, so I am disabling them for now.
                                 .fillParentMaxWidth()
@@ -366,11 +360,22 @@ fun LogViewerRoot(
                                     focusRequester.requestFocus()
                                 }
                                 .padding(horizontal = Dimens.mttPadding),
-                            delimiters = delimiters,
-                            themeForColorCoding = theme,
-                            defaultColor = themeColors.onBackground,
-                            softWrap = shouldWrapText,
                         )
+                        {
+                            // show the log line
+                            ColorCodedLogLine(
+                                text = item.line,
+                                invisibleText = when (horizontalMode)
+                                {
+                                    is HorizontalMode.WordWrap -> ""
+                                    is HorizontalMode.Scroll -> (1..horizontalMode.longestLineLength).joinToString("") { " " }
+                                },
+                                delimiters = delimiters,
+                                themeForColorCoding = theme,
+                                defaultColor = themeColors.onBackground,
+                                softWrap = shouldWrapText,
+                            )
+                        }
                     }
                 }
             }
