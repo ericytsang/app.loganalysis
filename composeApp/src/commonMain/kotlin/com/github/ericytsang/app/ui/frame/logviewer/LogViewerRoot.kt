@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -223,6 +224,8 @@ fun LogViewerRoot(
                 border = ButtonDefaults.outlinedBorder,
             )
             {
+                var maxTagWidth by mutableStateOf(0)
+
                 LazyColumnWithScrollbar(
                     enableHorizontalScroll = when (horizontalMode)
                     {
@@ -364,7 +367,7 @@ fun LogViewerRoot(
                                     }
                                     focusRequester.requestFocus()
                                 }
-                                .padding(horizontal = Dimens.mttPadding),
+                                .padding(end = Dimens.mttPadding),
                         )
                         {
                             // show the tags associated with the filters that match this log line - even for filters that are not enabled
@@ -376,20 +379,31 @@ fun LogViewerRoot(
                                 }
                                 .map { it.tagString }
                                 .toSet()
-                            ColorCodedLogLine(
-                                text = relatedTags.joinToString(),
-                                modifier = Modifier,
-                                invisibleText = "",
-                                delimiters = "",
-                                themeForColorCoding = theme,
-                                defaultColor = themeColors.onBackground,
-                                softWrap = false,
+                            Box(
+                                modifier = Modifier
+                                    .widthIn(min = maxTagWidth.dp + Dimens.mttPadding * 2)
+                                    .background(themeColors.onBackground.copy(alpha = 0.05f))
+                                    .padding(horizontal = Dimens.mttPadding),
                             )
+                            {
+                                ColorCodedLogLine(
+                                    text = relatedTags.joinToString(""),
+                                    modifier = Modifier
+                                        .onSizeChanged { size -> maxTagWidth = size.width.coerceAtLeast(maxTagWidth) },
+                                    invisibleText = "",
+                                    delimiters = "",
+                                    themeForColorCoding = theme,
+                                    defaultColor = themeColors.onBackground,
+                                    softWrap = false,
+                                )
+                            }
 
                             // show the log line
                             ColorCodedLogLine(
                                 text = item.line,
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = Dimens.mttPadding),
                                 invisibleText = when (horizontalMode)
                                 {
                                     is HorizontalMode.WordWrap -> ""
