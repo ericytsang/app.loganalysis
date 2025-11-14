@@ -106,7 +106,7 @@ sealed class HorizontalMode
 
 sealed class LogViewerRootCommand
 {
-    data class ScrollToFirstLineMatchingFilter(val filterId:FilterId):LogViewerRootCommand()
+    class ScrollToFirstLineMatchingFilter(val filterId:FilterId):LogViewerRootCommand()
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
