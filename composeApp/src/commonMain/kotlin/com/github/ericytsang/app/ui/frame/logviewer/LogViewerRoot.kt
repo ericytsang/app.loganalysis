@@ -583,7 +583,7 @@ private fun subscribeToCommandChannelAndHandleCommands(
     }
     if (indexOfFirst !in logLinesState.logLines.indices)
     {
-        return println("failed to find log line in shown lines (indexOfFirst = $indexOfFirst, filterModel = $filterModel, command = $scrollToFirstLineCommand)")
+        return println("failed to find log line in shown lines (indexOfFirst = $indexOfFirst, filterModel = $filterModel, command = $scrollToFirstLineMatchingFilterCommand)")
     }
 
     uiScope.launch()
